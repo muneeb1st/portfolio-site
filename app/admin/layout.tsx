@@ -104,7 +104,7 @@ export default function AdminLayout({
 
       {/* Main Content */}
       <main className="ml-64 min-h-screen">
-        <div className="p-8">
+        <div className="p-8 max-w-7xl">
           {children}
         </div>
       </main>
