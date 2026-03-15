@@ -573,10 +573,9 @@ export default function Home() {
           animation-delay: 4s;
         }
         
-        .scroll-fade-in {
-          opacity: 0;
-          transform: translateY(40px);
-          transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        .scroll-fade-in.visible {
+          opacity: 1;
+          transform: translateY(0);
         }
         
         .scroll-fade-in.visible {
