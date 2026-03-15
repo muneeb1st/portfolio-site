@@ -86,11 +86,16 @@ function useDarkMode() {
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
+    // Check localStorage on mount
     const saved = localStorage.getItem('darkMode')
     const initialDark = saved === 'true'
     setIsDark(initialDark)
+    
+    // Apply or remove dark class
     if (initialDark) {
       document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
     }
   }, [])
 
@@ -98,6 +103,7 @@ function useDarkMode() {
     const newDark = !isDark
     setIsDark(newDark)
     localStorage.setItem('darkMode', String(newDark))
+    
     if (newDark) {
       document.documentElement.classList.add('dark')
     } else {
