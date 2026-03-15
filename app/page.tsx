@@ -55,6 +55,113 @@ function AnimatedCard({ children, delay = 0 }: { children: React.ReactNode; dela
   )
 }
 
+// Typing animation component
+function TypingAnimation({ text }: { text: string }) {
+  const [displayText, setDisplayText] = useState('')
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayText(prev => prev + text[currentIndex])
+        setCurrentIndex(prev => prev + 1)
+      }, 100)
+      return () => clearTimeout(timeout)
+    }
+  }, [currentIndex, text])
+
+  return <span>{displayText}<span className="typing-cursor">|</span></span>
+}
+
+// Project Modal Component
+function ProjectModal({ project, onClose }: { project: Project | null; onClose: () => void }) {
+  if (!project) return null
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header with Image */}
+        {project.image_url && (
+          <div className="w-full h-64 overflow-hidden rounded-t-2xl bg-gradient-to-br from-purple-100 to-pink-100">
+            <img 
+              src={project.image_url} 
+              alt={project.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        {/* Modal Content */}
+        <div className="p-8">
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="float-right text-gray-400 hover:text-gray-600 text-3xl leading-none"
+          >
+            ×
+          </button>
+
+          {/* Project Title */}
+          <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
+            {project.title}
+          </h2>
+
+          {/* Technologies */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {Array.isArray(project.technologies) && project.technologies.map((tech: string, i: number) => (
+              <span 
+                key={tech} 
+                className="px-4 py-2 text-sm font-medium rounded-full text-white"
+                style={{
+                  background: `linear-gradient(135deg, ${['#a855f7', '#ec4899', '#3b82f6', '#8b5cf6', '#f472b6'][i % 5]} 0%, ${['#c084fc', '#f472b6', '#60a5fa', '#a78bfa', '#f9a8d4'][i % 5]} 100%)`
+                }}
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+
+          {/* Description */}
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-3">About This Project</h3>
+            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+              {project.description}
+            </p>
+          </div>
+
+          {/* Links */}
+          <div className="flex gap-4">
+            {project.demo_url && (
+              <a 
+                href={project.demo_url} 
+                target="_blank" 
+                className="flex-1 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
+              >
+                🚀 Live Demo
+              </a>
+            )}
+            {project.github_url && (
+              <a 
+                href={project.github_url} 
+                target="_blank" 
+                className="flex-1 text-center border-2 border-purple-500 text-purple-600 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-all"
+              >
+                💻 View Code
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 interface Project {
   id: string
   title: string
@@ -76,6 +183,7 @@ interface Certificate {
 }
 
 export default function Home() {
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [certificates, setCertificates] = useState<Certificate[]>([])
   const [loading, setLoading] = useState(true)
@@ -173,7 +281,11 @@ export default function Home() {
             )}
           </h1>
           <p className="text-2xl text-white/90 mb-8 animate-fade-in-delay">
-            {aboutData?.tagline || 'Full Stack Developer | Building Amazing Web Experiences'}
+            {aboutData?.tagline ? (
+              <TypingAnimation text={aboutData.tagline} />
+            ) : (
+              <TypingAnimation text="Full Stack Developer | Building Amazing Web Experiences" />
+            )}
           </p>
           
           {(aboutData?.github_url || aboutData?.linkedin_url || aboutData?.twitter_url) && (
@@ -269,7 +381,10 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredProjects.map((project, index) => (
               <AnimatedCard key={project.id} delay={index * 100}>
-                <div className="group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2">
+                <div 
+                  className="group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 cursor-pointer"
+                  onClick={() => setSelectedProject(project)}
+                >
                   <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"></div>
 
                   {project.image_url && (
@@ -581,6 +696,15 @@ export default function Home() {
         .scroll-fade-in.visible {
           opacity: 1;
           transform: translateY(0);
+        }
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+
+        .typing-cursor {
+          animation: blink 1s infinite;
+          margin-left: 2px;
         }
       `}</style>
     </main>
