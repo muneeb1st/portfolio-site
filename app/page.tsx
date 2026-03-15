@@ -81,6 +81,50 @@ function TypingAnimation({ text }: { text: string }) {
   )
 }
 
+// Dark mode hook
+function useDarkMode() {
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('darkMode')
+    const initialDark = saved === 'true'
+    setIsDark(initialDark)
+    if (initialDark) {
+      document.documentElement.classList.add('dark')
+    }
+  }, [])
+
+  const toggleDark = () => {
+    const newDark = !isDark
+    setIsDark(newDark)
+    localStorage.setItem('darkMode', String(newDark))
+    if (newDark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }
+
+  return { isDark, toggleDark }
+}
+
+// Dark mode toggle button
+function DarkModeToggle({ isDark, onToggle }: { isDark: boolean; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      className="fixed top-6 right-6 z-50 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:shadow-xl transition-all border-2 border-gray-200 dark:border-gray-700"
+      aria-label="Toggle dark mode"
+    >
+      {isDark ? (
+        <span className="text-2xl">☀️</span>
+      ) : (
+        <span className="text-2xl">🌙</span>
+      )}
+    </button>
+  )
+}
+
 // Project Modal Component
 function ProjectModal({ project, onClose }: { project: Project | null; onClose: () => void }) {
   if (!project) return null
@@ -91,12 +135,11 @@ function ProjectModal({ project, onClose }: { project: Project | null; onClose: 
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+        className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transition-colors duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header with Image */}
         {project.image_url && (
-          <div className="w-full h-64 overflow-hidden rounded-t-2xl bg-gradient-to-br from-purple-100 to-pink-100">
+          <div className="w-full h-64 overflow-hidden rounded-t-2xl bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
             <img 
               src={project.image_url} 
               alt={project.title}
@@ -105,22 +148,18 @@ function ProjectModal({ project, onClose }: { project: Project | null; onClose: 
           </div>
         )}
 
-        {/* Modal Content */}
         <div className="p-8">
-          {/* Close Button */}
           <button
             onClick={onClose}
-            className="float-right text-gray-400 hover:text-gray-600 text-3xl leading-none"
+            className="float-right text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-3xl leading-none"
           >
             ×
           </button>
 
-          {/* Project Title */}
           <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
             {project.title}
           </h2>
 
-          {/* Technologies */}
           <div className="flex flex-wrap gap-2 mb-6">
             {Array.isArray(project.technologies) && project.technologies.map((tech: string, i: number) => (
               <span 
@@ -135,15 +174,13 @@ function ProjectModal({ project, onClose }: { project: Project | null; onClose: 
             ))}
           </div>
 
-          {/* Description */}
           <div className="mb-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-3">About This Project</h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">About This Project</h3>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
               {project.description}
             </p>
           </div>
 
-          {/* Links */}
           <div className="flex gap-4">
             {project.demo_url && (
               <a 
@@ -158,7 +195,7 @@ function ProjectModal({ project, onClose }: { project: Project | null; onClose: 
               <a 
                 href={project.github_url} 
                 target="_blank" 
-                className="flex-1 text-center border-2 border-purple-500 text-purple-600 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-all"
+                className="flex-1 text-center border-2 border-purple-500 text-purple-600 dark:text-purple-400 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all"
               >
                 💻 View Code
               </a>
@@ -191,7 +228,6 @@ interface Certificate {
 }
 
 export default function Home() {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [certificates, setCertificates] = useState<Certificate[]>([])
   const [loading, setLoading] = useState(true)
@@ -204,6 +240,8 @@ export default function Home() {
   const [skills, setSkills] = useState<any[]>([])
   const [contactSubmitting, setContactSubmitting] = useState(false)
   const [contactStatus, setContactStatus] = useState('')
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const { isDark, toggleDark } = useDarkMode()
 
   useEffect(() => {
     async function fetchData() {
@@ -260,10 +298,13 @@ export default function Home() {
   const regularProjects = projects.filter(p => !p.featured)
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+      {/* Dark Mode Toggle */}
+      <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 opacity-90"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 opacity-90 dark:opacity-70"></div>
         <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
           <div className="absolute top-40 right-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
@@ -332,17 +373,17 @@ export default function Home() {
         <AnimatedSection>
           <section className="max-w-7xl mx-auto px-6 py-20">
             <div className="grid md:grid-cols-2 gap-12">
-              <div className="bg-white rounded-2xl shadow-xl p-8">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-300">
                 <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-6">
                   About Me
                 </h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                   {aboutData.bio}
                 </p>
               </div>
 
               {skills.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-xl p-8">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-300">
                   <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-6">
                     Skills
                   </h2>
@@ -350,12 +391,12 @@ export default function Home() {
                     {skills.map((skill: any, index: number) => (
                       <div key={skill.id}>
                         <div className="flex justify-between mb-1">
-                          <span className="font-medium text-gray-700">{skill.name}</span>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">{skill.name}</span>
                           {skill.category && (
-                            <span className="text-sm text-gray-500">{skill.category}</span>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">{skill.category}</span>
                           )}
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div 
                             className="h-2 rounded-full transition-all duration-1000"
                             style={{
@@ -382,7 +423,7 @@ export default function Home() {
               <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
                 Featured Projects
               </h2>
-              <p className="text-gray-600 text-lg">Check out my best work</p>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">Check out my best work</p>
             </div>
           </AnimatedSection>
           
@@ -390,13 +431,13 @@ export default function Home() {
             {featuredProjects.map((project, index) => (
               <AnimatedCard key={project.id} delay={index * 100}>
                 <div 
-                  className="group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 cursor-pointer"
+                  className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 cursor-pointer"
                   onClick={() => setSelectedProject(project)}
                 >
                   <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"></div>
 
                   {project.image_url && (
-                    <div className="w-full h-48 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
+                    <div className="w-full h-48 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
                       <img 
                         src={project.image_url} 
                         alt={project.title}
@@ -407,13 +448,13 @@ export default function Home() {
 
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-2xl font-bold text-gray-800 group-hover:text-purple-600 transition-colors">
+                      <h3 className="text-2xl font-bold text-gray-800 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                         {project.title}
                       </h3>
                       <span className="text-2xl">⭐</span>
                     </div>
                     
-                    <p className="text-gray-600 mb-4 line-clamp-2">{project.description}</p>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{project.description}</p>
                     
                     <div className="flex flex-wrap gap-2 mb-4">
                       {Array.isArray(project.technologies) && project.technologies.map((tech: string, i: number) => (
@@ -436,6 +477,7 @@ export default function Home() {
                           href={project.demo_url} 
                           target="_blank" 
                           className="flex-1 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           Live Demo →
                         </a>
@@ -444,7 +486,8 @@ export default function Home() {
                         <a 
                           href={project.github_url} 
                           target="_blank" 
-                          className="flex-1 text-center border-2 border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:border-purple-500 hover:text-purple-600 transition-all"
+                          className="flex-1 text-center border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:border-purple-500 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           GitHub →
                         </a>
@@ -472,11 +515,11 @@ export default function Home() {
               {regularProjects.map((project: any) => (
                 <div 
                   key={project.id} 
-                  className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-300 hover:-translate-y-1 overflow-hidden cursor-pointer"
+                  className="group bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1 overflow-hidden cursor-pointer"
                   onClick={() => setSelectedProject(project)}
                 >
                   {project.image_url && (
-                    <div className="w-full h-40 overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100">
+                    <div className="w-full h-40 overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30">
                       <img 
                         src={project.image_url} 
                         alt={project.title}
@@ -486,8 +529,8 @@ export default function Home() {
                   )}
                   
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">{project.title}</h3>
-                    <p className="text-gray-600 mb-4 text-sm">{project.description}</p>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{project.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">{project.description}</p>
                     
                     <div className="flex flex-wrap gap-2">
                       {Array.isArray(project.technologies) && project.technologies.map((tech: string, i: number) => (
@@ -509,7 +552,8 @@ export default function Home() {
                           <a 
                             href={project.demo_url} 
                             target="_blank" 
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             Demo →
                           </a>
@@ -518,7 +562,8 @@ export default function Home() {
                           <a 
                             href={project.github_url} 
                             target="_blank" 
-                            className="text-sm text-gray-600 hover:text-gray-700 font-medium"
+                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             Code →
                           </a>
@@ -547,7 +592,7 @@ export default function Home() {
               {certificates.map((cert, index) => (
                 <div 
                   key={cert.id} 
-                  className="relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 overflow-hidden group"
+                  className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 overflow-hidden group"
                 >
                   <div 
                     className="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-10 group-hover:opacity-20 transition-opacity"
@@ -556,9 +601,9 @@ export default function Home() {
                   
                   <div className="relative">
                     <div className="text-3xl mb-3">🏆</div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">{cert.title}</h3>
-                    <p className="text-gray-600 font-medium mb-2">{cert.issuer}</p>
-                    <p className="text-sm text-gray-500 mb-4">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{cert.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">{cert.issuer}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
                       {new Date(cert.issue_date).toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'long' 
@@ -569,7 +614,7 @@ export default function Home() {
                       <a 
                         href={cert.credential_url} 
                         target="_blank" 
-                        className="inline-block text-purple-600 hover:text-pink-600 font-medium text-sm transition-colors"
+                        className="inline-block text-purple-600 dark:text-purple-400 hover:text-pink-600 dark:hover:text-pink-400 font-medium text-sm transition-colors"
                       >
                         View Credential →
                       </a>
@@ -585,48 +630,48 @@ export default function Home() {
       {/* Contact Form */}
       <AnimatedSection>
         <section id="contact" className="max-w-4xl mx-auto px-6 py-20">
-          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl p-8 md:p-12 border border-white">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-2xl p-8 md:p-12 border border-white dark:border-gray-700 transition-colors duration-300">
             <div className="text-center mb-8">
               <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
                 Let's Work Together
               </h2>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
                 Have a project in mind? Drop me a message!
               </p>
             </div>
             
             <form onSubmit={handleContactSubmit} className="space-y-6">
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Name</label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Name</label>
                 <input
                   type="text"
                   value={contactForm.name}
                   onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 transition-colors"
                   placeholder="Your name"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Email</label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Email</label>
                 <input
                   type="email"
                   value={contactForm.email}
                   onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 transition-colors"
                   placeholder="your@email.com"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Message</label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Message</label>
                 <textarea
                   value={contactForm.message}
                   onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
                   rows={5}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 transition-colors resize-none"
                   placeholder="Tell me about your project..."
                   required
                 />
@@ -635,8 +680,8 @@ export default function Home() {
               {contactStatus && (
                 <div className={`p-4 rounded-xl text-center font-medium ${
                   contactStatus.includes('successfully') 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-red-100 text-red-700'
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                 }`}>
                   {contactStatus}
                 </div>
@@ -675,6 +720,11 @@ export default function Home() {
           33% { transform: translate(30px, -50px) scale(1.1); }
           66% { transform: translate(-20px, 20px) scale(0.9); }
         }
+
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
         
         .animate-fade-in {
           animation: fade-in 1s ease-out;
@@ -700,18 +750,15 @@ export default function Home() {
           animation-delay: 4s;
         }
         
-        .scroll-fade-in.visible {
-          opacity: 1;
-          transform: translateY(0);
+        .scroll-fade-in {
+          opacity: 0;
+          transform: translateY(80px);
+          transition: opacity 1.5s ease-out, transform 1.5s ease-out;
         }
         
         .scroll-fade-in.visible {
           opacity: 1;
           transform: translateY(0);
-        }
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
         }
 
         .typing-cursor {
