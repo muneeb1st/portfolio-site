@@ -464,7 +464,8 @@ export default function Home() {
               {regularProjects.map((project: any) => (
                 <div 
                   key={project.id} 
-                  className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-300 hover:-translate-y-1 overflow-hidden"
+                  className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-300 hover:-translate-y-1 overflow-hidden cursor-pointer"
+                  onClick={() => setSelectedProject(project)}
                 >
                   {project.image_url && (
                     <div className="w-full h-40 overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100">
@@ -644,6 +645,9 @@ export default function Home() {
           </div>
         </section>
       </AnimatedSection>
+
+      {/* Project Modal */}
+      <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
 
       {/* Footer */}
       <footer className="bg-gradient-to-r from-purple-900 to-pink-900 text-white py-8 mt-20">
