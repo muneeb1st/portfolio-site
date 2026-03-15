@@ -59,6 +59,7 @@ function AnimatedCard({ children, delay = 0 }: { children: React.ReactNode; dela
 function TypingAnimation({ text }: { text: string }) {
   const [displayText, setDisplayText] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isComplete, setIsComplete] = useState(false)
 
   useEffect(() => {
     if (currentIndex < text.length) {
@@ -67,10 +68,17 @@ function TypingAnimation({ text }: { text: string }) {
         setCurrentIndex(prev => prev + 1)
       }, 100)
       return () => clearTimeout(timeout)
+    } else {
+      setIsComplete(true)
     }
   }, [currentIndex, text])
 
-  return <span>{displayText}<span className="typing-cursor">|</span></span>
+  return (
+    <span>
+      {displayText}
+      {!isComplete && <span className="typing-cursor">|</span>}
+    </span>
+  )
 }
 
 // Project Modal Component
