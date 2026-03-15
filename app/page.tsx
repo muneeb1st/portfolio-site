@@ -112,9 +112,13 @@ export default function Home() {
           )}
           
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
-            Hi, I'm <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-pink-200">
-              {aboutData?.name || 'Your Name'}
-            </span>
+            {aboutData?.name ? (
+              <>Hi, I'm <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-pink-200">
+                {aboutData.name}
+              </span></>
+            ) : (
+              <span className="opacity-0">Loading...</span>
+            )}
           </h1>
           <p className="text-2xl text-white/90 mb-8 animate-fade-in-delay">
             {aboutData?.tagline || 'Full Stack Developer | Building Amazing Web Experiences'}
