@@ -84,31 +84,43 @@ function TypingAnimation({ text }: { text: string }) {
 // Dark mode hook
 function useDarkMode() {
   const [isDark, setIsDark] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+    
     // Check localStorage on mount
     const saved = localStorage.getItem('darkMode')
-    const initialDark = saved === 'true'
-    setIsDark(initialDark)
+    console.log('Saved dark mode:', saved) // Debug log
     
-    // Apply or remove dark class
-    if (initialDark) {
+    if (saved === 'true') {
+      setIsDark(true)
       document.documentElement.classList.add('dark')
     } else {
+      setIsDark(false)
       document.documentElement.classList.remove('dark')
     }
   }, [])
 
   const toggleDark = () => {
+    console.log('Toggle clicked! Current isDark:', isDark) // Debug log
+    
     const newDark = !isDark
     setIsDark(newDark)
     localStorage.setItem('darkMode', String(newDark))
+    
+    console.log('Setting dark mode to:', newDark) // Debug log
     
     if (newDark) {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
+  }
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return { isDark: false, toggleDark: () => {} }
   }
 
   return { isDark, toggleDark }
