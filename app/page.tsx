@@ -493,7 +493,6 @@ export default function Home() {
                       {project.demo_url && (
                         <a 
                           href={project.demo_url} 
-                          target="_blank" 
                           className="flex-1 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -568,8 +567,7 @@ export default function Home() {
                       <div className="flex gap-2 mt-4">
                         {project.demo_url && (
                           <a 
-                            href={project.demo_url} 
-                            target="_blank" 
+                            href={project.demo_url}  
                             className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                             onClick={(e) => e.stopPropagation()}
                           >
