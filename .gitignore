@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI / Agent specific files
+AGENTS.md
+implementation_plan.md
+performance_improvement_plan.md
+.opencode.json
+.opencodeignore

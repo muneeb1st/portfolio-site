@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
 // Scroll animation hook
@@ -143,6 +144,21 @@ function DarkModeToggle({ isDark, onToggle }: { isDark: boolean; onToggle: () =>
   )
 }
 
+// Hero skeleton loader
+function HeroSkeleton() {
+  return (
+    <div className="max-w-7xl mx-auto px-6 py-32 text-center">
+      <div className="skeleton skeleton-avatar mx-auto mb-6"></div>
+      <div className="skeleton skeleton-text mx-auto mb-6"></div>
+      <div className="skeleton skeleton-text-sm mx-auto mb-6"></div>
+      <div className="flex gap-4 justify-center">
+        <div className="skeleton skeleton-btn"></div>
+        <div className="skeleton skeleton-btn"></div>
+      </div>
+    </div>
+  )
+}
+
 // Project Modal Component
 function ProjectModal({ project, onClose }: { project: Project | null; onClose: () => void }) {
   if (!project) return null
@@ -249,6 +265,7 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>([])
   const [certificates, setCertificates] = useState<Certificate[]>([])
   const [loading, setLoading] = useState(true)
+  const [heroLoading, setHeroLoading] = useState(true)
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -263,30 +280,18 @@ export default function Home() {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: projectsData } = await supabase
-        .from('projects')
-        .select('*')
-        .order('order', { ascending: true })
+      const [projectsResult, certificatesResult, aboutResult, skillsResult] = await Promise.all([
+        supabase.from('projects').select('*').order('order', { ascending: true }),
+        supabase.from('certificates').select('*').order('order', { ascending: true }),
+        supabase.from('about').select('*').single(),
+        supabase.from('skills').select('*').order('order_num', { ascending: true })
+      ])
       
-      const { data: certificatesData } = await supabase
-        .from('certificates')
-        .select('*')
-        .order('order', { ascending: true })
-      
-      const { data: about } = await supabase
-        .from('about')
-        .select('*')
-        .single()
-      
-      const { data: skillsData } = await supabase
-        .from('skills')
-        .select('*')
-        .order('order_num', { ascending: true })
-      
-      setProjects(projectsData || [])
-      setCertificates(certificatesData || [])
-      setAboutData(about)
-      setSkills(skillsData || [])
+      setProjects(projectsResult.data || [])
+      setCertificates(certificatesResult.data || [])
+      setAboutData(aboutResult.data)
+      setSkills(skillsResult.data || [])
+      setHeroLoading(false)
       setLoading(false)
     }
 
@@ -330,59 +335,62 @@ export default function Home() {
         </div>
         
         <div className="relative max-w-7xl mx-auto px-6 py-32 text-center">
-          {aboutData?.profile_image_url && (
-            <img 
-              src={aboutData.profile_image_url} 
-              alt={aboutData.name}
-              className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white shadow-2xl object-cover animate-fade-in"
-            />
+          {heroLoading ? (
+            <HeroSkeleton />
+          ) : (
+            <>
+              {aboutData?.profile_image_url && (
+                <div className="relative w-32 h-32 mx-auto mb-6">
+                  <Image
+                    src={aboutData.profile_image_url}
+                    alt={aboutData.name}
+                    fill
+                    priority
+                    className="rounded-full border-4 border-white shadow-2xl object-cover animate-fade-in"
+                    sizes="128px"
+                  />
+                </div>
+              )}
+              
+              <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
+                Hi, I&apos;m <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-pink-200">
+                  {aboutData?.name}
+                </span>
+              </h1>
+              <p className="text-2xl text-white/90 mb-8 animate-fade-in-delay">
+                {aboutData?.tagline && <TypingAnimation text={aboutData.tagline} />}
+              </p>
+              
+              {(aboutData?.github_url || aboutData?.linkedin_url || aboutData?.twitter_url) && (
+                <div className="flex gap-4 justify-center mb-8 animate-fade-in-delay">
+                  {aboutData.github_url && (
+                    <a href={aboutData.github_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
+                      GitHub
+                    </a>
+                  )}
+                  {aboutData.linkedin_url && (
+                    <a href={aboutData.linkedin_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
+                      LinkedIn
+                    </a>
+                  )}
+                  {aboutData.twitter_url && (
+                    <a href={aboutData.twitter_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
+                      Twitter
+                    </a>
+                  )}
+                </div>
+              )}
+              
+              <div className="flex gap-4 justify-center animate-fade-in-delay-2">
+                <a href="#projects" className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:scale-105 transition-transform shadow-lg">
+                  View My Work
+                </a>
+                <a href="#contact" className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all">
+                  Get In Touch
+                </a>
+              </div>
+            </>
           )}
-          
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
-            {aboutData?.name ? (
-              <>Hi, I'm <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-pink-200">
-                {aboutData.name}
-              </span></>
-            ) : (
-              <span className="opacity-0">Loading...</span>
-            )}
-          </h1>
-          <p className="text-2xl text-white/90 mb-8 animate-fade-in-delay">
-            {aboutData?.tagline ? (
-              <TypingAnimation text={aboutData.tagline} />
-            ) : (
-              <TypingAnimation text="Full Stack Developer | Building Amazing Web Experiences" />
-            )}
-          </p>
-          
-          {(aboutData?.github_url || aboutData?.linkedin_url || aboutData?.twitter_url) && (
-            <div className="flex gap-4 justify-center mb-8 animate-fade-in-delay">
-              {aboutData.github_url && (
-                <a href={aboutData.github_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
-                  GitHub
-                </a>
-              )}
-              {aboutData.linkedin_url && (
-                <a href={aboutData.linkedin_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
-                  LinkedIn
-                </a>
-              )}
-              {aboutData.twitter_url && (
-                <a href={aboutData.twitter_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
-                  Twitter
-                </a>
-              )}
-            </div>
-          )}
-          
-          <div className="flex gap-4 justify-center animate-fade-in-delay-2">
-            <a href="#projects" className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:scale-105 transition-transform shadow-lg">
-              View My Work
-            </a>
-            <a href="#contact" className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all">
-              Get In Touch
-            </a>
-          </div>
         </div>
       </section>
 

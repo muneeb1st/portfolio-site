@@ -21,3 +21,42 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+:where(.dark, .dark *) .skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-avatar {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+}
+
+.skeleton-text {
+  height: 2.5rem;
+  width: 60%;
+}
+
+.skeleton-text-sm {
+  height: 1.5rem;
+  width: 40%;
+}
+
+.skeleton-btn {
+  height: 3rem;
+  width: 8rem;
+  border-radius: 9999px;
+}
