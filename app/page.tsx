@@ -346,8 +346,9 @@ export default function Home() {
                     alt={aboutData.name}
                     fill
                     priority
+                    quality={100}
                     className="rounded-full border-4 border-white shadow-2xl object-cover animate-fade-in"
-                    sizes="128px"
+                    sizes="256px"
                   />
                 </div>
               )}
