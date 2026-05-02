@@ -128,7 +128,8 @@ export default function SiteSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Site Settings</h1>
+      <h1 className="text-2xl font-bold mb-2">Site Settings</h1>
+      <p className="text-sm text-slate-500 mb-6">These settings control text shown on the public homepage. Changes apply immediately after saving.</p>
 
       {schemaMessage ? (
         <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{schemaMessage}</div>
@@ -137,7 +138,8 @@ export default function SiteSettingsPage() {
       <div className="bg-white p-6 rounded-lg shadow">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-700 mb-2">Hero Title</label>
+            <label className="block text-gray-700 font-medium">Hero Title</label>
+            <p className="text-xs text-slate-400 mb-2">The big headline at the very top of your homepage.</p>
             <input
               type="text"
               value={formData.hero_title}
@@ -148,7 +150,8 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2">Hero Badge Text</label>
+            <label className="block text-gray-700 font-medium">Hero Badge Text</label>
+            <p className="text-xs text-slate-400 mb-2">The small badge above the headline (e.g. "Available for projects").</p>
             <input
               type="text"
               value={formData.hero_badge}
@@ -159,7 +162,8 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2">Contact Section Title</label>
+            <label className="block text-gray-700 font-medium">Contact Section Title</label>
+            <p className="text-xs text-slate-400 mb-2">The heading in the "Get in touch" section at the bottom.</p>
             <input
               type="text"
               value={formData.contact_title}
@@ -170,7 +174,8 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2">Contact Section Subtitle</label>
+            <label className="block text-gray-700 font-medium">Contact Section Subtitle</label>
+            <p className="text-xs text-slate-400 mb-2">The paragraph under the contact heading.</p>
             <textarea
               value={formData.contact_subtitle}
               onChange={(event) => setFormData((current) => ({ ...current, contact_subtitle: event.target.value }))}
@@ -181,7 +186,8 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2">Footer Text</label>
+            <label className="block text-gray-700 font-medium">Footer Text</label>
+            <p className="text-xs text-slate-400 mb-2">Text shown at the very bottom of the page after © {new Date().getFullYear()} Muneeb.</p>
             <input
               type="text"
               value={formData.footer_text}
@@ -192,7 +198,8 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2">Ticker Items (comma separated)</label>
+            <label className="block text-gray-700 font-medium">Ticker Items (comma separated)</label>
+            <p className="text-xs text-slate-400 mb-2">The scrolling keywords bar between the hero and the about section.</p>
             <textarea
               value={formData.ticker_items}
               onChange={(event) => setFormData((current) => ({ ...current, ticker_items: event.target.value }))}

@@ -15,6 +15,7 @@ export default function HeroStatsPage() {
   const [stats, setStats] = useState<HeroStat[]>([])
   const [loading, setLoading] = useState(true)
   const [schemaMessage, setSchemaMessage] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     value: '',
     label: '',
@@ -43,10 +44,32 @@ export default function HeroStatsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  function editStat(stat: HeroStat) {
+    setEditingId(stat.id)
+    setFormData({ value: stat.value, label: stat.label, order_num: stat.order_num })
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setFormData({ value: '', label: '', order_num: stats.length + 1 })
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (schemaMessage) {
+      return
+    }
+
+    if (editingId) {
+      const { error } = await supabase.from('hero_stats').update({
+        value: formData.value, label: formData.label, order_num: formData.order_num,
+      }).eq('id', editingId)
+      
+      if (!error) {
+        cancelEdit()
+        void fetchStats()
+      }
       return
     }
 
@@ -72,6 +95,9 @@ export default function HeroStatsPage() {
     const { error } = await supabase.from('hero_stats').delete().eq('id', id)
     if (!error) {
       void fetchStats()
+      if (editingId === id) {
+        cancelEdit()
+      }
     }
   }
 
@@ -88,7 +114,7 @@ export default function HeroStatsPage() {
       ) : null}
 
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">Add Hero Stat</h2>
+        <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Hero Stat' : 'Add Hero Stat'}</h2>
         <form onSubmit={handleSubmit} className="grid md:grid-cols-3 gap-4">
           <input
             type="text"
@@ -114,13 +140,24 @@ export default function HeroStatsPage() {
             className="w-full px-4 py-2 border rounded-lg"
             required
           />
-          <button
-            type="submit"
-            disabled={Boolean(schemaMessage)}
-            className="md:col-span-3 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-60"
-          >
-            Add Stat
-          </button>
+          <div className="md:col-span-3 flex gap-2">
+            <button
+              type="submit"
+              disabled={Boolean(schemaMessage)}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-60"
+            >
+              {editingId ? 'Update Stat' : 'Add Stat'}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -134,9 +171,14 @@ export default function HeroStatsPage() {
                 <div className="text-sm text-gray-600">{stat.label}</div>
                 <div className="text-xs text-gray-400 mt-1">Order: {stat.order_num}</div>
               </div>
-              <button type="button" onClick={() => deleteStat(stat.id)} className="text-red-600 hover:text-red-700 text-sm">
-                Delete
-              </button>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => editStat(stat)} className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  Edit
+                </button>
+                <button type="button" onClick={() => deleteStat(stat.id)} className="text-red-600 hover:text-red-700 text-sm font-medium">
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

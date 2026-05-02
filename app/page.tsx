@@ -123,6 +123,18 @@ interface TimelineItem {
   order_num: number
 }
 
+interface SkillCategoryRow {
+  id: string
+  title: string
+  skills: unknown
+  order_num: number
+}
+
+interface SkillCategoryDisplay {
+  title: string
+  skills: string[]
+}
+
 interface ServiceShowcaseRow {
   id: string
   eyebrow: string
@@ -181,7 +193,7 @@ const fallbackAbout: Required<AboutData> = {
   name: 'Muneeb Ur Rehman',
   tagline: 'CS student who builds websites and AI systems faster than most people expect.',
   bio: 'I picked up web development and AI automation on my own, started shipping real projects within weeks, and I have not slowed down. I build premium websites and smart chatbot systems for businesses that want to stand out.',
-  profile_image_url: 'https://avatars.githubusercontent.com/u/213479346?v=4',
+  profile_image_url: null,
   github_url: 'https://github.com/muneeb1st',
   linkedin_url: null,
   twitter_url: null,
@@ -771,6 +783,7 @@ export default function Home() {
   const [serviceShowcasesData, setServiceShowcasesData] = useState<ServiceShowcase[]>([])
   const [offerPackagesData, setOfferPackagesData] = useState<PackageCardData[]>([])
   const [buildingNextData, setBuildingNextData] = useState<BuildingNext[]>([])
+  const [skillCategoriesData, setSkillCategoriesData] = useState<SkillCategoryDisplay[]>([])
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [contactSubmitting, setContactSubmitting] = useState(false)
   const [contactStatus, setContactStatus] = useState<{
@@ -839,6 +852,7 @@ export default function Home() {
         serviceShowcasesResult,
         offerPackagesResult,
         buildingNextResult,
+        skillCategoriesResult,
       ] = await Promise.allSettled([
         supabase.from('projects').select('*').order('order', { ascending: true }),
         supabase.from('certificates').select('*').order('order', { ascending: true }),
@@ -850,6 +864,7 @@ export default function Home() {
         supabase.from('service_showcases').select('*').order('order_num', { ascending: true }),
         supabase.from('offer_packages').select('*').order('order_num', { ascending: true }),
         supabase.from('building_next').select('*').order('order_num', { ascending: true }),
+        supabase.from('skill_categories').select('*').order('order_num', { ascending: true }),
       ])
 
       if (cancelled) {
@@ -906,6 +921,14 @@ export default function Home() {
           ? (buildingNextResult.value.data as BuildingNextRow[]).map(normalizeBuildingNext)
           : []
 
+      const nextSkillCategories =
+        skillCategoriesResult.status === 'fulfilled' && Array.isArray(skillCategoriesResult.value.data)
+          ? (skillCategoriesResult.value.data as SkillCategoryRow[]).map((row) => ({
+              title: row.title,
+              skills: toStringArray(row.skills),
+            }))
+          : []
+
       startTransition(() => {
         setProjects(nextProjects)
         setCertificates(nextCertificates)
@@ -917,6 +940,7 @@ export default function Home() {
         setServiceShowcasesData(nextServiceShowcases)
         setOfferPackagesData(nextOfferPackages)
         setBuildingNextData(nextBuildingNext)
+        setSkillCategoriesData(nextSkillCategories)
       })
     }
 
@@ -954,7 +978,7 @@ export default function Home() {
     name: aboutData?.name?.trim() || fallbackAbout.name,
     tagline: aboutData?.tagline?.trim() || fallbackAbout.tagline,
     bio: aboutData?.bio?.trim() || fallbackAbout.bio,
-    profileImage: aboutData?.profile_image_url || fallbackAbout.profile_image_url,
+    profileImage: aboutData?.profile_image_url || null,
     socialLinks: [
       { label: 'GitHub', href: aboutData?.github_url || fallbackAbout.github_url },
       { label: 'LinkedIn', href: aboutData?.linkedin_url || fallbackAbout.linkedin_url },
@@ -975,6 +999,7 @@ export default function Home() {
   const displayServiceShowcases = serviceShowcasesData.length > 0 ? serviceShowcasesData : serviceShowcases
   const displayOfferPackages = offerPackagesData.length > 0 ? offerPackagesData : offerPackages
   const displayBuildingNext = buildingNextData.length > 0 ? buildingNextData : buildingNext
+  const displaySkillCategories = skillCategoriesData.length > 0 ? skillCategoriesData : skillCategories
 
   return (
     <main ref={surfaceRef} className="page-shell relative overflow-x-clip pb-14">
@@ -988,7 +1013,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-5">
           <div className="glass-panel flex items-center justify-between rounded-full px-3 sm:px-4 py-2.5 sm:py-3 md:px-6">
             <div className="flex items-center gap-2 sm:gap-3">
-              <span className="font-display text-sm sm:text-lg text-[#fff7ec]">{profile.name}</span>
+              <span className="font-display text-sm sm:text-lg text-[#fff7ec]">{profile.name?.split(' ')[0] || 'Muneeb'}</span>
               <span className="hidden text-xs uppercase tracking-[0.3em] text-white/35 md:inline">
                 Web Dev · AI Builder
               </span>
@@ -1045,7 +1070,7 @@ export default function Home() {
               <div className="relative flex items-center justify-center py-8 sm:py-10 bg-gradient-to-b from-white/[0.08] to-transparent">
                 <div className="avatar-ring">
                   <Image
-                    src={profile.profileImage || 'https://avatars.githubusercontent.com/u/213479346?v=4'}
+                    src={profile.profileImage || 'https://api.dicebear.com/7.x/initials/svg?seed=Muneeb&backgroundColor=247,178,77'}
                     alt={profile.name ?? 'Profile portrait'}
                     width={160}
                     height={160}
@@ -1123,7 +1148,7 @@ export default function Home() {
           <div className="glass-panel rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8">
             <div className="eyebrow mb-5 sm:mb-6">Skill stack</div>
             <div className="space-y-5 sm:space-y-6">
-              {skillCategories.map((cat) => (
+              {displaySkillCategories.map((cat) => (
                 <div key={cat.title}>
                   <div className="skill-category-title">{cat.title}</div>
                   <div className="flex flex-wrap gap-2">

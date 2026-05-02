@@ -15,6 +15,7 @@ export default function TimelinePage() {
   const [items, setItems] = useState<TimelineItem[]>([])
   const [loading, setLoading] = useState(true)
   const [schemaMessage, setSchemaMessage] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     phase: '',
     description: '',
@@ -43,10 +44,32 @@ export default function TimelinePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  function editItem(item: TimelineItem) {
+    setEditingId(item.id)
+    setFormData({ phase: item.phase, description: item.description, order_num: item.order_num })
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setFormData({ phase: '', description: '', order_num: items.length + 1 })
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (schemaMessage) {
+      return
+    }
+
+    if (editingId) {
+      const { error } = await supabase.from('timeline_items').update({
+        phase: formData.phase, description: formData.description, order_num: formData.order_num,
+      }).eq('id', editingId)
+      
+      if (!error) {
+        cancelEdit()
+        void fetchItems()
+      }
       return
     }
 
@@ -72,6 +95,9 @@ export default function TimelinePage() {
     const { error } = await supabase.from('timeline_items').delete().eq('id', id)
     if (!error) {
       void fetchItems()
+      if (editingId === id) {
+        cancelEdit()
+      }
     }
   }
 
@@ -88,7 +114,7 @@ export default function TimelinePage() {
       ) : null}
 
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">Add Timeline Item</h2>
+        <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Timeline Item' : 'Add Timeline Item'}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <input
@@ -116,13 +142,24 @@ export default function TimelinePage() {
             placeholder="Describe this phase..."
             required
           />
-          <button
-            type="submit"
-            disabled={Boolean(schemaMessage)}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-60"
-          >
-            Add Timeline Item
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={Boolean(schemaMessage)}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-60"
+            >
+              {editingId ? 'Update Item' : 'Add Timeline Item'}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -136,9 +173,14 @@ export default function TimelinePage() {
                 <div className="text-sm text-gray-600 mt-1">{item.description}</div>
                 <div className="text-xs text-gray-400 mt-2">Order: {item.order_num}</div>
               </div>
-              <button type="button" onClick={() => deleteItem(item.id)} className="text-red-600 hover:text-red-700 text-sm">
-                Delete
-              </button>
+              <div className="flex gap-3 mt-2 sm:mt-0 sm:ml-4">
+                <button type="button" onClick={() => editItem(item)} className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  Edit
+                </button>
+                <button type="button" onClick={() => deleteItem(item.id)} className="text-red-600 hover:text-red-700 text-sm font-medium">
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
