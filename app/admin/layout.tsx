@@ -82,17 +82,17 @@ export default function AdminLayout({
         <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      <aside className={`fixed left-0 top-0 z-50 h-screen w-72 border-r border-slate-700 bg-slate-900 shadow-xl transition-transform duration-300 ${
+      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col border-r border-slate-700 bg-slate-900 shadow-xl transition-transform duration-300 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
-        <div className="border-b border-slate-700 p-6">
+        <div className="border-b border-slate-700 p-6 shrink-0">
           <h1 className="text-2xl font-bold text-white">
             Admin Panel
           </h1>
           <p className="mt-1 text-sm text-slate-400">{user?.email}</p>
         </div>
 
-        <nav className="space-y-2 p-4 h-[calc(100vh-160px)] overflow-y-auto">
+        <nav className="flex-1 space-y-2 overflow-y-auto p-4">
           {menuItems.map((item) => (
             <button
               key={item.path}
@@ -112,7 +112,7 @@ export default function AdminLayout({
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 border-t border-slate-700 p-4 bg-slate-900">
+        <div className="shrink-0 border-t border-slate-700 bg-slate-900 p-4">
           <button
             type="button"
             onClick={() => router.push('/')}

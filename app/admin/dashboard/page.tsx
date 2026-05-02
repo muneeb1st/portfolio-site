@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                 key={item.path}
                 type="button"
                 onClick={() => router.push(item.path)}
-                className="rounded-2xl border border-slate-200 px-4 py-4 text-left text-sm font-medium text-slate-700 transition hover:border-slate-900 hover:bg-slate-900 hover:text-white"
+                className="rounded-2xl border border-slate-200 px-4 py-4 text-left text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
               >
                 {item.label}
               </button>
