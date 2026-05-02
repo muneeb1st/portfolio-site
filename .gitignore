@@ -45,5 +45,10 @@ next-env.d.ts
 AGENTS.md
 implementation_plan.md
 performance_improvement_plan.md
+image_quality_plan.md
+master prompt.md
+test_prompt.md
+memory.md
 .opencode.json
 .opencodeignore
+.cursor/
