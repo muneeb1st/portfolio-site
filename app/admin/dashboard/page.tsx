@@ -166,6 +166,7 @@ export default function AdminDashboard() {
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {[
+              { label: 'Update About Me', path: '/admin/about' },
               { label: 'Update Site Settings', path: '/admin/site-settings' },
               { label: 'Refresh Services', path: '/admin/services' },
               { label: 'Add New Project', path: '/admin/projects' },

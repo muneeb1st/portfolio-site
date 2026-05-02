@@ -16,33 +16,10 @@ interface AboutRecord {
   profile_image_url: string | null
 }
 
-interface Skill {
-  id: string
-  name: string
-  category: string | null
-  proficiency: number
-  order_num: number
-}
-
-interface SkillForm {
-  name: string
-  category: string
-  proficiency: number
-}
-
-const emptySkillForm: SkillForm = {
-  name: '',
-  category: '',
-  proficiency: 5,
-}
-
 export default function ManageAbout() {
   const [aboutData, setAboutData] = useState<AboutRecord | null>(null)
-  const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
-  const [showSkillForm, setShowSkillForm] = useState(false)
-  const [skillForm, setSkillForm] = useState<SkillForm>(emptySkillForm)
 
   useEffect(() => {
     let cancelled = false
@@ -56,17 +33,15 @@ export default function ManageAbout() {
         return
       }
 
-      const [aboutResult, skillsResult] = await Promise.all([
-        supabase.from('about').select('*').single(),
-        supabase.from('skills').select('*').order('order_num', { ascending: true }),
-      ])
+      const { data, error } = await supabase.from('about').select('*').single()
 
       if (cancelled) {
         return
       }
 
-      setAboutData((aboutResult.data as AboutRecord | null) ?? null)
-      setSkills((skillsResult.data as Skill[] | null) ?? [])
+      if (!error) {
+        setAboutData((data as AboutRecord | null) ?? null)
+      }
       setLoading(false)
     }
 
@@ -76,11 +51,6 @@ export default function ManageAbout() {
       cancelled = true
     }
   }, [])
-
-  async function refreshSkills() {
-    const { data } = await supabase.from('skills').select('*').order('order_num', { ascending: true })
-    setSkills((data as Skill[] | null) ?? [])
-  }
 
   async function handleAboutUpdate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -141,36 +111,6 @@ export default function ManageAbout() {
     setUploading(false)
   }
 
-  async function addSkill(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    const { error } = await supabase.from('skills').insert([
-      {
-        ...skillForm,
-        category: skillForm.category || null,
-        order_num: skills.length + 1,
-      },
-    ])
-
-    if (!error) {
-      setShowSkillForm(false)
-      setSkillForm(emptySkillForm)
-      void refreshSkills()
-    }
-  }
-
-  async function deleteSkill(id: string) {
-    if (!confirm('Delete this skill?')) {
-      return
-    }
-
-    const { error } = await supabase.from('skills').delete().eq('id', id)
-
-    if (!error) {
-      void refreshSkills()
-    }
-  }
-
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center">Loading...</div>
   }
@@ -181,8 +121,8 @@ export default function ManageAbout() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">About & Skills</h1>
-      <p className="text-sm text-slate-500 mb-6">Manage your personal info, social links, and individual skills.</p>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">About Me</h1>
+      <p className="text-sm text-slate-500 mb-6">Manage your personal information, profile photo, and social links.</p>
 
       <div className="space-y-6">
         <div className="rounded-lg bg-white p-6 shadow">
@@ -316,85 +256,6 @@ export default function ManageAbout() {
               Save Changes
             </button>
           </form>
-        </div>
-
-        <div className="rounded-lg bg-white p-6 shadow">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">Skills</h2>
-            <button
-              type="button"
-              onClick={() => setShowSkillForm((current) => !current)}
-              className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-            >
-              {showSkillForm ? 'Cancel' : '+ Add Skill'}
-            </button>
-          </div>
-
-          {showSkillForm ? (
-            <form onSubmit={addSkill} className="mb-6 rounded-lg border bg-gray-50 p-4">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div>
-                  <label htmlFor="skill-name" className="mb-2 block text-sm text-gray-700">
-                    Skill Name *
-                  </label>
-                  <input
-                    id="skill-name"
-                    type="text"
-                    value={skillForm.name}
-                    onChange={(event) => setSkillForm((current) => ({ ...current, name: event.target.value }))}
-                    className="w-full rounded border px-3 py-2"
-                    placeholder="React"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="skill-category" className="mb-2 block text-sm text-gray-700">
-                    Category
-                  </label>
-                  <input
-                    id="skill-category"
-                    type="text"
-                    value={skillForm.category}
-                    onChange={(event) => setSkillForm((current) => ({ ...current, category: event.target.value }))}
-                    className="w-full rounded border px-3 py-2"
-                    placeholder="Frontend"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="skill-proficiency" className="mb-2 block text-sm text-gray-700">
-                    Proficiency (1-10)
-                  </label>
-                  <input
-                    id="skill-proficiency"
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={skillForm.proficiency}
-                    onChange={(event) => setSkillForm((current) => ({ ...current, proficiency: Number(event.target.value) }))}
-                    className="w-full rounded border px-3 py-2"
-                  />
-                </div>
-              </div>
-              <button type="submit" className="mt-3 rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">
-                Add Skill
-              </button>
-            </form>
-          ) : null}
-
-          <div className="grid gap-3 md:grid-cols-2">
-            {skills.map((skill) => (
-              <div key={skill.id} className="flex items-center justify-between rounded border p-3">
-                <div>
-                  <p className="font-medium">{skill.name}</p>
-                  {skill.category ? <p className="text-xs text-gray-500">{skill.category}</p> : null}
-                  <p className="text-xs text-gray-400">Level: {skill.proficiency}/10</p>
-                </div>
-                <button type="button" onClick={() => deleteSkill(skill.id)} className="text-sm text-red-600 hover:text-red-700">
-                  Delete
-                </button>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

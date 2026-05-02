@@ -15,7 +15,7 @@ const menuItems = [
   { name: 'Services', path: '/admin/services', icon: 'SV' },
   { name: 'Roadmap', path: '/admin/roadmap', icon: 'RM' },
   { name: 'Messages', path: '/admin/messages', icon: 'MS' },
-  { name: 'About & Skills', path: '/admin/about', icon: 'AB' },
+  { name: 'About Me', path: '/admin/about', icon: 'AB' },
   { name: 'Skill Stack', path: '/admin/skill-stack', icon: 'SK' },
 ]
 
