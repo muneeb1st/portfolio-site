@@ -1,244 +1,26 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
+import {
+  startTransition,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 import { supabase } from '@/lib/supabase'
 
-// Scroll animation hook
-function useScrollAnimation() {
-  const ref = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    if (ref.current) {
-      observer.observe(ref.current)
-    }
-
-    return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current)
-      }
-    }
-  }, [])
-
-  return { ref, isVisible }
-}
-
-// Animated wrapper components
-function AnimatedSection({ children }: { children: React.ReactNode }) {
-  const { ref, isVisible } = useScrollAnimation()
-  return (
-    <div ref={ref} className={`scroll-fade-in ${isVisible ? 'visible' : ''}`}>
-      {children}
-    </div>
-  )
-}
-
-function AnimatedCard({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const { ref, isVisible } = useScrollAnimation()
-  return (
-    <div 
-      ref={ref} 
-      className={`scroll-fade-in ${isVisible ? 'visible' : ''}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  )
-}
-
-// Typing animation component
-function TypingAnimation({ text }: { text: string }) {
-  const [displayText, setDisplayText] = useState('')
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isComplete, setIsComplete] = useState(false)
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex])
-        setCurrentIndex(prev => prev + 1)
-      }, 100)
-      return () => clearTimeout(timeout)
-    } else {
-      setIsComplete(true)
-    }
-  }, [currentIndex, text])
-
-  return (
-    <span>
-      {displayText}
-      {!isComplete && <span className="typing-cursor">|</span>}
-    </span>
-  )
-}
-
-// Dark mode hook
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    
-    // Check localStorage on mount
-    const saved = localStorage.getItem('darkMode')
-    console.log('Saved dark mode:', saved) // Debug log
-    
-    if (saved === 'true') {
-      setIsDark(true)
-      document.documentElement.classList.add('dark')
-    } else {
-      setIsDark(false)
-      document.documentElement.classList.remove('dark')
-    }
-  }, [])
-
-  const toggleDark = () => {
-    console.log('Toggle clicked! Current isDark:', isDark) // Debug log
-    
-    const newDark = !isDark
-    setIsDark(newDark)
-    localStorage.setItem('darkMode', String(newDark))
-    
-    console.log('Setting dark mode to:', newDark) // Debug log
-    
-    if (newDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }
-
-  // Don't render until mounted to avoid hydration mismatch
-  if (!mounted) {
-    return { isDark: false, toggleDark: () => {} }
-  }
-
-  return { isDark, toggleDark }
-}
-
-// Dark mode toggle button
-function DarkModeToggle({ isDark, onToggle }: { isDark: boolean; onToggle: () => void }) {
-  return (
-    <button
-      onClick={onToggle}
-      className="fixed top-6 right-6 z-50 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:shadow-xl transition-all border-2 border-gray-200 dark:border-gray-700"
-      aria-label="Toggle dark mode"
-    >
-      {isDark ? (
-        <span className="text-2xl">☀️</span>
-      ) : (
-        <span className="text-2xl">🌙</span>
-      )}
-    </button>
-  )
-}
-
-// Hero skeleton loader
-function HeroSkeleton() {
-  return (
-    <div className="max-w-7xl mx-auto px-6 py-32 text-center">
-      <div className="skeleton skeleton-avatar mx-auto mb-6"></div>
-      <div className="skeleton skeleton-text mx-auto mb-6"></div>
-      <div className="skeleton skeleton-text-sm mx-auto mb-6"></div>
-      <div className="flex gap-4 justify-center">
-        <div className="skeleton skeleton-btn"></div>
-        <div className="skeleton skeleton-btn"></div>
-      </div>
-    </div>
-  )
-}
-
-// Project Modal Component
-function ProjectModal({ project, onClose }: { project: Project | null; onClose: () => void }) {
-  if (!project) return null
-
-  return (
-    <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div 
-        className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transition-colors duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {project.image_url && (
-          <div className="w-full h-64 overflow-hidden rounded-t-2xl bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
-            <img 
-              src={project.image_url} 
-              alt={project.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-        <div className="p-8">
-          <button
-            onClick={onClose}
-            className="float-right text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-3xl leading-none"
-          >
-            ×
-          </button>
-
-          <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
-            {project.title}
-          </h2>
-
-          <div className="flex flex-wrap gap-2 mb-6">
-            {Array.isArray(project.technologies) && project.technologies.map((tech: string, i: number) => (
-              <span 
-                key={tech} 
-                className="px-4 py-2 text-sm font-medium rounded-full text-white"
-                style={{
-                  background: `linear-gradient(135deg, ${['#a855f7', '#ec4899', '#3b82f6', '#8b5cf6', '#f472b6'][i % 5]} 0%, ${['#c084fc', '#f472b6', '#60a5fa', '#a78bfa', '#f9a8d4'][i % 5]} 100%)`
-                }}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">About This Project</h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-              {project.description}
-            </p>
-          </div>
-
-          <div className="flex gap-4">
-            {project.demo_url && (
-              <a 
-                href={project.demo_url} 
-                target="_blank" 
-                className="flex-1 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
-              >
-                🚀 Live Demo
-              </a>
-            )}
-            {project.github_url && (
-              <a 
-                href={project.github_url} 
-                target="_blank" 
-                className="flex-1 text-center border-2 border-purple-500 text-purple-600 dark:text-purple-400 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all"
-              >
-                💻 View Code
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+interface ProjectRow {
+  id: string
+  title: string
+  description: string
+  technologies: unknown
+  image_url: string | null
+  demo_url: string | null
+  github_url: string | null
+  featured: boolean | null
 }
 
 interface Project {
@@ -258,539 +40,1406 @@ interface Certificate {
   issuer: string
   issue_date: string
   credential_url: string | null
-  image_url: string | null
+}
+
+interface AboutData {
+  name: string | null
+  tagline: string | null
+  bio: string | null
+  profile_image_url: string | null
+  github_url: string | null
+  linkedin_url: string | null
+  twitter_url: string | null
+}
+
+interface SkillRow {
+  id: string
+  name: string
+  category: string | null
+  proficiency: number | null
+}
+
+interface ServiceShowcase {
+  id: string
+  eyebrow: string
+  title: string
+  summary: string
+  highlight: string
+  deliverables: string[]
+  accent: string
+  tags: string[]
+}
+
+interface PackageCardData {
+  id: string
+  family: string
+  title: string
+  pitch: string
+  bestFor: string
+  timeline: string
+  deliverables: string[]
+  accent: string
+}
+
+interface BuildingNext {
+  id: string
+  title: string
+  description: string
+  tags: string[]
+  accent: string
+}
+
+interface SiteSettings {
+  id: string
+  hero_title: string
+  hero_badge: string
+  contact_title: string
+  contact_subtitle: string
+  footer_text: string
+  ticker_items: string[]
+}
+
+interface SiteSettingsRow {
+  id: string
+  hero_title: string | null
+  hero_badge: string | null
+  contact_title: string | null
+  contact_subtitle: string | null
+  footer_text: string | null
+  ticker_items: unknown
+}
+
+interface HeroStat {
+  id: string
+  value: string
+  label: string
+  order_num: number
+}
+
+interface TimelineItem {
+  id: string
+  phase: string
+  description: string
+  order_num: number
+}
+
+interface ServiceShowcaseRow {
+  id: string
+  eyebrow: string
+  title: string
+  summary: string
+  highlight: string
+  deliverables: unknown
+  accent: string | null
+  tags: unknown
+}
+
+interface OfferPackageRow {
+  id: string
+  family: string
+  title: string
+  pitch: string
+  best_for: string
+  timeline: string
+  deliverables: unknown
+  accent: string | null
+}
+
+interface BuildingNextRow {
+  id: string
+  title: string
+  description: string
+  tags: unknown
+  accent: string | null
+}
+
+const fallbackSiteSettings: SiteSettings = {
+  id: 'fallback-site-settings',
+  hero_title: 'I build what most people think takes years to learn.',
+  hero_badge: 'Available for projects',
+  contact_title: "Got a project in mind? Let's build it.",
+  contact_subtitle:
+    'Tell me what you need - a website, a chatbot, or both. I will get back to you with a clear plan and timeline.',
+  footer_text: 'Built with Next.js, Supabase, and a lot of late nights.',
+  ticker_items: [
+    'React',
+    'Next.js',
+    'TypeScript',
+    'Python',
+    'Tailwind CSS',
+    'Supabase',
+    'Node.js',
+    'AI Chatbots',
+    'Responsive Design',
+    'Git & GitHub',
+    'AWS',
+    'REST APIs',
+  ],
+}
+
+const fallbackAbout: Required<AboutData> = {
+  name: 'Muneeb Ur Rehman',
+  tagline: 'CS student who builds websites and AI systems faster than most people expect.',
+  bio: 'I picked up web development and AI automation on my own, started shipping real projects within weeks, and I have not slowed down. I build premium websites and smart chatbot systems for businesses that want to stand out.',
+  profile_image_url: 'https://avatars.githubusercontent.com/u/213479346?v=4',
+  github_url: 'https://github.com/muneeb1st',
+  linkedin_url: null,
+  twitter_url: null,
+}
+
+const fallbackProjects: Project[] = [
+  {
+    id: 'portfolio-site',
+    title: 'This Portfolio',
+    description:
+      'The site you are looking at right now. A Next.js portfolio with glassmorphism design, 3D tilt interactions, scroll-reveal animations, ambient cursor spotlight, Supabase-powered CMS, and a full admin panel. Built from scratch.',
+    technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Supabase'],
+    image_url: null,
+    demo_url: null,
+    github_url: 'https://github.com/muneeb1st/portfolio-site',
+    featured: true,
+  },
+  {
+    id: 'ar-cafe',
+    title: 'AR Cafe Website',
+    description:
+      'A premium restaurant website with animated customer reviews, dynamic menu management, and a brand-focused design. Built with Next.js and Supabase with a full admin panel for the business owner.',
+    technologies: ['Next.js', 'Supabase', 'Responsive Design', 'Admin Panel'],
+    image_url: null,
+    demo_url: null,
+    github_url: null,
+    featured: true,
+  },
+  {
+    id: 'ai-chatbot-system',
+    title: 'AI Chatbot System',
+    description:
+      'A self-hosted AI assistant deployed on AWS that connects to Discord for real-time conversations. Features custom conversation flows, server management, and multi-channel support.',
+    technologies: ['Python', 'AWS', 'Discord API', 'AI/LLM'],
+    image_url: null,
+    demo_url: null,
+    github_url: null,
+    featured: true,
+  },
+]
+
+const fallbackSkills = [
+  'Next.js', 'React', 'TypeScript', 'Tailwind CSS',
+  'Python', 'Supabase', 'Node.js', 'AI Automation',
+]
+
+const skillCategories = [
+  {
+    title: 'Frontend',
+    skills: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'HTML/CSS', 'Responsive Design'],
+  },
+  {
+    title: 'Backend & Data',
+    skills: ['Python', 'Node.js', 'Supabase', 'PostgreSQL', 'REST APIs'],
+  },
+  {
+    title: 'AI & Automation',
+    skills: ['LLM Integration', 'Chatbot Systems', 'AI Agents', 'Discord Bots', 'Prompt Engineering'],
+  },
+  {
+    title: 'Tools & Deployment',
+    skills: ['Git', 'GitHub', 'Vercel', 'AWS', 'VS Code', 'Figma'],
+  },
+]
+
+const heroSignals: HeroStat[] = [
+  { id: 'hero-stat-1', value: '430+', label: 'GitHub contributions in the last year', order_num: 1 },
+  { id: 'hero-stat-2', value: 'Self-taught', label: 'Learned web development, AI, and deployment independently', order_num: 2 },
+  { id: 'hero-stat-3', value: 'CS Student', label: 'Studying Computer Science at NFC-IET, Multan', order_num: 3 },
+]
+
+const fallbackTimelineItems: TimelineItem[] = [
+  {
+    id: 'timeline-1',
+    phase: 'Phase 1',
+    description: 'Started CS at NFC-IET and began learning programming independently - HTML, CSS, Python, JavaScript.',
+    order_num: 1,
+  },
+  {
+    id: 'timeline-2',
+    phase: 'Phase 2',
+    description: 'Built first full-stack projects with Next.js and Supabase. Shipped a restaurant site and a student portal.',
+    order_num: 2,
+  },
+  {
+    id: 'timeline-3',
+    phase: 'Phase 3',
+    description: 'Deployed AI chatbot systems on AWS. Integrated LLMs with Discord and built custom automation flows.',
+    order_num: 3,
+  },
+  {
+    id: 'timeline-4',
+    phase: 'Now',
+    description: 'Building this portfolio and offering web development and AI chatbot services to real clients.',
+    order_num: 4,
+  },
+]
+
+const serviceShowcases: ServiceShowcase[] = [
+  {
+    id: 'website-showcase',
+    eyebrow: 'Website Systems',
+    title: 'Signature websites that feel like a product launch, not a template.',
+    summary:
+      'Custom portfolio, brand, and business sites with cinematic motion, strong hierarchy, sharp copy layout, and conversion-aware journeys.',
+    highlight: 'Perfect for founders, agencies, consultants, personal brands, and modern businesses that need an unforgettable first impression.',
+    deliverables: ['Creative direction', 'Custom UI build', 'Lead capture flow', 'Responsive polish'],
+    accent: '247, 178, 77',
+    tags: ['Storytelling', 'Performance', 'Premium Branding'],
+  },
+  {
+    id: 'chatbot-showcase',
+    eyebrow: 'Business Chatbots',
+    title: 'AI chatbot experiences that answer faster, qualify leads, and save your team time.',
+    summary:
+      'Smart chatbot systems for websites and business workflows with branded conversations, lead qualification, FAQ handling, and automation handoffs.',
+    highlight: 'Ideal for clinics, service businesses, local brands, support teams, and companies that want fast customer communication without sounding robotic.',
+    deliverables: ['Conversation flow', 'Lead routing', 'Business FAQ logic', 'Deployment support'],
+    accent: '93, 226, 231',
+    tags: ['Lead Qualification', 'Support Automation', 'Branded UX'],
+  },
+]
+
+const offerPackages: PackageCardData[] = [
+  {
+    id: 'starter-site',
+    family: 'Web Development',
+    title: 'Starter Site',
+    pitch: 'A clean, modern landing page or portfolio site for personal brands, small businesses, or anyone who needs a strong online presence fast.',
+    bestFor: 'Best for: founders, freelancers, local businesses',
+    timeline: 'Delivery: 1-2 weeks',
+    deliverables: ['Custom design', 'Mobile responsive', 'Contact form', 'SEO setup'],
+    accent: '247, 178, 77',
+  },
+  {
+    id: 'full-brand-site',
+    family: 'Web Development',
+    title: 'Full Brand Site',
+    pitch: 'A multi-page website with custom animations, stronger storytelling, and conversion-focused structure for businesses ready to look professional.',
+    bestFor: 'Best for: growing businesses, agencies, professionals',
+    timeline: 'Delivery: 2-4 weeks',
+    deliverables: ['Multi-page build', 'Custom animations', 'CMS integration', 'Performance optimized'],
+    accent: '255, 122, 89',
+  },
+  {
+    id: 'lead-chatbot',
+    family: 'AI Chatbots',
+    title: 'Lead Capture Bot',
+    pitch: 'A smart chatbot for your website that greets visitors, answers common questions, collects leads, and routes serious inquiries to you automatically.',
+    bestFor: 'Best for: service businesses, clinics, consultants',
+    timeline: 'Delivery: 1-2 weeks',
+    deliverables: ['Custom Q&A flow', 'Lead capture', 'Email notifications', 'Easy deployment'],
+    accent: '93, 226, 231',
+  },
+  {
+    id: 'support-bot',
+    family: 'AI Chatbots',
+    title: 'Support Assistant',
+    pitch: 'An advanced AI chatbot that handles customer support, booking inquiries, and FAQ responses with natural conversation and your brand voice.',
+    bestFor: 'Best for: teams, clinics, e-commerce',
+    timeline: 'Delivery: 2-3 weeks',
+    deliverables: ['Knowledge base setup', 'Booking integration', 'Multi-channel support', 'Analytics dashboard'],
+    accent: '126, 166, 255',
+  },
+]
+
+const buildingNext: BuildingNext[] = [
+  {
+    id: 'real-estate-demo',
+    title: 'Real Estate Platform',
+    description: 'A property showcase site with interactive maps and agent booking flows.',
+    tags: ['Next.js', 'Maps API', 'Lead Funnels'],
+    accent: '247, 178, 77',
+  },
+  {
+    id: 'clinic-chatbot',
+    title: 'Healthcare Chatbot',
+    description: 'A patient-facing AI assistant for appointment booking and FAQ handling.',
+    tags: ['AI/LLM', 'Healthcare', 'Booking Logic'],
+    accent: '93, 226, 231',
+  },
+  {
+    id: 'ecommerce-bot',
+    title: 'E-Commerce Assistant',
+    description: 'A product recommendation chatbot with cart integration and order tracking.',
+    tags: ['E-Commerce', 'AI Agent', 'WhatsApp'],
+    accent: '126, 166, 255',
+  },
+]
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ')
+}
+
+function accentStyle(accent: string): CSSProperties {
+  return { ['--card-accent' as string]: accent } as CSSProperties
+}
+
+function toStringArray(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    : []
+}
+
+function normalizeSiteSettings(row: SiteSettingsRow): SiteSettings {
+  return {
+    id: row.id,
+    hero_title: row.hero_title?.trim() || fallbackSiteSettings.hero_title,
+    hero_badge: row.hero_badge?.trim() || fallbackSiteSettings.hero_badge,
+    contact_title: row.contact_title?.trim() || fallbackSiteSettings.contact_title,
+    contact_subtitle: row.contact_subtitle?.trim() || fallbackSiteSettings.contact_subtitle,
+    footer_text: row.footer_text?.trim() || fallbackSiteSettings.footer_text,
+    ticker_items: toStringArray(row.ticker_items),
+  }
+}
+
+function normalizeServiceShowcase(row: ServiceShowcaseRow): ServiceShowcase {
+  return {
+    id: row.id,
+    eyebrow: row.eyebrow,
+    title: row.title,
+    summary: row.summary,
+    highlight: row.highlight,
+    deliverables: toStringArray(row.deliverables),
+    accent: row.accent?.trim() || '247, 178, 77',
+    tags: toStringArray(row.tags),
+  }
+}
+
+function normalizeOfferPackage(row: OfferPackageRow): PackageCardData {
+  return {
+    id: row.id,
+    family: row.family,
+    title: row.title,
+    pitch: row.pitch,
+    bestFor: row.best_for,
+    timeline: row.timeline,
+    deliverables: toStringArray(row.deliverables),
+    accent: row.accent?.trim() || '247, 178, 77',
+  }
+}
+
+function normalizeBuildingNext(row: BuildingNextRow): BuildingNext {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    tags: toStringArray(row.tags),
+    accent: row.accent?.trim() || '247, 178, 77',
+  }
+}
+
+function formatIssueDate(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+  })
+}
+
+function normalizeProject(row: ProjectRow): Project {
+  const technologies = Array.isArray(row.technologies)
+    ? row.technologies.filter((item): item is string => typeof item === 'string')
+    : []
+
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    technologies,
+    image_url: row.image_url,
+    demo_url: row.demo_url,
+    github_url: row.github_url,
+    featured: Boolean(row.featured),
+  }
+}
+
+function RevealSection({
+  children,
+  className,
+  id,
+  immediate = false,
+}: {
+  children: ReactNode
+  className?: string
+  id?: string
+  immediate?: boolean
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(immediate)
+
+  useEffect(() => {
+    if (immediate) {
+      return
+    }
+
+    const node = ref.current
+
+    if (!node) {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.16 }
+    )
+
+    observer.observe(node)
+
+    return () => observer.disconnect()
+  }, [immediate])
+
+  return (
+    <div id={id} ref={ref} className={cn('reveal', isVisible && 'is-visible', className)}>
+      {children}
+    </div>
+  )
+}
+
+function TiltPanel({
+  children,
+  className,
+  style,
+}: {
+  children: ReactNode
+  className?: string
+  style?: CSSProperties
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  function handleMove(event: React.MouseEvent<HTMLDivElement>) {
+    const node = ref.current
+
+    if (!node) {
+      return
+    }
+
+    const rect = node.getBoundingClientRect()
+    const offsetX = (event.clientX - rect.left) / rect.width
+    const offsetY = (event.clientY - rect.top) / rect.height
+    const rotateY = (offsetX - 0.5) * 10
+    const rotateX = (0.5 - offsetY) * 10
+
+    node.style.setProperty('--rotate-x', `${rotateX.toFixed(2)}deg`)
+    node.style.setProperty('--rotate-y', `${rotateY.toFixed(2)}deg`)
+    node.style.setProperty('--lift', '-6px')
+  }
+
+  function handleLeave() {
+    const node = ref.current
+
+    if (!node) {
+      return
+    }
+
+    node.style.setProperty('--rotate-x', '0deg')
+    node.style.setProperty('--rotate-y', '0deg')
+    node.style.setProperty('--lift', '0px')
+  }
+
+  return (
+    <div
+      ref={ref}
+      className={cn('tilt-panel', className)}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      style={style}
+    >
+      {children}
+    </div>
+  )
+}
+
+function WindowChrome({ label }: { label: string }) {
+  return (
+    <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.28em] text-white/50">
+      <div className="flex items-center gap-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#ff6b5f]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#f4bf4f]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#4bd37b]" />
+      </div>
+      <span>{label}</span>
+    </div>
+  )
+}
+
+function WebsiteDemoPreview() {
+  return (
+    <div className="mock-window">
+      <WindowChrome label="website-system.preview" />
+      <div className="grid gap-4 p-4">
+        <div className="grid gap-4 md:grid-cols-[1.15fr,0.85fr]">
+          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.05] p-5">
+            <span className="offer-chip">Website preview</span>
+            <h3 className="font-display mt-4 text-3xl text-[#fff7ec]">Brand Website</h3>
+            <p className="mt-3 max-w-sm text-sm leading-6 text-white/65">
+              A polished responsive site where brand, trust, and conversion work together from the first scroll.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                <div className="text-xs uppercase tracking-[0.2em] text-white/40">Focus</div>
+                <div className="mt-2 text-sm text-white/80">Brand-first hero</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                <div className="text-xs uppercase tracking-[0.2em] text-white/40">Flow</div>
+                <div className="mt-2 text-sm text-white/80">Offer stacking</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                <div className="text-xs uppercase tracking-[0.2em] text-white/40">Finish</div>
+                <div className="mt-2 text-sm text-white/80">Cinematic motion</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="rounded-[1.35rem] border border-white/10 bg-gradient-to-br from-white/10 to-white/[0.04] p-4">
+              <div className="text-xs uppercase tracking-[0.22em] text-white/40">Launch sections</div>
+              <div className="mt-4 space-y-3">
+                <div className="mock-line h-3 w-[84%]" />
+                <div className="mock-line h-3 w-[66%]" />
+                <div className="mock-line h-3 w-[72%]" />
+              </div>
+            </div>
+            <div className="rounded-[1.35rem] border border-white/10 bg-gradient-to-br from-[#f7b24d]/20 to-transparent p-4">
+              <div className="text-xs uppercase tracking-[0.22em] text-white/40">Conversion layer</div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="mock-pill">Lead forms</span>
+                <span className="mock-pill">Social proof</span>
+                <span className="mock-pill">CTAs</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ChatbotDemoPreview() {
+  return (
+    <div className="mock-window">
+      <WindowChrome label="business-bot.flow" />
+      <div className="grid gap-4 p-4 md:grid-cols-[0.95fr,1.05fr]">
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.05] p-4">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-white/40">
+            <span className="signal-dot" />
+            Conversation Preview
+          </div>
+          <div className="mt-4 space-y-3">
+            <div className="max-w-[82%] rounded-2xl rounded-bl-md border border-white/10 bg-black/25 px-4 py-3 text-sm text-white/70">
+              Welcome in. Want pricing, support, or a fast answer to your question?
+            </div>
+            <div className="ml-auto max-w-[75%] rounded-2xl rounded-br-md bg-[#5de2e7]/20 px-4 py-3 text-sm text-white/90">
+              I need a chatbot for my clinic and booking questions.
+            </div>
+            <div className="max-w-[88%] rounded-2xl rounded-bl-md border border-white/10 bg-black/25 px-4 py-3 text-sm text-white/70">
+              Perfect. I can qualify patient questions, handle FAQs, and route ready bookings.
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-3">
+          <div className="rounded-[1.35rem] border border-white/10 bg-gradient-to-br from-[#5de2e7]/20 to-transparent p-4">
+            <div className="text-xs uppercase tracking-[0.22em] text-white/40">Automation path</div>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                <span className="text-sm text-white/80">Intent captured</span>
+                <span className="text-xs text-[#5de2e7]">Step 01</span>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                <span className="text-sm text-white/80">Answer or qualify</span>
+                <span className="text-xs text-[#5de2e7]">Step 02</span>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                <span className="text-sm text-white/80">Book or escalate</span>
+                <span className="text-xs text-[#5de2e7]">Step 03</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-[1.35rem] border border-white/10 bg-white/[0.04] p-4">
+            <div className="text-xs uppercase tracking-[0.22em] text-white/40">Business outcomes</div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="mock-pill">24/7 answers</span>
+              <span className="mock-pill">Lead routing</span>
+              <span className="mock-pill">Branded tone</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ProjectModal({
+  project,
+  onClose,
+}: {
+  project: Project | null
+  onClose: () => void
+}) {
+  if (!project) {
+    return null
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#05070c]/80 p-4 backdrop-blur-xl"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="glass-panel max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] p-7 md:p-10"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-modal-title"
+      >
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <div className="eyebrow">Project spotlight</div>
+            <h2 id="project-modal-title" className="font-display mt-5 text-4xl text-[#fff7ec] md:text-5xl">
+              {project.title}
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-white/10 bg-white/5 p-3 text-white/70 transition hover:border-white/20 hover:text-white"
+            aria-label="Close project dialog"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="mt-6 max-w-2xl text-base leading-7 text-white/68 md:text-lg">{project.description}</p>
+
+        <div className="mt-7 flex flex-wrap gap-3">
+          {project.technologies.map((technology) => (
+            <span key={technology} className="offer-chip">
+              {technology}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-10 flex flex-wrap gap-4">
+          {project.demo_url && (
+            <a
+              href={project.demo_url}
+              className="glow-button inline-flex"
+              target={project.demo_url.startsWith('#') ? undefined : '_blank'}
+              rel={project.demo_url.startsWith('#') ? undefined : 'noreferrer'}
+            >
+              View demo
+            </a>
+          )}
+          {project.github_url && (
+            <a href={project.github_url} target="_blank" rel="noreferrer" className="ghost-button inline-flex">
+              View code
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function Home() {
+  const surfaceRef = useRef<HTMLElement>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [certificates, setCertificates] = useState<Certificate[]>([])
-  const [loading, setLoading] = useState(true)
-  const [heroLoading, setHeroLoading] = useState(true)
+  const [aboutData, setAboutData] = useState<AboutData | null>(null)
+  const [skills, setSkills] = useState<SkillRow[]>([])
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
+  const [heroStats, setHeroStats] = useState<HeroStat[]>([])
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([])
+  const [serviceShowcasesData, setServiceShowcasesData] = useState<ServiceShowcase[]>([])
+  const [offerPackagesData, setOfferPackagesData] = useState<PackageCardData[]>([])
+  const [buildingNextData, setBuildingNextData] = useState<BuildingNext[]>([])
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [contactSubmitting, setContactSubmitting] = useState(false)
+  const [contactStatus, setContactStatus] = useState<{
+    tone: 'success' | 'error'
+    message: string
+  } | null>(null)
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
   })
-  const [aboutData, setAboutData] = useState<any>(null)
-  const [skills, setSkills] = useState<any[]>([])
-  const [contactSubmitting, setContactSubmitting] = useState(false)
-  const [contactStatus, setContactStatus] = useState('')
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const { isDark, toggleDark } = useDarkMode()
+
+  const syncSpotlight = useEffectEvent((event: PointerEvent) => {
+    const node = surfaceRef.current
+
+    if (!node) {
+      return
+    }
+
+    node.style.setProperty('--pointer-x', `${(event.clientX / window.innerWidth) * 100}%`)
+    node.style.setProperty('--pointer-y', `${(event.clientY / window.innerHeight) * 100}%`)
+  })
+
+  const closeModal = useEffectEvent(() => {
+    setSelectedProject(null)
+  })
 
   useEffect(() => {
+    window.addEventListener('pointermove', syncSpotlight)
+
+    return () => {
+      window.removeEventListener('pointermove', syncSpotlight)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!selectedProject) {
+      return
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        closeModal()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedProject])
+
+  useEffect(() => {
+    let cancelled = false
+
     async function fetchData() {
-      const [projectsResult, certificatesResult, aboutResult, skillsResult] = await Promise.all([
+      const [
+        projectsResult,
+        certificatesResult,
+        aboutResult,
+        skillsResult,
+        siteSettingsResult,
+        heroStatsResult,
+        timelineItemsResult,
+        serviceShowcasesResult,
+        offerPackagesResult,
+        buildingNextResult,
+      ] = await Promise.allSettled([
         supabase.from('projects').select('*').order('order', { ascending: true }),
         supabase.from('certificates').select('*').order('order', { ascending: true }),
         supabase.from('about').select('*').single(),
-        supabase.from('skills').select('*').order('order_num', { ascending: true })
+        supabase.from('skills').select('*').order('order_num', { ascending: true }),
+        supabase.from('site_settings').select('*').maybeSingle(),
+        supabase.from('hero_stats').select('*').order('order_num', { ascending: true }),
+        supabase.from('timeline_items').select('*').order('order_num', { ascending: true }),
+        supabase.from('service_showcases').select('*').order('order_num', { ascending: true }),
+        supabase.from('offer_packages').select('*').order('order_num', { ascending: true }),
+        supabase.from('building_next').select('*').order('order_num', { ascending: true }),
       ])
-      
-      setProjects(projectsResult.data || [])
-      setCertificates(certificatesResult.data || [])
-      setAboutData(aboutResult.data)
-      setSkills(skillsResult.data || [])
-      setHeroLoading(false)
-      setLoading(false)
+
+      if (cancelled) {
+        return
+      }
+
+      const nextProjects =
+        projectsResult.status === 'fulfilled' && Array.isArray(projectsResult.value.data)
+          ? (projectsResult.value.data as ProjectRow[]).map(normalizeProject)
+          : []
+
+      const nextCertificates =
+        certificatesResult.status === 'fulfilled' && Array.isArray(certificatesResult.value.data)
+          ? (certificatesResult.value.data as Certificate[])
+          : []
+
+      const nextAbout =
+        aboutResult.status === 'fulfilled' && aboutResult.value.data
+          ? (aboutResult.value.data as AboutData)
+          : null
+
+      const nextSkills =
+        skillsResult.status === 'fulfilled' && Array.isArray(skillsResult.value.data)
+          ? (skillsResult.value.data as SkillRow[])
+          : []
+
+      const nextSiteSettings =
+        siteSettingsResult.status === 'fulfilled' && siteSettingsResult.value.data
+          ? normalizeSiteSettings(siteSettingsResult.value.data as SiteSettingsRow)
+          : null
+
+      const nextHeroStats =
+        heroStatsResult.status === 'fulfilled' && Array.isArray(heroStatsResult.value.data)
+          ? (heroStatsResult.value.data as HeroStat[])
+          : []
+
+      const nextTimelineItems =
+        timelineItemsResult.status === 'fulfilled' && Array.isArray(timelineItemsResult.value.data)
+          ? (timelineItemsResult.value.data as TimelineItem[])
+          : []
+
+      const nextServiceShowcases =
+        serviceShowcasesResult.status === 'fulfilled' && Array.isArray(serviceShowcasesResult.value.data)
+          ? (serviceShowcasesResult.value.data as ServiceShowcaseRow[]).map(normalizeServiceShowcase)
+          : []
+
+      const nextOfferPackages =
+        offerPackagesResult.status === 'fulfilled' && Array.isArray(offerPackagesResult.value.data)
+          ? (offerPackagesResult.value.data as OfferPackageRow[]).map(normalizeOfferPackage)
+          : []
+
+      const nextBuildingNext =
+        buildingNextResult.status === 'fulfilled' && Array.isArray(buildingNextResult.value.data)
+          ? (buildingNextResult.value.data as BuildingNextRow[]).map(normalizeBuildingNext)
+          : []
+
+      startTransition(() => {
+        setProjects(nextProjects)
+        setCertificates(nextCertificates)
+        setAboutData(nextAbout)
+        setSkills(nextSkills)
+        setSiteSettings(nextSiteSettings)
+        setHeroStats(nextHeroStats)
+        setTimelineItems(nextTimelineItems)
+        setServiceShowcasesData(nextServiceShowcases)
+        setOfferPackagesData(nextOfferPackages)
+        setBuildingNextData(nextBuildingNext)
+      })
     }
 
-    fetchData()
+    void fetchData()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  async function handleContactSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleContactSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
     setContactSubmitting(true)
-    setContactStatus('')
+    setContactStatus(null)
 
-    const { error } = await supabase
-      .from('contact_messages')
-      .insert([contactForm])
+    const { error } = await supabase.from('contact_messages').insert([contactForm])
 
     if (error) {
-      setContactStatus('Failed to send message. Please try again.')
+      setContactStatus({
+        tone: 'error',
+        message: 'Message did not send. Try again and I will make sure we get it through.',
+      })
     } else {
-      setContactStatus('Message sent successfully! I\'ll get back to you soon.')
+      setContactStatus({
+        tone: 'success',
+        message: 'Message sent. I will get back to you with ideas for your build.',
+      })
       setContactForm({ name: '', email: '', message: '' })
     }
 
     setContactSubmitting(false)
   }
 
-  const featuredProjects = projects.filter(p => p.featured)
-  const regularProjects = projects.filter(p => !p.featured)
+  const profile = {
+    name: aboutData?.name?.trim() || fallbackAbout.name,
+    tagline: aboutData?.tagline?.trim() || fallbackAbout.tagline,
+    bio: aboutData?.bio?.trim() || fallbackAbout.bio,
+    profileImage: aboutData?.profile_image_url || fallbackAbout.profile_image_url,
+    socialLinks: [
+      { label: 'GitHub', href: aboutData?.github_url || fallbackAbout.github_url },
+      { label: 'LinkedIn', href: aboutData?.linkedin_url || fallbackAbout.linkedin_url },
+      { label: 'Twitter', href: aboutData?.twitter_url || fallbackAbout.twitter_url },
+    ].filter((item): item is { label: string; href: string } => Boolean(item.href)),
+  }
+
+  const projectDeck = projects.length > 0 ? projects : fallbackProjects
+  const featuredProjects = projectDeck.filter((project) => project.featured).slice(0, 3)
+  const displayProjects = (featuredProjects.length > 0 ? featuredProjects : projectDeck).slice(0, 3)
+  const displaySkills = skills.length > 0 ? skills.slice(0, 8).map((skill) => skill.name) : fallbackSkills
+  const featuredCertificates = certificates.slice(0, 3)
+  const activeSiteSettings = siteSettings ?? fallbackSiteSettings
+  const displayTickerItems =
+    activeSiteSettings.ticker_items.length > 0 ? activeSiteSettings.ticker_items : fallbackSiteSettings.ticker_items
+  const displayHeroStats = heroStats.length > 0 ? heroStats : heroSignals
+  const displayTimelineItems = timelineItems.length > 0 ? timelineItems : fallbackTimelineItems
+  const displayServiceShowcases = serviceShowcasesData.length > 0 ? serviceShowcasesData : serviceShowcases
+  const displayOfferPackages = offerPackagesData.length > 0 ? offerPackagesData : offerPackages
+  const displayBuildingNext = buildingNextData.length > 0 ? buildingNextData : buildingNext
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
-      {/* Dark Mode Toggle */}
-      <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
+    <main ref={surfaceRef} className="page-shell relative overflow-x-clip pb-14">
+      <div className="ambient-spotlight" aria-hidden />
+      <div className="site-grid" aria-hidden />
+      <div className="hero-orbit hero-orbit-one" aria-hidden />
+      <div className="hero-orbit hero-orbit-two" aria-hidden />
+      <div className="hero-orbit hero-orbit-three" aria-hidden />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 opacity-90 dark:opacity-70"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-          <div className="absolute top-40 right-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-40 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      <header className="sticky top-0 z-40">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-5">
+          <div className="glass-panel flex items-center justify-between rounded-full px-3 sm:px-4 py-2.5 sm:py-3 md:px-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="font-display text-sm sm:text-lg text-[#fff7ec]">{profile.name}</span>
+              <span className="hidden text-xs uppercase tracking-[0.3em] text-white/35 md:inline">
+                Web Dev · AI Builder
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-4">
+              <a href="https://github.com/muneeb1st" target="_blank" rel="noreferrer" className="text-white/50 transition hover:text-white" aria-label="GitHub profile">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" fill="currentColor">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 2.964 1.121.858-.24 1.786-.357 2.714-.357.927 0 1.855.117 2.714.357 1.956-1.443 2.964-1.121 2.964-1.121.652 1.652.24 2.873.117 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+              </a>
+
+              <nav className="hidden items-center gap-6 text-sm text-white/62 lg:flex">
+                <a href="#about" className="transition hover:text-white">About</a>
+                <a href="#projects" className="transition hover:text-white">Projects</a>
+                <a href="#services" className="transition hover:text-white">Services</a>
+                <a href="#contact" className="transition hover:text-white">Contact</a>
+              </nav>
+
+              <a href="#contact" className="glow-button hidden md:inline-flex text-sm px-4 py-2">
+                Let&apos;s work together
+              </a>
+            </div>
+          </div>
         </div>
-        
-        <div className="relative max-w-7xl mx-auto px-6 py-32 text-center">
-          {heroLoading ? (
-            <HeroSkeleton />
-          ) : (
-            <>
-              {aboutData?.profile_image_url && (
-                <div className="relative w-32 h-32 mx-auto mb-6">
+      </header>
+
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-16 pt-8 md:pb-20 md:pt-16">
+        <div className="grid items-start gap-8 md:gap-10 lg:grid-cols-[1.08fr,0.92fr]">
+          <RevealSection immediate>
+            <div className="status-badge">
+              <span className="signal-dot" />
+              {activeSiteSettings.hero_badge}
+            </div>
+
+            <h1 className="font-display mt-6 sm:mt-8 text-[2.25rem] sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] tracking-tight text-[#fff7ec]">
+              {activeSiteSettings.hero_title}
+            </h1>
+
+            <p className="mt-5 sm:mt-6 max-w-2xl text-base sm:text-lg leading-7 sm:leading-8 text-white/70">
+              {profile.tagline}
+            </p>
+
+            <p className="mt-3 sm:mt-4 max-w-2xl text-sm sm:text-base leading-6 sm:leading-7 text-white/55">{profile.bio}</p>
+
+            <div className="mt-8 sm:mt-10 flex flex-wrap gap-3 sm:gap-4">
+              <a href="#projects" className="glow-button inline-flex text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3">See my work</a>
+              <a href="#contact" className="ghost-button inline-flex text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3">Work with me</a>
+            </div>
+          </RevealSection>
+
+          <RevealSection immediate className="lg:pt-4">
+            <div className="glass-panel rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
+              <div className="relative flex items-center justify-center py-8 sm:py-10 bg-gradient-to-b from-white/[0.08] to-transparent">
+                <div className="avatar-ring">
                   <Image
-                    src={aboutData.profile_image_url}
-                    alt={aboutData.name}
-                    fill
-                    priority
-                    quality={100}
-                    className="rounded-full border-4 border-white shadow-2xl object-cover animate-fade-in"
-                    sizes="256px"
+                    src={profile.profileImage || 'https://avatars.githubusercontent.com/u/213479346?v=4'}
+                    alt={profile.name ?? 'Profile portrait'}
+                    width={160}
+                    height={160}
+                    className="rounded-full"
+                    style={{ width: 'auto', height: 'auto' }}
                   />
                 </div>
-              )}
-              
-              <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
-                Hi, I&apos;m <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-pink-200">
-                  {aboutData?.name}
-                </span>
-              </h1>
-              <p className="text-2xl text-white/90 mb-8 animate-fade-in-delay">
-                {aboutData?.tagline && <TypingAnimation text={aboutData.tagline} />}
-              </p>
-              
-              {(aboutData?.github_url || aboutData?.linkedin_url || aboutData?.twitter_url) && (
-                <div className="flex gap-4 justify-center mb-8 animate-fade-in-delay">
-                  {aboutData.github_url && (
-                    <a href={aboutData.github_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
-                      GitHub
-                    </a>
-                  )}
-                  {aboutData.linkedin_url && (
-                    <a href={aboutData.linkedin_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
-                      LinkedIn
-                    </a>
-                  )}
-                  {aboutData.twitter_url && (
-                    <a href={aboutData.twitter_url} target="_blank" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-2 rounded-full transition-all">
-                      Twitter
-                    </a>
-                  )}
-                </div>
-              )}
-              
-              <div className="flex gap-4 justify-center animate-fade-in-delay-2">
-                <a href="#projects" className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:scale-105 transition-transform shadow-lg">
-                  View My Work
-                </a>
-                <a href="#contact" className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all">
-                  Get In Touch
-                </a>
               </div>
-            </>
-          )}
+              <div className="px-5 sm:px-6 pb-5 sm:pb-6">
+                <div className="text-xs uppercase tracking-[0.3em] text-white/38 mb-4 sm:mb-5">What I bring to the table</div>
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+                  <div className="metric-card">
+                    <div className="text-xs uppercase tracking-[0.22em] text-white/40">Web Dev</div>
+                    <div className="mt-2 font-display text-lg sm:text-xl text-[#fff7ec]">Premium Websites</div>
+                    <p className="mt-1.5 text-xs sm:text-sm leading-5 sm:leading-6 text-white/60">
+                      Modern, responsive sites with clean design.
+                    </p>
+                  </div>
+                  <div className="metric-card">
+                    <div className="text-xs uppercase tracking-[0.22em] text-white/40">AI Systems</div>
+                    <div className="mt-2 font-display text-lg sm:text-xl text-[#fff7ec]">AI Chatbots</div>
+                    <p className="mt-1.5 text-xs sm:text-sm leading-5 sm:leading-6 text-white/60">
+                      Smart assistants for leads and support.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </RevealSection>
+        </div>
+
+        <RevealSection immediate className="mt-8 sm:mt-12 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
+          {displayHeroStats.map((signal) => (
+            <div key={signal.value} className="metric-card">
+              <div className={signal.value === '430+' ? 'stat-number' : 'font-display text-2xl sm:text-3xl text-[#fff7ec]'}>{signal.value}</div>
+              <p className="mt-2 text-xs sm:text-sm leading-5 sm:leading-6 text-white/58">{signal.label}</p>
+            </div>
+          ))}
+        </RevealSection>
+      </section>
+
+      <section className="ticker border-y border-white/10 py-3 sm:py-4">
+        <div className="ticker__track">
+          {displayTickerItems.map((item, index) => (
+            <div key={`${item}-${index}`} className="flex items-center gap-4 text-sm uppercase tracking-[0.28em] text-white/48">
+              <span>{item}</span>
+              <span className="text-[#5de2e7]">•</span>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* About & Skills Section */}
-      {aboutData?.bio && (
-        <AnimatedSection>
-          <section className="max-w-7xl mx-auto px-6 py-20">
-            <div className="grid md:grid-cols-2 gap-12">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-300">
-                <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-6">
-                  About Me
-                </h2>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                  {aboutData.bio}
-                </p>
-              </div>
-
-              {skills.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-300">
-                  <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-6">
-                    Skills
-                  </h2>
-                  <div className="space-y-3">
-                    {skills.map((skill: any, index: number) => (
-                      <div key={skill.id}>
-                        <div className="flex justify-between mb-1">
-                          <span className="font-medium text-gray-700 dark:text-gray-300">{skill.name}</span>
-                          {skill.category && (
-                            <span className="text-sm text-gray-500 dark:text-gray-400">{skill.category}</span>
-                          )}
-                        </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                          <div 
-                            className="h-2 rounded-full transition-all duration-1000"
-                            style={{
-                              width: `${skill.proficiency * 10}%`,
-                              background: `linear-gradient(90deg, ${['#a855f7', '#ec4899', '#3b82f6', '#10b981', '#f59e0b'][index % 5]} 0%, ${['#c084fc', '#f472b6', '#60a5fa', '#34d399', '#fbbf24'][index % 5]} 100%)`
-                            }}
-                          ></div>
-                        </div>
-                      </div>
+      <RevealSection id="about" className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20 md:py-28">
+        <div className="max-w-3xl mb-8 sm:mb-12">
+          <div className="eyebrow">My story</div>
+          <h2 className="section-title font-display mt-4 sm:mt-6 text-[#fff7ec]">
+            Started recently. Already building things that work.
+          </h2>
+          <p className="mt-3 sm:mt-5 text-base sm:text-lg leading-7 sm:leading-8 text-white/62">
+            No CS degree yet, no years of experience. Just obsessive learning, real projects shipped, and a track record that speaks faster than a resume.
+          </p>
+        </div>
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-2">
+          <div className="glass-panel rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8">
+            <div className="eyebrow mb-5 sm:mb-6">Learning timeline</div>
+            <div className="space-y-5 sm:space-y-6">
+              {displayTimelineItems.map((item) => (
+                <div key={item.phase} className="timeline-line">
+                  <div className="text-xs uppercase tracking-[0.22em] text-[#5de2e7] mb-1">{item.phase}</div>
+                  <p className="text-sm leading-6 text-white/70">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="glass-panel rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8">
+            <div className="eyebrow mb-5 sm:mb-6">Skill stack</div>
+            <div className="space-y-5 sm:space-y-6">
+              {skillCategories.map((cat) => (
+                <div key={cat.title}>
+                  <div className="skill-category-title">{cat.title}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {cat.skills.map((s) => (
+                      <span key={s} className="offer-chip">{s}</span>
                     ))}
                   </div>
                 </div>
-              )}
-            </div>
-          </section>
-        </AnimatedSection>
-      )}
-
-      {/* Featured Projects */}
-      {featuredProjects.length > 0 && (
-        <section id="projects" className="max-w-7xl mx-auto px-6 py-20">
-          <AnimatedSection>
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
-                Featured Projects
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">Check out my best work</p>
-            </div>
-          </AnimatedSection>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProjects.map((project, index) => (
-              <AnimatedCard key={project.id} delay={index * 100}>
-                <div 
-                  className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 cursor-pointer"
-                  onClick={() => setSelectedProject(project)}
-                >
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"></div>
-
-                  {project.image_url && (
-                    <div className="w-full h-48 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
-                      <img 
-                        src={project.image_url} 
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-2xl font-bold text-gray-800 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                        {project.title}
-                      </h3>
-                      <span className="text-2xl">⭐</span>
-                    </div>
-                    
-                    <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{project.description}</p>
-                    
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {Array.isArray(project.technologies) && project.technologies.map((tech: string, i: number) => (
-                        <span 
-                          key={tech} 
-                          className="px-3 py-1 text-sm font-medium rounded-full transition-all hover:scale-110"
-                          style={{
-                            background: `linear-gradient(135deg, ${['#a855f7', '#ec4899', '#3b82f6', '#8b5cf6', '#f472b6'][i % 5]} 0%, ${['#c084fc', '#f472b6', '#60a5fa', '#a78bfa', '#f9a8d4'][i % 5]} 100%)`,
-                            color: 'white'
-                          }}
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex gap-3">
-                      {project.demo_url && (
-                        <a 
-                          href={project.demo_url} 
-                          className="flex-1 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Live Demo →
-                        </a>
-                      )}
-                      {project.github_url && (
-                        <a 
-                          href={project.github_url} 
-                          target="_blank" 
-                          className="flex-1 text-center border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:border-purple-500 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          GitHub →
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </AnimatedCard>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Other Projects */}
-      {regularProjects.length > 0 && (
-        <AnimatedSection>
-          <section className="max-w-7xl mx-auto px-6 py-20">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-4">
-                More Projects
-              </h2>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {regularProjects.map((project: any) => (
-                <div 
-                  key={project.id} 
-                  className="group bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1 overflow-hidden cursor-pointer"
-                  onClick={() => setSelectedProject(project)}
-                >
-                  {project.image_url && (
-                    <div className="w-full h-40 overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30">
-                      <img 
-                        src={project.image_url} 
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{project.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">{project.description}</p>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {Array.isArray(project.technologies) && project.technologies.map((tech: string, i: number) => (
-                        <span 
-                          key={tech} 
-                          className="px-3 py-1 text-sm font-medium rounded-full text-white transition-all hover:scale-110"
-                          style={{
-                            background: `linear-gradient(135deg, ${['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][i % 5]} 0%, ${['#60a5fa', '#a78bfa', '#f472b6', '#34d399', '#fbbf24'][i % 5]} 100%)`
-                          }}
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                    
-                    {(project.demo_url || project.github_url) && (
-                      <div className="flex gap-2 mt-4">
-                        {project.demo_url && (
-                          <a 
-                            href={project.demo_url}  
-                            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Demo →
-                          </a>
-                        )}
-                        {project.github_url && (
-                          <a 
-                            href={project.github_url} 
-                            target="_blank" 
-                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Code →
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
               ))}
             </div>
-          </section>
-        </AnimatedSection>
-      )}
+          </div>
+        </div>
+      </RevealSection>
 
-      {/* Certificates */}
-      {certificates.length > 0 && (
-        <AnimatedSection>
-          <section className="max-w-7xl mx-auto px-6 py-20">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-blue-600 mb-4">
-                Certificates & Achievements
+      <RevealSection id="projects" className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20 md:py-28">
+        <div className="max-w-3xl">
+          <div className="eyebrow">Real projects</div>
+          <h2 className="section-title font-display mt-4 sm:mt-6 text-[#fff7ec]">
+            Everything here is built, shipped, or in active development.
+          </h2>
+          <p className="mt-3 sm:mt-5 text-base sm:text-lg leading-7 sm:leading-8 text-white/62">
+            I don&apos;t show mockups. These are real things I have built. More coming as I keep shipping.
+          </p>
+        </div>
+
+        <div className="mt-8 sm:mt-12 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {displayProjects.map((project, index) => (
+            <button
+              key={project.id}
+              type="button"
+              onClick={() => setSelectedProject(project)}
+              className="text-left"
+            >
+              <TiltPanel className="package-card h-full rounded-[1.5rem] sm:rounded-[1.85rem] p-4 sm:p-5 md:p-6" style={accentStyle(index === 0 ? '247, 178, 77' : index === 1 ? '93, 226, 231' : '255, 122, 89')}>
+                <div className="overflow-hidden rounded-[1.2rem] sm:rounded-[1.4rem] border border-white/10 bg-black/20">
+                  {project.image_url ? (
+                    <Image
+                      src={project.image_url}
+                      alt={project.title}
+                      width={1200}
+                      height={760}
+                      className="h-48 sm:h-64 w-full object-cover transition duration-500 hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-48 sm:h-64 flex-col justify-between bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_35%),linear-gradient(135deg,rgba(247,178,77,0.22),rgba(93,226,231,0.12)_50%,rgba(255,122,89,0.14))] p-4 sm:p-5">
+                      <div className="flex items-center justify-between">
+                        <span className="offer-chip">Live project</span>
+                        <span className="text-xs uppercase tracking-[0.24em] text-white/45">0{index + 1}</span>
+                      </div>
+                      <div>
+                        <div className="font-display text-2xl sm:text-3xl text-[#fff7ec]">{project.title}</div>
+                        <div className="mt-2 sm:mt-3 max-w-xs text-xs sm:text-sm leading-5 sm:leading-6 text-white/68">Built and shipped — click for details.</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 sm:mt-6">
+                  <div className="text-xs uppercase tracking-[0.24em] text-white/38">
+                    {project.featured ? 'Featured project' : 'Showcase project'}
+                  </div>
+                  <h3 className="font-display mt-2 sm:mt-3 text-2xl sm:text-3xl text-[#fff7ec]">{project.title}</h3>
+                  <p className="mt-3 sm:mt-4 line-clamp-4 text-xs sm:text-sm leading-6 sm:leading-7 text-white/60">{project.description}</p>
+                  <div className="mt-4 sm:mt-5 flex flex-wrap gap-2">
+                    {project.technologies.slice(0, 3).map((technology) => (
+                      <span key={technology} className="offer-chip">
+                        {technology}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-4 sm:mt-6 text-xs sm:text-sm uppercase tracking-[0.24em] text-[#5de2e7]">View details →</div>
+                </div>
+              </TiltPanel>
+            </button>
+          ))}
+        </div>
+      </RevealSection>
+
+      <RevealSection id="services" className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20 md:py-28">
+        <div className="max-w-3xl">
+          <div className="eyebrow">What I offer</div>
+          <h2 className="section-title font-display mt-4 sm:mt-6 text-[#fff7ec]">
+            I build two things: premium websites and smart chatbots.
+          </h2>
+          <p className="mt-3 sm:mt-5 text-base sm:text-lg leading-7 sm:leading-8 text-white/62">
+            Every project gets the same obsessive attention to detail. I work directly with you, no middlemen, no templates.
+          </p>
+        </div>
+
+        <div className="mt-8 sm:mt-12 grid gap-6 sm:gap-8 xl:grid-cols-2">
+          {displayServiceShowcases.map((item, index) => (
+            <TiltPanel key={item.id} className="package-card rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-5 md:p-6" style={accentStyle(item.accent)}>
+              <div className="text-xs uppercase tracking-[0.28em] text-white/38">{item.eyebrow}</div>
+              <h3 className="font-display mt-4 sm:mt-5 text-2xl sm:text-3xl md:text-4xl text-[#fff7ec]">{item.title}</h3>
+              <p className="mt-3 sm:mt-5 text-sm sm:text-base leading-6 sm:leading-7 text-white/62">{item.summary}</p>
+              <p className="mt-3 sm:mt-5 text-xs sm:text-sm leading-5 sm:leading-6 text-white/52">{item.highlight}</p>
+              <div className="mt-5 sm:mt-6 flex flex-wrap gap-3">
+                {item.tags.map((tag) => (
+                  <span key={tag} className="offer-chip">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-6 sm:mt-8">
+                {index === 0 ? <WebsiteDemoPreview /> : <ChatbotDemoPreview />}
+              </div>
+              <div className="mt-5 sm:mt-7 grid gap-3 sm:grid-cols-2">
+                {item.deliverables.map((deliverable) => (
+                  <div key={deliverable} className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/74">
+                    {deliverable}
+                  </div>
+                ))}
+              </div>
+            </TiltPanel>
+          ))}
+        </div>
+
+        <div className="mt-10 sm:mt-12 grid gap-5 sm:gap-6 sm:grid-cols-2 xl:grid-cols-4">
+          {displayOfferPackages.map((item) => (
+            <TiltPanel key={item.id} className="package-card rounded-[1.5rem] sm:rounded-[1.85rem] p-4 sm:p-5" style={accentStyle(item.accent)}>
+              <div className="text-xs uppercase tracking-[0.24em] text-white/38">{item.family}</div>
+              <h3 className="font-display mt-3 sm:mt-4 text-xl sm:text-2xl md:text-3xl text-[#fff7ec]">{item.title}</h3>
+              <p className="mt-3 sm:mt-4 text-xs sm:text-sm leading-6 sm:leading-7 text-white/62">{item.pitch}</p>
+              <div className="mt-4 sm:mt-6 space-y-2 text-xs sm:text-sm text-white/55">
+                <p>{item.bestFor}</p>
+                <p>{item.timeline}</p>
+              </div>
+              <div className="mt-4 sm:mt-6 space-y-3">
+                {item.deliverables.map((deliverable) => (
+                  <div key={deliverable} className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs sm:text-sm text-white/76">
+                    {deliverable}
+                  </div>
+                ))}
+              </div>
+            </TiltPanel>
+          ))}
+        </div>
+      </RevealSection>
+
+      {(displaySkills.length > 0 || featuredCertificates.length > 0) && (
+        <RevealSection className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20 md:py-28">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[0.95fr,1.05fr]">
+            <div className="glass-panel rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8">
+              <div className="eyebrow">Skills & proof</div>
+              <h2 className="font-display mt-4 sm:mt-6 text-3xl sm:text-4xl md:text-5xl text-[#fff7ec]">
+                The stack behind the work.
               </h2>
+              <p className="mt-3 sm:mt-5 max-w-xl text-sm sm:text-base leading-6 sm:leading-7 text-white/62">
+                Every skill here has been used in a real project. Certificates back it up.
+              </p>
+              <div className="mt-6 sm:mt-7 flex flex-wrap gap-3">
+                {displaySkills.map((skill) => (
+                  <span key={skill} className="offer-chip">
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {certificates.map((cert, index) => (
-                <div 
-                  key={cert.id} 
-                  className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 overflow-hidden group"
-                >
-                  <div 
-                    className="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-10 group-hover:opacity-20 transition-opacity"
-                    style={{background: `linear-gradient(135deg, ${['#a855f7', '#ec4899', '#3b82f6'][index % 3]} 0%, ${['#c084fc', '#f472b6', '#60a5fa'][index % 3]} 100%)`}}
-                  ></div>
-                  
-                  <div className="relative">
-                    <div className="text-3xl mb-3">🏆</div>
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{cert.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">{cert.issuer}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-                      {new Date(cert.issue_date).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long' 
-                      })}
+
+            <div className="grid gap-4 sm:gap-5 sm:grid-cols-3">
+              {featuredCertificates.length > 0 ? (
+                featuredCertificates.map((certificate) => (
+                  <div key={certificate.id} className="package-card rounded-[1.4rem] sm:rounded-[1.6rem] p-4 sm:p-5" style={accentStyle('126, 166, 255')}>
+                    <div className="text-xs uppercase tracking-[0.22em] text-white/38">Credential</div>
+                    <h3 className="font-display mt-3 sm:mt-4 text-xl sm:text-2xl text-[#fff7ec]">{certificate.title}</h3>
+                    <p className="mt-3 sm:mt-4 text-xs sm:text-sm leading-5 sm:leading-6 text-white/62">{certificate.issuer}</p>
+                    <p className="mt-2 sm:mt-3 text-xs uppercase tracking-[0.24em] text-white/38">
+                      {formatIssueDate(certificate.issue_date)}
                     </p>
-                    
-                    {cert.credential_url && (
-                      <a 
-                        href={cert.credential_url} 
-                        target="_blank" 
-                        className="inline-block text-purple-600 dark:text-purple-400 hover:text-pink-600 dark:hover:text-pink-400 font-medium text-sm transition-colors"
+                    {certificate.credential_url && (
+                      <a
+                        href={certificate.credential_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-4 sm:mt-6 inline-flex text-xs sm:text-sm uppercase tracking-[0.24em] text-[#5de2e7]"
                       >
-                        View Credential →
+                        View credential →
                       </a>
                     )}
                   </div>
+                ))
+              ) : (
+                <div className="package-card rounded-[1.4rem] sm:rounded-[1.6rem] p-4 sm:p-5 sm:col-span-3" style={accentStyle('126, 166, 255')}>
+                  <div className="text-xs uppercase tracking-[0.22em] text-white/38">Portfolio note</div>
+                  <h3 className="font-display mt-3 sm:mt-4 text-2xl sm:text-3xl text-[#fff7ec]">Ready for live proof blocks</h3>
+                  <p className="mt-3 sm:mt-4 max-w-2xl text-xs sm:text-sm leading-6 sm:leading-7 text-white/62">
+                    When your certificates, testimonials, or more project data are added through the admin, this section is already shaped to display them elegantly.
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
-          </section>
-        </AnimatedSection>
+          </div>
+        </RevealSection>
       )}
 
-      {/* Contact Form */}
-      <AnimatedSection>
-        <section id="contact" className="max-w-4xl mx-auto px-6 py-20">
-          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-2xl p-8 md:p-12 border border-white dark:border-gray-700 transition-colors duration-300">
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
-                Let's Work Together
+      <RevealSection id="roadmap" className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20 md:py-28">
+        <div className="max-w-3xl">
+          <div className="eyebrow">What&apos;s next</div>
+          <h2 className="section-title font-display mt-4 sm:mt-6 text-[#fff7ec]">
+            Projects I&apos;m actively working toward.
+          </h2>
+          <p className="mt-3 sm:mt-5 text-base sm:text-lg leading-7 sm:leading-8 text-white/62">
+            These are not hypothetical. They&apos;re next on my build list.
+          </p>
+        </div>
+
+        <div className="mt-8 sm:mt-12 grid gap-5 sm:gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {displayBuildingNext.map((item) => (
+            <TiltPanel key={item.id} className="package-card rounded-[1.5rem] sm:rounded-[1.8rem] p-4 sm:p-5" style={accentStyle(item.accent)}>
+              <div className="text-xs uppercase tracking-[0.24em] text-white/38">Coming soon</div>
+              <h3 className="font-display mt-3 sm:mt-4 text-xl sm:text-2xl md:text-3xl text-[#fff7ec]">{item.title}</h3>
+              <p className="mt-3 sm:mt-4 text-xs sm:text-sm leading-6 sm:leading-7 text-white/62">{item.description}</p>
+              <div className="mt-4 sm:mt-6 flex flex-wrap gap-2">
+                {item.tags.map((tag) => (
+                  <span key={tag} className="offer-chip">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </TiltPanel>
+          ))}
+        </div>
+      </RevealSection>
+
+      <RevealSection id="contact" className="mx-auto max-w-7xl px-4 sm:px-6 pt-6 sm:pt-8">
+        <div className="glass-panel rounded-[1.75rem] sm:rounded-[2.2rem] p-5 sm:p-6 md:p-8 lg:p-10">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[0.92fr,1.08fr]">
+            <div>
+              <div className="eyebrow">Get in touch</div>
+              <h2 className="font-display mt-4 sm:mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#fff7ec]">
+                {activeSiteSettings.contact_title}
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
-                Have a project in mind? Drop me a message!
+              <p className="mt-3 sm:mt-5 max-w-xl text-sm sm:text-base leading-6 sm:leading-7 text-white/62">
+                {activeSiteSettings.contact_subtitle}
               </p>
+
+              <div className="mt-6 sm:mt-8 space-y-3">
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs sm:text-sm text-white/72">
+                  Custom websites with modern design, animations, and mobile-first approach.
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs sm:text-sm text-white/72">
+                  AI chatbots that handle leads, answer questions, and save you time.
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs sm:text-sm text-white/72">
+                  Fast turnaround, direct communication, no corporate overhead.
+                </div>
+              </div>
             </div>
-            
-            <form onSubmit={handleContactSubmit} className="space-y-6">
+
+            <form onSubmit={handleContactSubmit} className="grid gap-4 sm:gap-5">
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Name</label>
+                <label className="mb-2 block text-xs sm:text-sm uppercase tracking-[0.22em] text-white/48">Name</label>
                 <input
                   type="text"
                   value={contactForm.name}
-                  onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 transition-colors"
+                  onChange={(event) => setContactForm((current) => ({ ...current, name: event.target.value }))}
+                  className="w-full rounded-2xl border border-white/12 bg-white/5 px-4 py-3 sm:py-4 text-sm sm:text-base text-white outline-none transition placeholder:text-white/28 focus:border-[#5de2e7]"
                   placeholder="Your name"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Email</label>
+                <label className="mb-2 block text-xs sm:text-sm uppercase tracking-[0.22em] text-white/48">Email</label>
                 <input
                   type="email"
                   value={contactForm.email}
-                  onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 transition-colors"
-                  placeholder="your@email.com"
+                  onChange={(event) => setContactForm((current) => ({ ...current, email: event.target.value }))}
+                  className="w-full rounded-2xl border border-white/12 bg-white/5 px-4 py-3 sm:py-4 text-sm sm:text-base text-white outline-none transition placeholder:text-white/28 focus:border-[#5de2e7]"
+                  placeholder="you@example.com"
                   required
+                  suppressHydrationWarning
                 />
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Message</label>
+                <label className="mb-2 block text-xs sm:text-sm uppercase tracking-[0.22em] text-white/48">Project vision</label>
                 <textarea
                   value={contactForm.message}
-                  onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                  onChange={(event) => setContactForm((current) => ({ ...current, message: event.target.value }))}
                   rows={5}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 transition-colors resize-none"
-                  placeholder="Tell me about your project..."
+                  className="w-full resize-none rounded-2xl border border-white/12 bg-white/5 px-4 py-3 sm:py-4 text-sm sm:text-base text-white outline-none transition placeholder:text-white/28 focus:border-[#5de2e7]"
+                  placeholder="Tell me what you want to launch, improve, or automate."
                   required
                 />
               </div>
 
               {contactStatus && (
-                <div className={`p-4 rounded-xl text-center font-medium ${
-                  contactStatus.includes('successfully') 
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                }`}>
-                  {contactStatus}
+                <div
+                  className={cn(
+                    'rounded-2xl border px-4 py-4 text-xs sm:text-sm',
+                    contactStatus.tone === 'success'
+                      ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
+                      : 'border-rose-400/30 bg-rose-400/10 text-rose-200'
+                  )}
+                >
+                  {contactStatus.message}
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={contactSubmitting}
-                className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all disabled:opacity-50 hover:scale-[1.02]"
-              >
-                {contactSubmitting ? 'Sending...' : 'Send Message 🚀'}
+              <button type="submit" disabled={contactSubmitting} className="glow-button inline-flex justify-center text-sm sm:text-base disabled:cursor-not-allowed disabled:opacity-65">
+                {contactSubmitting ? 'Sending your note...' : 'Send project request'}
               </button>
             </form>
           </div>
-        </section>
-      </AnimatedSection>
-
-      {/* Project Modal */}
-      <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
-
-      {/* Footer */}
-      <footer className="bg-gradient-to-r from-purple-900 to-pink-900 text-white py-8 mt-20">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-white/80">© 2026 {aboutData?.name || 'Your Name'}. Built with Next.js & Supabase</p>
         </div>
+      </RevealSection>
+
+      <footer className="mx-auto mt-12 sm:mt-16 max-w-7xl px-4 sm:px-6 pb-10 pt-10 sm:pt-12 text-center text-xs sm:text-sm text-white/42">
+        <div className="flex justify-center gap-6 mb-3 sm:mb-4">
+          <a href="https://github.com/muneeb1st" target="_blank" rel="noreferrer" className="transition hover:text-white">GitHub</a>
+        </div>
+        <p>© 2026 {profile.name}. {activeSiteSettings.footer_text}</p>
       </footer>
 
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 1s ease-out;
-        }
-        
-        .animate-fade-in-delay {
-          animation: fade-in 1s ease-out 0.2s backwards;
-        }
-        
-        .animate-fade-in-delay-2 {
-          animation: fade-in 1s ease-out 0.4s backwards;
-        }
-        
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        
-        .scroll-fade-in {
-          opacity: 0;
-          transform: translateY(80px);
-          transition: opacity 1.5s ease-out, transform 1.5s ease-out;
-        }
-        
-        .scroll-fade-in.visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
-        .typing-cursor {
-          animation: blink 1s infinite;
-          margin-left: 2px;
-        }
-      `}</style>
+      <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
     </main>
   )
 }

@@ -1,11 +1,12 @@
-import type { NextConfig } from "next";
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import type { NextConfig } from 'next'
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
 const nextConfig: NextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
+  turbopack: {
+    root: rootDir,
   },
   images: {
     remotePatterns: [
@@ -14,8 +15,13 @@ const nextConfig: NextConfig = {
         hostname: 'ipditzvdtddpahizkbej.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        pathname: '/**',
+      },
     ],
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

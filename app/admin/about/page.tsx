@@ -1,51 +1,97 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+
+interface AboutRecord {
+  id: string
+  name: string
+  tagline: string | null
+  bio: string | null
+  email: string | null
+  github_url: string | null
+  linkedin_url: string | null
+  twitter_url: string | null
+  profile_image_url: string | null
+}
+
+interface Skill {
+  id: string
+  name: string
+  category: string | null
+  proficiency: number
+  order_num: number
+}
+
+interface SkillForm {
+  name: string
+  category: string
+  proficiency: number
+}
+
+const emptySkillForm: SkillForm = {
+  name: '',
+  category: '',
+  proficiency: 5,
+}
 
 export default function ManageAbout() {
-  const [aboutData, setAboutData] = useState<any>(null)
-  const [skills, setSkills] = useState<any[]>([])
+  const [aboutData, setAboutData] = useState<AboutRecord | null>(null)
+  const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [showSkillForm, setShowSkillForm] = useState(false)
-  const [skillForm, setSkillForm] = useState({
-    name: '',
-    category: '',
-    proficiency: 5
-  })
+  const [skillForm, setSkillForm] = useState<SkillForm>(emptySkillForm)
   const router = useRouter()
 
   useEffect(() => {
-    checkAuth()
-    fetchData()
-  }, [])
+    let cancelled = false
 
-  async function checkAuth() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) router.push('/admin')
+    async function loadData() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/admin')
+        return
+      }
+
+      const [aboutResult, skillsResult] = await Promise.all([
+        supabase.from('about').select('*').single(),
+        supabase.from('skills').select('*').order('order_num', { ascending: true }),
+      ])
+
+      if (cancelled) {
+        return
+      }
+
+      setAboutData((aboutResult.data as AboutRecord | null) ?? null)
+      setSkills((skillsResult.data as Skill[] | null) ?? [])
+      setLoading(false)
+    }
+
+    void loadData()
+
+    return () => {
+      cancelled = true
+    }
+  }, [router])
+
+  async function refreshSkills() {
+    const { data } = await supabase.from('skills').select('*').order('order_num', { ascending: true })
+    setSkills((data as Skill[] | null) ?? [])
   }
 
-  async function fetchData() {
-    const { data: about } = await supabase
-      .from('about')
-      .select('*')
-      .single()
-    
-    const { data: skillsData } = await supabase
-      .from('skills')
-      .select('*')
-      .order('order_num', { ascending: true })
-    
-    setAboutData(about)
-    setSkills(skillsData || [])
-    setLoading(false)
-  }
+  async function handleAboutUpdate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
 
-  async function handleAboutUpdate(e: React.FormEvent) {
-    e.preventDefault()
-    
+    if (!aboutData) {
+      return
+    }
+
     const { error } = await supabase
       .from('about')
       .update({
@@ -56,268 +102,303 @@ export default function ManageAbout() {
         github_url: aboutData.github_url,
         linkedin_url: aboutData.linkedin_url,
         twitter_url: aboutData.twitter_url,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', aboutData.id)
-    
+
     if (!error) {
-      alert('Updated successfully!')
+      alert('Updated successfully.')
     }
   }
 
-  async function handleProfileImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  async function handleProfileImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+
+    if (!file || !aboutData) {
+      return
+    }
 
     setUploading(true)
 
     const fileExt = file.name.split('.').pop()
     const fileName = `profile.${fileExt}`
 
-    const { error: uploadError } = await supabase.storage
-      .from('profile-images')
-      .upload(fileName, file, { upsert: true })
+    const { error: uploadError } = await supabase.storage.from('profile-images').upload(fileName, file, { upsert: true })
 
     if (uploadError) {
-      alert('Error uploading image!')
+      alert('Error uploading image.')
       setUploading(false)
       return
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('profile-images')
-      .getPublicUrl(fileName)
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('profile-images').getPublicUrl(fileName)
 
-    const { error } = await supabase
-      .from('about')
-      .update({ profile_image_url: publicUrl })
-      .eq('id', aboutData.id)
+    const { error } = await supabase.from('about').update({ profile_image_url: publicUrl }).eq('id', aboutData.id)
 
     if (!error) {
-      setAboutData({ ...aboutData, profile_image_url: publicUrl })
+      setAboutData((current) => (current ? { ...current, profile_image_url: publicUrl } : current))
     }
 
     setUploading(false)
   }
 
-  async function addSkill(e: React.FormEvent) {
-    e.preventDefault()
-    
-    const { error } = await supabase
-      .from('skills')
-      .insert([{
+  async function addSkill(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const { error } = await supabase.from('skills').insert([
+      {
         ...skillForm,
-        order_num: skills.length + 1
-      }])
-    
+        category: skillForm.category || null,
+        order_num: skills.length + 1,
+      },
+    ])
+
     if (!error) {
       setShowSkillForm(false)
-      setSkillForm({ name: '', category: '', proficiency: 5 })
-      fetchData()
+      setSkillForm(emptySkillForm)
+      void refreshSkills()
     }
   }
 
   async function deleteSkill(id: string) {
-    if (!confirm('Delete this skill?')) return
-    
-    const { error } = await supabase
-      .from('skills')
-      .delete()
-      .eq('id', id)
-    
-    if (!error) fetchData()
+    if (!confirm('Delete this skill?')) {
+      return
+    }
+
+    const { error } = await supabase.from('skills').delete().eq('id', id)
+
+    if (!error) {
+      void refreshSkills()
+    }
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center">Loading...</div>
+  }
+
+  if (!aboutData) {
+    return <div className="flex min-h-screen items-center justify-center">About record not found.</div>
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm p-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Manage About & Skills</h1>
-          <button
-            onClick={() => router.push('/admin/dashboard')}
-            className="text-blue-600 hover:underline"
-          >
-            ← Back to Dashboard
+      <nav className="bg-white p-4 shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <h1 className="text-2xl font-bold">Manage About &amp; Skills</h1>
+          <button type="button" onClick={() => router.push('/admin/dashboard')} className="text-blue-600 hover:underline">
+            Back to Dashboard
           </button>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        {/* About Section */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4">Personal Information</h2>
-          
+      <div className="mx-auto max-w-4xl space-y-6 p-6">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-bold">Personal Information</h2>
+
           <form onSubmit={handleAboutUpdate} className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-2">Profile Photo</label>
+              <label htmlFor="profile-photo" className="mb-2 block text-gray-700">
+                Profile Photo
+              </label>
               <input
+                id="profile-photo"
                 type="file"
                 accept="image/*"
                 onChange={handleProfileImageUpload}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full rounded-lg border px-4 py-2"
                 disabled={uploading}
               />
-              {uploading && <p className="text-sm text-blue-600 mt-2">Uploading...</p>}
-              {aboutData?.profile_image_url && (
-                <img src={aboutData.profile_image_url} alt="Profile" className="w-32 h-32 object-cover rounded-full mt-3 border-4 border-purple-200" />
-              )}
+              {uploading ? <p className="mt-2 text-sm text-blue-600">Uploading...</p> : null}
+              {aboutData.profile_image_url ? (
+                <Image
+                  src={aboutData.profile_image_url}
+                  alt="Profile"
+                  width={128}
+                  height={128}
+                  className="mt-3 h-32 w-32 rounded-full border-4 border-purple-200 object-cover"
+                />
+              ) : null}
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Name *</label>
+              <label htmlFor="about-name" className="mb-2 block text-gray-700">
+                Name *
+              </label>
               <input
+                id="about-name"
                 type="text"
-                value={aboutData?.name || ''}
-                onChange={(e) => setAboutData({...aboutData, name: e.target.value})}
-                className="w-full px-4 py-2 border rounded-lg"
+                value={aboutData.name}
+                onChange={(event) => setAboutData((current) => (current ? { ...current, name: event.target.value } : current))}
+                className="w-full rounded-lg border px-4 py-2"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Tagline</label>
+              <label htmlFor="about-tagline" className="mb-2 block text-gray-700">
+                Tagline
+              </label>
               <input
+                id="about-tagline"
                 type="text"
-                value={aboutData?.tagline || ''}
-                onChange={(e) => setAboutData({...aboutData, tagline: e.target.value})}
-                className="w-full px-4 py-2 border rounded-lg"
+                value={aboutData.tagline ?? ''}
+                onChange={(event) => setAboutData((current) => (current ? { ...current, tagline: event.target.value } : current))}
+                className="w-full rounded-lg border px-4 py-2"
                 placeholder="Full Stack Developer | Building Amazing Web Experiences"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Bio</label>
+              <label htmlFor="about-bio" className="mb-2 block text-gray-700">
+                Bio
+              </label>
               <textarea
-                value={aboutData?.bio || ''}
-                onChange={(e) => setAboutData({...aboutData, bio: e.target.value})}
-                className="w-full px-4 py-2 border rounded-lg"
+                id="about-bio"
+                value={aboutData.bio ?? ''}
+                onChange={(event) => setAboutData((current) => (current ? { ...current, bio: event.target.value } : current))}
+                className="w-full rounded-lg border px-4 py-2"
                 rows={5}
                 placeholder="Tell your story..."
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Email</label>
+              <label htmlFor="about-email" className="mb-2 block text-gray-700">
+                Email
+              </label>
               <input
+                id="about-email"
                 type="email"
-                value={aboutData?.email || ''}
-                onChange={(e) => setAboutData({...aboutData, email: e.target.value})}
-                className="w-full px-4 py-2 border rounded-lg"
+                value={aboutData.email ?? ''}
+                onChange={(event) => setAboutData((current) => (current ? { ...current, email: event.target.value } : current))}
+                className="w-full rounded-lg border px-4 py-2"
               />
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid gap-4 md:grid-cols-3">
               <div>
-                <label className="block text-gray-700 mb-2">GitHub URL</label>
+                <label htmlFor="about-github" className="mb-2 block text-gray-700">
+                  GitHub URL
+                </label>
                 <input
+                  id="about-github"
                   type="url"
-                  value={aboutData?.github_url || ''}
-                  onChange={(e) => setAboutData({...aboutData, github_url: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  value={aboutData.github_url ?? ''}
+                  onChange={(event) => setAboutData((current) => (current ? { ...current, github_url: event.target.value } : current))}
+                  className="w-full rounded-lg border px-4 py-2"
                   placeholder="https://github.com/yourusername"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-700 mb-2">LinkedIn URL</label>
+                <label htmlFor="about-linkedin" className="mb-2 block text-gray-700">
+                  LinkedIn URL
+                </label>
                 <input
+                  id="about-linkedin"
                   type="url"
-                  value={aboutData?.linkedin_url || ''}
-                  onChange={(e) => setAboutData({...aboutData, linkedin_url: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  value={aboutData.linkedin_url ?? ''}
+                  onChange={(event) => setAboutData((current) => (current ? { ...current, linkedin_url: event.target.value } : current))}
+                  className="w-full rounded-lg border px-4 py-2"
                   placeholder="https://linkedin.com/in/you"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-700 mb-2">Twitter URL</label>
+                <label htmlFor="about-twitter" className="mb-2 block text-gray-700">
+                  Twitter URL
+                </label>
                 <input
+                  id="about-twitter"
                   type="url"
-                  value={aboutData?.twitter_url || ''}
-                  onChange={(e) => setAboutData({...aboutData, twitter_url: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  value={aboutData.twitter_url ?? ''}
+                  onChange={(event) => setAboutData((current) => (current ? { ...current, twitter_url: event.target.value } : current))}
+                  className="w-full rounded-lg border px-4 py-2"
                   placeholder="https://twitter.com/you"
                 />
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
-            >
+            <button type="submit" className="rounded-lg bg-green-600 px-6 py-2 text-white hover:bg-green-700">
               Save Changes
             </button>
           </form>
         </div>
 
-        {/* Skills Section */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-4">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-bold">Skills</h2>
             <button
-              onClick={() => setShowSkillForm(!showSkillForm)}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+              type="button"
+              onClick={() => setShowSkillForm((current) => !current)}
+              className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
             >
               {showSkillForm ? 'Cancel' : '+ Add Skill'}
             </button>
           </div>
 
-          {showSkillForm && (
-            <form onSubmit={addSkill} className="mb-6 p-4 border rounded-lg bg-gray-50">
-              <div className="grid md:grid-cols-3 gap-4">
+          {showSkillForm ? (
+            <form onSubmit={addSkill} className="mb-6 rounded-lg border bg-gray-50 p-4">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div>
-                  <label className="block text-gray-700 mb-2 text-sm">Skill Name *</label>
+                  <label htmlFor="skill-name" className="mb-2 block text-sm text-gray-700">
+                    Skill Name *
+                  </label>
                   <input
+                    id="skill-name"
                     type="text"
                     value={skillForm.name}
-                    onChange={(e) => setSkillForm({...skillForm, name: e.target.value})}
-                    className="w-full px-3 py-2 border rounded"
+                    onChange={(event) => setSkillForm((current) => ({ ...current, name: event.target.value }))}
+                    className="w-full rounded border px-3 py-2"
                     placeholder="React"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 mb-2 text-sm">Category</label>
+                  <label htmlFor="skill-category" className="mb-2 block text-sm text-gray-700">
+                    Category
+                  </label>
                   <input
+                    id="skill-category"
                     type="text"
                     value={skillForm.category}
-                    onChange={(e) => setSkillForm({...skillForm, category: e.target.value})}
-                    className="w-full px-3 py-2 border rounded"
+                    onChange={(event) => setSkillForm((current) => ({ ...current, category: event.target.value }))}
+                    className="w-full rounded border px-3 py-2"
                     placeholder="Frontend"
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 mb-2 text-sm">Proficiency (1-10)</label>
+                  <label htmlFor="skill-proficiency" className="mb-2 block text-sm text-gray-700">
+                    Proficiency (1-10)
+                  </label>
                   <input
+                    id="skill-proficiency"
                     type="number"
                     min="1"
                     max="10"
                     value={skillForm.proficiency}
-                    onChange={(e) => setSkillForm({...skillForm, proficiency: parseInt(e.target.value)})}
-                    className="w-full px-3 py-2 border rounded"
+                    onChange={(event) => setSkillForm((current) => ({ ...current, proficiency: Number(event.target.value) }))}
+                    className="w-full rounded border px-3 py-2"
                   />
                 </div>
               </div>
-              <button type="submit" className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+              <button type="submit" className="mt-3 rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">
                 Add Skill
               </button>
             </form>
-          )}
+          ) : null}
 
-          <div className="grid md:grid-cols-2 gap-3">
-            {skills.map(skill => (
-              <div key={skill.id} className="flex justify-between items-center p-3 border rounded">
+          <div className="grid gap-3 md:grid-cols-2">
+            {skills.map((skill) => (
+              <div key={skill.id} className="flex items-center justify-between rounded border p-3">
                 <div>
                   <p className="font-medium">{skill.name}</p>
-                  {skill.category && <p className="text-xs text-gray-500">{skill.category}</p>}
+                  {skill.category ? <p className="text-xs text-gray-500">{skill.category}</p> : null}
                   <p className="text-xs text-gray-400">Level: {skill.proficiency}/10</p>
                 </div>
-                <button
-                  onClick={() => deleteSkill(skill.id)}
-                  className="text-red-600 hover:text-red-700 text-sm"
-                >
+                <button type="button" onClick={() => deleteSkill(skill.id)} className="text-sm text-red-600 hover:text-red-700">
                   Delete
                 </button>
               </div>
@@ -327,4 +408,4 @@ export default function ManageAbout() {
       </div>
     </div>
   )
-} 
+}

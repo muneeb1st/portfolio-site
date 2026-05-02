@@ -1,139 +1,201 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+
+interface Project {
+  id: string
+  title: string
+  description: string
+  technologies: string[]
+  demo_url: string | null
+  github_url: string | null
+  featured: boolean
+  image_url: string | null
+  order: number
+}
+
+interface ProjectForm {
+  title: string
+  description: string
+  technologies: string
+  demo_url: string
+  github_url: string
+  featured: boolean
+  image_url: string
+}
+
+const emptyForm: ProjectForm = {
+  title: '',
+  description: '',
+  technologies: '',
+  demo_url: '',
+  github_url: '',
+  featured: false,
+  image_url: '',
+}
+
+function toStringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+}
 
 export default function ManageProjects() {
-  const [projects, setProjects] = useState<any[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    technologies: '',
-    demo_url: '',
-    github_url: '',
-    featured: false,
-    image_url: '',
-  })
+  const [loading, setLoading] = useState(true)
+  const [formData, setFormData] = useState<ProjectForm>(emptyForm)
   const router = useRouter()
 
   useEffect(() => {
-    checkAuth()
-    fetchProjects()
-  }, [])
+    let cancelled = false
 
-  async function checkAuth() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) router.push('/admin')
+    async function loadProjects() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/admin')
+        return
+      }
+
+      const { data } = await supabase.from('projects').select('*').order('order', { ascending: true })
+
+      if (cancelled) {
+        return
+      }
+
+      const nextProjects =
+        ((data as Array<Omit<Project, 'technologies'> & { technologies: unknown }> | null) ?? []).map((project) => ({
+          ...project,
+          technologies: toStringArray(project.technologies),
+          featured: Boolean(project.featured),
+          image_url: project.image_url ?? null,
+          demo_url: project.demo_url ?? null,
+          github_url: project.github_url ?? null,
+        }))
+
+      setProjects(nextProjects)
+      setLoading(false)
+    }
+
+    void loadProjects()
+
+    return () => {
+      cancelled = true
+    }
+  }, [router])
+
+  async function refreshProjects() {
+    const { data } = await supabase.from('projects').select('*').order('order', { ascending: true })
+    const nextProjects =
+      ((data as Array<Omit<Project, 'technologies'> & { technologies: unknown }> | null) ?? []).map((project) => ({
+        ...project,
+        technologies: toStringArray(project.technologies),
+        featured: Boolean(project.featured),
+        image_url: project.image_url ?? null,
+        demo_url: project.demo_url ?? null,
+        github_url: project.github_url ?? null,
+      }))
+    setProjects(nextProjects)
   }
 
-  async function fetchProjects() {
-    const { data } = await supabase
-      .from('projects')
-      .select('*')
-      .order('order', { ascending: true })
-    setProjects(data || [])
-  }
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    if (!file) {
+      return
+    }
 
     setUploading(true)
 
     const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random()}.${fileExt}`
-    const filePath = `${fileName}`
+    const filePath = `${crypto.randomUUID()}.${fileExt}`
 
-    const { error: uploadError, data } = await supabase.storage
-      .from('project-images')
-      .upload(filePath, file)
+    const { error: uploadError } = await supabase.storage.from('project-images').upload(filePath, file)
 
     if (uploadError) {
-      alert('Error uploading image!')
+      alert('Error uploading image.')
       setUploading(false)
       return
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('project-images')
-      .getPublicUrl(filePath)
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('project-images').getPublicUrl(filePath)
 
-    setFormData({ ...formData, image_url: publicUrl })
+    setFormData((current) => ({ ...current, image_url: publicUrl }))
     setUploading(false)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    
-    const techArray = formData.technologies.split(',').map(t => t.trim())
-    
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      technologies: formData.technologies
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+      demo_url: formData.demo_url || null,
+      github_url: formData.github_url || null,
+      featured: formData.featured,
+      image_url: formData.image_url || null,
+    }
+
     if (editingId) {
-      const { error } = await supabase
-        .from('projects')
-        .update({
-          title: formData.title,
-          description: formData.description,
-          technologies: techArray,
-          demo_url: formData.demo_url,
-          github_url: formData.github_url,
-          featured: formData.featured,
-          image_url: formData.image_url,
-        })
-        .eq('id', editingId)
-      
-      if (!error) {
-        setShowForm(false)
-        setEditingId(null)
-        setFormData({ title: '', description: '', technologies: '', demo_url: '', github_url: '', featured: false, image_url: '' })
-        fetchProjects()
-      }
-    } else {
-      const { error } = await supabase.from('projects').insert([{
-        title: formData.title,
-        description: formData.description,
-        technologies: techArray,
-        demo_url: formData.demo_url,
-        github_url: formData.github_url,
-        featured: formData.featured,
-        image_url: formData.image_url,
-        order: projects.length + 1
-      }])
+      const { error } = await supabase.from('projects').update(payload).eq('id', editingId)
 
       if (!error) {
         setShowForm(false)
-        setFormData({ title: '', description: '', technologies: '', demo_url: '', github_url: '', featured: false, image_url: '' })
-        fetchProjects()
+        setEditingId(null)
+        setFormData(emptyForm)
+        void refreshProjects()
       }
+      return
+    }
+
+    const { error } = await supabase.from('projects').insert([
+      {
+        ...payload,
+        order: projects.length + 1,
+      },
+    ])
+
+    if (!error) {
+      setShowForm(false)
+      setFormData(emptyForm)
+      void refreshProjects()
     }
   }
 
   async function deleteProject(id: string) {
-    if (!confirm('Are you sure you want to delete this project?')) return
-    
-    const { error } = await supabase
-      .from('projects')
-      .delete()
-      .eq('id', id)
-    
+    if (!confirm('Are you sure you want to delete this project?')) {
+      return
+    }
+
+    const { error } = await supabase.from('projects').delete().eq('id', id)
+
     if (!error) {
-      fetchProjects()
+      void refreshProjects()
     }
   }
 
-  function editProject(project: any) {
+  function editProject(project: Project) {
     setEditingId(project.id)
     setFormData({
       title: project.title,
       description: project.description,
-      technologies: Array.isArray(project.technologies) ? project.technologies.join(', ') : '',
-      demo_url: project.demo_url || '',
-      github_url: project.github_url || '',
+      technologies: project.technologies.join(', '),
+      demo_url: project.demo_url ?? '',
+      github_url: project.github_url ?? '',
       featured: project.featured,
-      image_url: project.image_url || '',
+      image_url: project.image_url ?? '',
     })
     setShowForm(true)
   }
@@ -141,112 +203,133 @@ export default function ManageProjects() {
   function cancelEdit() {
     setShowForm(false)
     setEditingId(null)
-    setFormData({ title: '', description: '', technologies: '', demo_url: '', github_url: '', featured: false, image_url: '' })
+    setFormData(emptyForm)
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm p-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <nav className="bg-white p-4 shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
           <h1 className="text-2xl font-bold">Manage Projects</h1>
-          <button
-            onClick={() => router.push('/admin/dashboard')}
-            className="text-blue-600 hover:underline"
-          >
-            ← Back to Dashboard
+          <button type="button" onClick={() => router.push('/admin/dashboard')} className="text-blue-600 hover:underline">
+            Back to Dashboard
           </button>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="mx-auto max-w-7xl p-6">
         <button
+          type="button"
           onClick={() => {
             if (showForm && !editingId) {
               setShowForm(false)
-            } else {
-              cancelEdit()
-              setShowForm(true)
+              return
             }
+
+            cancelEdit()
+            setShowForm(true)
           }}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mb-6"
+          className="mb-6 rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
         >
           {showForm ? 'Cancel' : '+ Add New Project'}
         </button>
 
-        {showForm && (
-          <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h2 className="text-xl font-bold mb-4">
-              {editingId ? 'Edit Project' : 'Add New Project'}
-            </h2>
+        {showForm ? (
+          <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="mb-4 text-xl font-bold">{editingId ? 'Edit Project' : 'Add New Project'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Project Image</label>
+                <label htmlFor="project-image" className="mb-2 block text-gray-700">
+                  Project Image
+                </label>
                 <input
+                  id="project-image"
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full rounded-lg border px-4 py-2"
                   disabled={uploading}
                 />
-                {uploading && <p className="text-sm text-blue-600 mt-2">Uploading...</p>}
-                {formData.image_url && (
+                {uploading ? <p className="mt-2 text-sm text-blue-600">Uploading...</p> : null}
+                {formData.image_url ? (
                   <div className="mt-3">
-                    <img src={formData.image_url} alt="Preview" className="w-48 h-32 object-cover rounded-lg border" />
+                    <Image
+                      src={formData.image_url}
+                      alt="Project preview"
+                      width={192}
+                      height={128}
+                      className="h-32 w-48 rounded-lg border object-cover"
+                    />
                   </div>
-                )}
+                ) : null}
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Title *</label>
+                <label htmlFor="project-title" className="mb-2 block text-gray-700">
+                  Title *
+                </label>
                 <input
+                  id="project-title"
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  onChange={(event) => setFormData((current) => ({ ...current, title: event.target.value }))}
+                  className="w-full rounded-lg border px-4 py-2"
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Description *</label>
+                <label htmlFor="project-description" className="mb-2 block text-gray-700">
+                  Description *
+                </label>
                 <textarea
+                  id="project-description"
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  onChange={(event) => setFormData((current) => ({ ...current, description: event.target.value }))}
+                  className="w-full rounded-lg border px-4 py-2"
                   rows={3}
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Technologies (comma separated) *</label>
+                <label htmlFor="project-technologies" className="mb-2 block text-gray-700">
+                  Technologies (comma separated) *
+                </label>
                 <input
+                  id="project-technologies"
                   type="text"
                   value={formData.technologies}
-                  onChange={(e) => setFormData({...formData, technologies: e.target.value})}
+                  onChange={(event) => setFormData((current) => ({ ...current, technologies: event.target.value }))}
                   placeholder="React, Node.js, MongoDB"
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full rounded-lg border px-4 py-2"
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Demo URL</label>
+                <label htmlFor="project-demo-url" className="mb-2 block text-gray-700">
+                  Demo URL
+                </label>
                 <input
+                  id="project-demo-url"
                   type="url"
                   value={formData.demo_url}
-                  onChange={(e) => setFormData({...formData, demo_url: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  onChange={(event) => setFormData((current) => ({ ...current, demo_url: event.target.value }))}
+                  className="w-full rounded-lg border px-4 py-2"
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">GitHub URL</label>
+                <label htmlFor="project-github-url" className="mb-2 block text-gray-700">
+                  GitHub URL
+                </label>
                 <input
+                  id="project-github-url"
                   type="url"
                   value={formData.github_url}
-                  onChange={(e) => setFormData({...formData, github_url: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  onChange={(event) => setFormData((current) => ({ ...current, github_url: event.target.value }))}
+                  className="w-full rounded-lg border px-4 py-2"
                 />
               </div>
 
@@ -255,7 +338,7 @@ export default function ManageProjects() {
                   <input
                     type="checkbox"
                     checked={formData.featured}
-                    onChange={(e) => setFormData({...formData, featured: e.target.checked})}
+                    onChange={(event) => setFormData((current) => ({ ...current, featured: event.target.checked }))}
                     className="mr-2"
                   />
                   <span className="text-gray-700">Featured Project</span>
@@ -263,67 +346,73 @@ export default function ManageProjects() {
               </div>
 
               <div className="flex gap-3">
-                <button
-                  type="submit"
-                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
-                >
+                <button type="submit" className="rounded-lg bg-green-600 px-6 py-2 text-white hover:bg-green-700">
                   {editingId ? 'Update Project' : 'Save Project'}
                 </button>
-                {editingId && (
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600"
-                  >
+                {editingId ? (
+                  <button type="button" onClick={cancelEdit} className="rounded-lg bg-gray-500 px-6 py-2 text-white hover:bg-gray-600">
                     Cancel
                   </button>
-                )}
+                ) : null}
               </div>
             </form>
           </div>
-        )}
+        ) : null}
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4">Existing Projects ({projects.length})</h2>
-          <div className="space-y-4">
-            {projects.map(project => (
-              <div key={project.id} className="border p-4 rounded-lg flex gap-4">
-                {project.image_url && (
-                  <img src={project.image_url} alt={project.title} className="w-24 h-24 object-cover rounded" />
-                )}
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg">{project.title}</h3>
-                  <p className="text-gray-600 text-sm mt-1">{project.description}</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {Array.isArray(project.technologies) && project.technologies.map(tech => (
-                      <span key={tech} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                        {tech}
-                      </span>
-                    ))}
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-bold">Existing Projects ({projects.length})</h2>
+
+          {loading ? (
+            <div className="py-8 text-center text-gray-500">Loading projects...</div>
+          ) : (
+            <div className="space-y-4">
+              {projects.map((project) => (
+                <div key={project.id} className="flex gap-4 rounded-lg border p-4">
+                  {project.image_url ? (
+                    <Image
+                      src={project.image_url}
+                      alt={project.title}
+                      width={96}
+                      height={96}
+                      className="h-24 w-24 rounded object-cover"
+                    />
+                  ) : null}
+
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold">{project.title}</h3>
+                    <p className="mt-1 text-sm text-gray-600">{project.description}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {project.technologies.map((technology) => (
+                        <span key={technology} className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                          {technology}
+                        </span>
+                      ))}
+                    </div>
+                    {project.featured ? (
+                      <span className="mt-2 inline-block rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-800">Featured</span>
+                    ) : null}
                   </div>
-                  {project.featured && (
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded mt-2 inline-block">
-                      ⭐ Featured
-                    </span>
-                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => editProject(project)}
+                      className="h-fit rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteProject(project.id)}
+                      className="h-fit rounded bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => editProject(project)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm h-fit"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteProject(project.id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm h-fit"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
