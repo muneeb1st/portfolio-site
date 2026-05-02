@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 interface AboutRecord {
@@ -44,7 +43,6 @@ export default function ManageAbout() {
   const [uploading, setUploading] = useState(false)
   const [showSkillForm, setShowSkillForm] = useState(false)
   const [skillForm, setSkillForm] = useState<SkillForm>(emptySkillForm)
-  const router = useRouter()
 
   useEffect(() => {
     let cancelled = false
@@ -55,7 +53,6 @@ export default function ManageAbout() {
       } = await supabase.auth.getUser()
 
       if (!user) {
-        router.push('/admin')
         return
       }
 
@@ -78,7 +75,7 @@ export default function ManageAbout() {
     return () => {
       cancelled = true
     }
-  }, [router])
+  }, [])
 
   async function refreshSkills() {
     const { data } = await supabase.from('skills').select('*').order('order_num', { ascending: true })
@@ -183,23 +180,17 @@ export default function ManageAbout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white p-4 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <h1 className="text-2xl font-bold">Manage About &amp; Skills</h1>
-          <button type="button" onClick={() => router.push('/admin/dashboard')} className="text-blue-600 hover:underline">
-            Back to Dashboard
-          </button>
-        </div>
-      </nav>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">About & Skills</h1>
+      <p className="text-sm text-slate-500 mb-6">Manage your personal info, social links, and individual skills.</p>
 
-      <div className="mx-auto max-w-4xl space-y-6 p-6">
+      <div className="space-y-6">
         <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-xl font-bold">Personal Information</h2>
+          <h2 className="mb-4 text-xl font-bold text-gray-900">Personal Information</h2>
 
           <form onSubmit={handleAboutUpdate} className="space-y-4">
             <div>
-              <label htmlFor="profile-photo" className="mb-2 block text-gray-700">
+              <label htmlFor="profile-photo" className="mb-2 block text-gray-900 font-medium">
                 Profile Photo
               </label>
               <input
@@ -223,7 +214,7 @@ export default function ManageAbout() {
             </div>
 
             <div>
-              <label htmlFor="about-name" className="mb-2 block text-gray-700">
+              <label htmlFor="about-name" className="mb-2 block text-gray-900 font-medium">
                 Name *
               </label>
               <input
@@ -231,13 +222,13 @@ export default function ManageAbout() {
                 type="text"
                 value={aboutData.name}
                 onChange={(event) => setAboutData((current) => (current ? { ...current, name: event.target.value } : current))}
-                className="w-full rounded-lg border px-4 py-2"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="about-tagline" className="mb-2 block text-gray-700">
+              <label htmlFor="about-tagline" className="mb-2 block text-gray-900 font-medium">
                 Tagline
               </label>
               <input
@@ -245,27 +236,27 @@ export default function ManageAbout() {
                 type="text"
                 value={aboutData.tagline ?? ''}
                 onChange={(event) => setAboutData((current) => (current ? { ...current, tagline: event.target.value } : current))}
-                className="w-full rounded-lg border px-4 py-2"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 placeholder="Full Stack Developer | Building Amazing Web Experiences"
               />
             </div>
 
             <div>
-              <label htmlFor="about-bio" className="mb-2 block text-gray-700">
+              <label htmlFor="about-bio" className="mb-2 block text-gray-900 font-medium">
                 Bio
               </label>
               <textarea
                 id="about-bio"
                 value={aboutData.bio ?? ''}
                 onChange={(event) => setAboutData((current) => (current ? { ...current, bio: event.target.value } : current))}
-                className="w-full rounded-lg border px-4 py-2"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 rows={5}
                 placeholder="Tell your story..."
               />
             </div>
 
             <div>
-              <label htmlFor="about-email" className="mb-2 block text-gray-700">
+              <label htmlFor="about-email" className="mb-2 block text-gray-900 font-medium">
                 Email
               </label>
               <input
@@ -273,13 +264,13 @@ export default function ManageAbout() {
                 type="email"
                 value={aboutData.email ?? ''}
                 onChange={(event) => setAboutData((current) => (current ? { ...current, email: event.target.value } : current))}
-                className="w-full rounded-lg border px-4 py-2"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
               <div>
-                <label htmlFor="about-github" className="mb-2 block text-gray-700">
+                <label htmlFor="about-github" className="mb-2 block text-gray-900 font-medium">
                   GitHub URL
                 </label>
                 <input
@@ -287,13 +278,13 @@ export default function ManageAbout() {
                   type="url"
                   value={aboutData.github_url ?? ''}
                   onChange={(event) => setAboutData((current) => (current ? { ...current, github_url: event.target.value } : current))}
-                  className="w-full rounded-lg border px-4 py-2"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="https://github.com/yourusername"
                 />
               </div>
 
               <div>
-                <label htmlFor="about-linkedin" className="mb-2 block text-gray-700">
+                <label htmlFor="about-linkedin" className="mb-2 block text-gray-900 font-medium">
                   LinkedIn URL
                 </label>
                 <input
@@ -301,13 +292,13 @@ export default function ManageAbout() {
                   type="url"
                   value={aboutData.linkedin_url ?? ''}
                   onChange={(event) => setAboutData((current) => (current ? { ...current, linkedin_url: event.target.value } : current))}
-                  className="w-full rounded-lg border px-4 py-2"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="https://linkedin.com/in/you"
                 />
               </div>
 
               <div>
-                <label htmlFor="about-twitter" className="mb-2 block text-gray-700">
+                <label htmlFor="about-twitter" className="mb-2 block text-gray-900 font-medium">
                   Twitter URL
                 </label>
                 <input
@@ -315,7 +306,7 @@ export default function ManageAbout() {
                   type="url"
                   value={aboutData.twitter_url ?? ''}
                   onChange={(event) => setAboutData((current) => (current ? { ...current, twitter_url: event.target.value } : current))}
-                  className="w-full rounded-lg border px-4 py-2"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="https://twitter.com/you"
                 />
               </div>
@@ -329,7 +320,7 @@ export default function ManageAbout() {
 
         <div className="rounded-lg bg-white p-6 shadow">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Skills</h2>
+            <h2 className="text-xl font-bold text-gray-900">Skills</h2>
             <button
               type="button"
               onClick={() => setShowSkillForm((current) => !current)}

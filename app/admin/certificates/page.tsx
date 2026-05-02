@@ -129,17 +129,11 @@ export default function ManageCertificates() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white p-4 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <h1 className="text-2xl font-bold">Manage Certificates</h1>
-          <button type="button" onClick={() => router.push('/admin/dashboard')} className="text-blue-600 hover:underline">
-            Back to Dashboard
-          </button>
-        </div>
-      </nav>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Certificates</h1>
+      <p className="text-sm text-slate-500 mb-6">Manage your certifications and professional credentials.</p>
 
-      <div className="mx-auto max-w-7xl p-6">
+      <div>
         <button
           type="button"
           onClick={() => {
@@ -158,7 +152,7 @@ export default function ManageCertificates() {
 
         {showForm ? (
           <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
-            <h2 className="mb-4 text-xl font-bold">{editingId ? 'Edit Certificate' : 'Add New Certificate'}</h2>
+            <h2 className="mb-4 text-xl font-bold text-gray-900">{editingId ? 'Edit Certificate' : 'Add New Certificate'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="certificate-title" className="mb-2 block text-gray-700">
@@ -233,7 +227,7 @@ export default function ManageCertificates() {
         ) : null}
 
         <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-xl font-bold">Existing Certificates ({certificates.length})</h2>
+          <h2 className="mb-4 text-xl font-bold text-gray-900">Existing Certificates ({certificates.length})</h2>
 
           {loading ? (
             <div className="py-8 text-center text-gray-500">Loading certificates...</div>
@@ -243,7 +237,7 @@ export default function ManageCertificates() {
                 <div key={certificate.id} className="rounded-lg border p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold">{certificate.title}</h3>
+                      <h3 className="text-lg font-bold text-gray-900">{certificate.title}</h3>
                       <p className="mt-1 text-sm text-gray-600">{certificate.issuer}</p>
                       <p className="mt-1 text-xs text-gray-500">
                         {new Date(certificate.issue_date).toLocaleDateString()}

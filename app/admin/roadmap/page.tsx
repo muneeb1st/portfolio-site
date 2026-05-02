@@ -84,7 +84,7 @@ export default function RoadmapPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Roadmap / Building Next</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Roadmap / Building Next</h1>
 
       {schemaMessage ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{schemaMessage}</div>
@@ -101,7 +101,7 @@ export default function RoadmapPage() {
 
       {showForm && (
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Roadmap Item' : 'Add Roadmap Item'}</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-900">{editingId ? 'Edit Roadmap Item' : 'Add Roadmap Item'}</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <input
@@ -155,7 +155,7 @@ export default function RoadmapPage() {
       )}
 
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">Existing Roadmap Items ({items.length})</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900">Existing Roadmap Items ({items.length})</h2>
         <div className="space-y-4">
           {items.map((item) => (
             <div key={item.id} className="border rounded-lg p-4 flex justify-between gap-4">

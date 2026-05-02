@@ -128,7 +128,7 @@ export default function SiteSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">Site Settings</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Site Settings</h1>
       <p className="text-sm text-slate-500 mb-6">These settings control text shown on the public homepage. Changes apply immediately after saving.</p>
 
       {schemaMessage ? (
@@ -138,7 +138,7 @@ export default function SiteSettingsPage() {
       <div className="bg-white p-6 rounded-lg shadow">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-700 font-medium">Hero Title</label>
+            <label className="block text-gray-900 font-medium">Hero Title</label>
             <p className="text-xs text-slate-400 mb-2">The big headline at the very top of your homepage.</p>
             <input
               type="text"
@@ -150,7 +150,7 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium">Hero Badge Text</label>
+            <label className="block text-gray-900 font-medium">Hero Badge Text</label>
             <p className="text-xs text-slate-400 mb-2">The small badge above the headline (e.g. "Available for projects").</p>
             <input
               type="text"
@@ -162,7 +162,7 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium">Contact Section Title</label>
+            <label className="block text-gray-900 font-medium">Contact Section Title</label>
             <p className="text-xs text-slate-400 mb-2">The heading in the "Get in touch" section at the bottom.</p>
             <input
               type="text"
@@ -174,7 +174,7 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium">Contact Section Subtitle</label>
+            <label className="block text-gray-900 font-medium">Contact Section Subtitle</label>
             <p className="text-xs text-slate-400 mb-2">The paragraph under the contact heading.</p>
             <textarea
               value={formData.contact_subtitle}
@@ -186,7 +186,7 @@ export default function SiteSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium">Footer Text</label>
+            <label className="block text-gray-900 font-medium">Footer Text</label>
             <p className="text-xs text-slate-400 mb-2">Text shown at the very bottom of the page after © {new Date().getFullYear()} Muneeb.</p>
             <input
               type="text"

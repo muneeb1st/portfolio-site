@@ -107,14 +107,14 @@ export default function HeroStatsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Hero Stats</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Hero Stats</h1>
 
       {schemaMessage ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{schemaMessage}</div>
       ) : null}
 
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Hero Stat' : 'Add Hero Stat'}</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900">{editingId ? 'Edit Hero Stat' : 'Add Hero Stat'}</h2>
         <form onSubmit={handleSubmit} className="grid md:grid-cols-3 gap-4">
           <input
             type="text"
@@ -162,7 +162,7 @@ export default function HeroStatsPage() {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">Existing Hero Stats ({stats.length})</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900">Existing Hero Stats ({stats.length})</h2>
         <div className="grid gap-3">
           {stats.map((stat) => (
             <div key={stat.id} className="flex items-center justify-between border rounded-lg p-4">

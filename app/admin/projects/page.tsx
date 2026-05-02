@@ -207,17 +207,11 @@ export default function ManageProjects() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white p-4 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <h1 className="text-2xl font-bold">Manage Projects</h1>
-          <button type="button" onClick={() => router.push('/admin/dashboard')} className="text-blue-600 hover:underline">
-            Back to Dashboard
-          </button>
-        </div>
-      </nav>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Projects</h1>
+      <p className="text-sm text-slate-500 mb-6">Manage your portfolio projects and featured work.</p>
 
-      <div className="mx-auto max-w-7xl p-6">
+      <div>
         <button
           type="button"
           onClick={() => {
@@ -236,7 +230,7 @@ export default function ManageProjects() {
 
         {showForm ? (
           <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
-            <h2 className="mb-4 text-xl font-bold">{editingId ? 'Edit Project' : 'Add New Project'}</h2>
+            <h2 className="mb-4 text-xl font-bold text-gray-900">{editingId ? 'Edit Project' : 'Add New Project'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="project-image" className="mb-2 block text-gray-700">

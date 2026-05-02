@@ -117,12 +117,12 @@ export default function ServicesPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Services &amp; Packages</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Services & Packages</h1>
       {schemaMessage ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{schemaMessage}</div> : null}
 
       <section className="bg-white p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Service Showcases</h2>
+          <h2 className="text-xl font-bold text-gray-900">Service Showcases</h2>
           <button type="button" onClick={() => (showShowcaseForm ? resetShowcaseForm() : setShowShowcaseForm(true))} disabled={Boolean(schemaMessage)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm disabled:opacity-60">{showShowcaseForm ? 'Cancel' : '+ Add Showcase'}</button>
         </div>
         {showShowcaseForm && (
@@ -162,7 +162,7 @@ export default function ServicesPage() {
 
       <section className="bg-white p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Offer Packages</h2>
+          <h2 className="text-xl font-bold text-gray-900">Offer Packages</h2>
           <button type="button" onClick={() => (showPackageForm ? resetPackageForm() : setShowPackageForm(true))} disabled={Boolean(schemaMessage)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm disabled:opacity-60">{showPackageForm ? 'Cancel' : '+ Add Package'}</button>
         </div>
         {showPackageForm && (

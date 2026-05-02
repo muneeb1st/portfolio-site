@@ -476,3 +476,44 @@ textarea {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ─── Admin Panel Reset ─────────────────────────────────────────────────────
+   The public site sets color: #fff7ec (warm cream) on body and uses
+   -webkit-text-fill-color: transparent for gradient text effects.
+   Everything inside .admin-shell gets a full light-theme reset.
+─────────────────────────────────────────────────────────────────────────── */
+.admin-shell {
+  color-scheme: light;
+  color: #111827 !important;
+  background: #f8fafc;
+}
+
+/* Force ALL descendants to have dark text and no webkit gradient bleed */
+.admin-shell *:not(aside):not(aside *) {
+  color: inherit;
+  -webkit-text-fill-color: currentColor !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+/* Sidebar keeps its own dark theme */
+.admin-shell aside,
+.admin-shell aside * {
+  -webkit-text-fill-color: currentColor !important;
+  background-clip: unset !important;
+}
+
+/* Form fields explicitly forced to dark readable text */
+.admin-shell input,
+.admin-shell textarea,
+.admin-shell select {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-color: #ffffff;
+}
+
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
+}

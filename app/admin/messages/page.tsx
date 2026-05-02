@@ -63,20 +63,14 @@ export default function ViewMessages() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white p-4 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <h1 className="text-2xl font-bold">Contact Messages</h1>
-          <button type="button" onClick={() => router.push('/admin/dashboard')} className="text-blue-600 hover:underline">
-            Back to Dashboard
-          </button>
-        </div>
-      </nav>
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Contact Messages</h1>
+      <p className="text-sm text-slate-500 mb-6">View and manage messages received through your portfolio contact form.</p>
 
-      <div className="mx-auto max-w-7xl p-6">
+      <div>
         <div className="rounded-[24px] bg-white shadow">
           <div className="border-b p-6">
-            <h2 className="text-xl font-bold">Messages Received ({messages.length})</h2>
+            <h2 className="text-xl font-bold text-gray-900">Messages Received ({messages.length})</h2>
           </div>
 
           {loading ? (
@@ -89,7 +83,7 @@ export default function ViewMessages() {
                 <div key={message.id} className="p-6 transition hover:bg-gray-50">
                   <div className="mb-2 flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-bold">{message.name}</h3>
+                      <h3 className="text-lg font-bold text-gray-900">{message.name}</h3>
                       <p className="text-sm text-gray-600">{message.email}</p>
                       <p className="mt-1 text-xs text-gray-400">{new Date(message.created_at).toLocaleString()}</p>
                     </div>
