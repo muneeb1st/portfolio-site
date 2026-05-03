@@ -361,7 +361,7 @@ export default function ManageProjects() {
           ) : (
             <div className="space-y-4">
               {projects.map((project) => (
-                <div key={project.id} className="flex gap-4 rounded-lg border p-4">
+                <div key={project.id} className="flex flex-col sm:flex-row gap-4 rounded-lg border p-4">
                   {project.image_url ? (
                     <Image
                       src={project.image_url}
@@ -387,7 +387,7 @@ export default function ManageProjects() {
                     ) : null}
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-4 sm:mt-0 items-start shrink-0">
                     <button
                       type="button"
                       onClick={() => editProject(project)}

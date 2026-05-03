@@ -167,7 +167,7 @@ export default function TimelinePage() {
         <h2 className="text-xl font-bold mb-4 text-gray-900">Existing Timeline Items ({items.length})</h2>
         <div className="space-y-3">
           {items.map((item) => (
-            <div key={item.id} className="flex items-start justify-between border rounded-lg p-4">
+            <div key={item.id} className="flex flex-col sm:flex-row sm:items-start justify-between border rounded-lg p-4">
               <div>
                 <div className="font-semibold">{item.phase}</div>
                 <div className="text-sm text-gray-600 mt-1">{item.description}</div>

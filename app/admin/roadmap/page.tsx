@@ -158,7 +158,7 @@ export default function RoadmapPage() {
         <h2 className="text-xl font-bold mb-4 text-gray-900">Existing Roadmap Items ({items.length})</h2>
         <div className="space-y-4">
           {items.map((item) => (
-            <div key={item.id} className="border rounded-lg p-4 flex justify-between gap-4">
+            <div key={item.id} className="border rounded-lg p-4 flex flex-col sm:flex-row justify-between gap-4">
               <div className="flex-1">
                 <h3 className="font-bold">{item.title}</h3>
                 <p className="text-sm text-gray-600 mt-1">{item.description}</p>
@@ -169,7 +169,7 @@ export default function RoadmapPage() {
                 </div>
                 <p className="text-xs text-gray-400 mt-3">Accent: {item.accent} | Order: {item.order_num}</p>
               </div>
-              <div className="flex gap-2 h-fit">
+              <div className="flex gap-2 h-fit mt-2 sm:mt-0">
                 <button type="button" onClick={() => editItem(item)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">Edit</button>
                 <button type="button" onClick={() => deleteItem(item.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm">Delete</button>
               </div>

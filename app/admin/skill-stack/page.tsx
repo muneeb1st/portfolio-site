@@ -218,26 +218,28 @@ export default function SkillStackPage() {
               <p className="text-sm text-gray-500">No categories found.</p>
             ) : (
               categories.map((category) => (
-                <div key={category.id} className="rounded-xl bg-white p-6 shadow-sm border border-gray-100 relative">
-                  <div className="absolute right-4 top-4 flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => editCategory(category)}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteCategory(category.id)}
-                      className="text-sm font-medium text-red-600 hover:text-red-800"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  <div className="mb-2 flex items-baseline gap-2">
-                    <span className="text-xs font-medium text-gray-400">#{category.order_num}</span>
-                    <h3 className="font-bold text-gray-900">{category.title}</h3>
+                <div key={category.id} className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
+                  <div className="mb-2 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xs font-medium text-gray-400">#{category.order_num}</span>
+                      <h3 className="font-bold text-gray-900">{category.title}</h3>
+                    </div>
+                    <div className="flex gap-3 mt-2 sm:mt-0">
+                      <button
+                        type="button"
+                        onClick={() => editCategory(category)}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteCategory(category.id)}
+                        className="text-sm font-medium text-red-600 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {category.skills.map((skill, i) => (

@@ -507,7 +507,7 @@ function RevealSection({
           observer.disconnect()
         }
       },
-      { threshold: 0.16 }
+      { threshold: 0, rootMargin: '0px 0px -100px 0px' }
     )
 
     observer.observe(node)

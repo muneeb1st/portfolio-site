@@ -235,7 +235,7 @@ export default function ManageCertificates() {
             <div className="space-y-4">
               {certificates.map((certificate) => (
                 <div key={certificate.id} className="rounded-lg border p-4">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="text-lg font-bold text-gray-900">{certificate.title}</h3>
                       <p className="mt-1 text-sm text-gray-600">{certificate.issuer}</p>
@@ -243,7 +243,7 @@ export default function ManageCertificates() {
                         {new Date(certificate.issue_date).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="ml-4 flex gap-2">
+                    <div className="flex gap-2 sm:ml-4">
                       <button
                         type="button"
                         onClick={() => editCertificate(certificate)}
