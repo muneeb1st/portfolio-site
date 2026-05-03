@@ -22,6 +22,8 @@ import {
   TickerSkeleton,
 } from '@/components/skeletons'
 
+export const dynamic = 'force-dynamic'
+
 function WindowChrome({ label }: { label: string }) {
   return (
     <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.28em] text-white/50">
@@ -146,6 +148,7 @@ function accentStyle(accent: string): React.CSSProperties {
 
 async function HeroSection() {
   const { about, siteSettings } = await fetchCriticalData()
+  const { heroStats } = await fetchAllPortfolioData()
   const name = about.name?.split(' ')[0] || 'Muneeb'
   const profileImage = about.profile_image_url
 
@@ -206,18 +209,14 @@ async function HeroSection() {
       </div>
 
       <RevealSection immediate className="mt-8 sm:mt-12 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
-        <div className="metric-card">
-          <div className="stat-number">430+</div>
-          <p className="mt-2 text-xs sm:text-sm leading-5 sm:leading-6 text-white/58">GitHub contributions in the last year</p>
-        </div>
-        <div className="metric-card">
-          <div className="font-display text-2xl sm:text-3xl text-[#fff7ec]">Self-taught</div>
-          <p className="mt-2 text-xs sm:text-sm leading-5 sm:leading-6 text-white/58">Learned web development, AI, and deployment independently</p>
-        </div>
-        <div className="metric-card">
-          <div className="font-display text-2xl sm:text-3xl text-[#fff7ec]">CS Student</div>
-          <p className="mt-2 text-xs sm:text-sm leading-5 sm:leading-6 text-white/58">Studying Computer Science at NFC-IET, Multan</p>
-        </div>
+        {heroStats.map((stat) => (
+          <div key={stat.id} className="metric-card">
+            <div className={stat.value.match(/\d/) ? 'stat-number' : 'font-display text-2xl sm:text-3xl text-[#fff7ec]'}>
+              {stat.value}
+            </div>
+            <p className="mt-2 text-xs sm:text-sm leading-5 sm:leading-6 text-white/58">{stat.label}</p>
+          </div>
+        ))}
       </RevealSection>
     </section>
   )
