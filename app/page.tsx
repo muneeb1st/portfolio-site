@@ -1076,6 +1076,7 @@ export default function Home() {
                     height={160}
                     className="rounded-full"
                     style={{ width: 'auto', height: 'auto' }}
+                    priority
                   />
                 </div>
               </div>
