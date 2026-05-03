@@ -165,13 +165,13 @@ export default function HeroStatsPage() {
         <h2 className="text-xl font-bold mb-4 text-gray-900">Existing Hero Stats ({stats.length})</h2>
         <div className="grid gap-3">
           {stats.map((stat) => (
-            <div key={stat.id} className="flex items-center justify-between border rounded-lg p-4">
+            <div key={stat.id} className="flex flex-col sm:flex-row sm:items-center justify-between border rounded-lg p-4 gap-4 sm:gap-0">
               <div>
                 <div className="font-semibold">{stat.value}</div>
                 <div className="text-sm text-gray-600">{stat.label}</div>
                 <div className="text-xs text-gray-400 mt-1">Order: {stat.order_num}</div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 sm:ml-4">
                 <button type="button" onClick={() => editStat(stat)} className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                   Edit
                 </button>

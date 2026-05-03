@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getSchemaSetupMessage, isMissingTableError } from '@/lib/admin-schema'
 import { supabase } from '@/lib/supabase'
 
 interface ContactMessage {
@@ -15,6 +16,7 @@ interface ContactMessage {
 export default function ViewMessages() {
   const [messages, setMessages] = useState<ContactMessage[]>([])
   const [loading, setLoading] = useState(true)
+  const [schemaMessage, setSchemaMessage] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -30,12 +32,19 @@ export default function ViewMessages() {
         return
       }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('contact_messages')
         .select('id, name, email, message, created_at')
         .order('created_at', { ascending: false })
 
       if (cancelled) {
+        return
+      }
+
+      if (isMissingTableError(error)) {
+        setSchemaMessage(getSchemaSetupMessage('Contact messages'))
+        setMessages([])
+        setLoading(false)
         return
       }
 
@@ -67,6 +76,12 @@ export default function ViewMessages() {
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Contact Messages</h1>
       <p className="text-sm text-slate-500 mb-6">View and manage messages received through your portfolio contact form.</p>
 
+      {schemaMessage ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 mb-6">
+          {schemaMessage}
+        </div>
+      ) : null}
+
       <div>
         <div className="rounded-[24px] bg-white shadow">
           <div className="border-b p-6">
@@ -81,7 +96,7 @@ export default function ViewMessages() {
             <div className="divide-y">
               {messages.map((message) => (
                 <div key={message.id} className="p-6 transition hover:bg-gray-50">
-                  <div className="mb-2 flex items-start justify-between gap-4">
+                  <div className="mb-2 flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">{message.name}</h3>
                       <p className="text-sm text-gray-600">{message.email}</p>
