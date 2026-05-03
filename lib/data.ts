@@ -23,6 +23,7 @@ export interface AboutData {
   name: string | null
   tagline: string | null
   bio: string | null
+  email: string | null
   profile_image_url: string | null
   github_url: string | null
   linkedin_url: string | null
@@ -114,6 +115,7 @@ export const fallbackAbout: Required<AboutData> = {
   tagline: 'CS student who builds websites and AI systems faster than most people expect.',
   bio: 'I picked up web development and AI automation on my own, started shipping real projects within weeks, and I have not slowed down. I build premium websites and smart chatbot systems for businesses that want to stand out.',
   profile_image_url: null,
+  email: 'muneeb@example.com',
   github_url: 'https://github.com/muneeb1st',
   linkedin_url: null,
   twitter_url: null,
@@ -288,6 +290,7 @@ async function fetchAbout(): Promise<Required<AboutData>> {
     name: data.name?.trim() || fallbackAbout.name,
     tagline: data.tagline?.trim() || fallbackAbout.tagline,
     bio: data.bio?.trim() || fallbackAbout.bio,
+    email: data.email?.trim() || fallbackAbout.email,
     profile_image_url: data.profile_image_url || fallbackAbout.profile_image_url,
     github_url: data.github_url || fallbackAbout.github_url,
     linkedin_url: data.linkedin_url || fallbackAbout.linkedin_url,
