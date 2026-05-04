@@ -9,7 +9,7 @@ function cn(...parts: Array<string | false | null | undefined>) {
 export function TiltPanel({ children, className, style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
   const ref = useRef<HTMLDivElement>(null)
 
-  function handleMove(event: React.MouseEvent<HTMLDivElement>) {
+  function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
     const node = ref.current
     if (!node) return
 
@@ -24,7 +24,7 @@ export function TiltPanel({ children, className, style }: { children: ReactNode;
     node.style.setProperty('--lift', '-6px')
   }
 
-  function handleLeave() {
+  function handlePointerLeave() {
     const node = ref.current
     if (!node) return
 
@@ -33,12 +33,22 @@ export function TiltPanel({ children, className, style }: { children: ReactNode;
     node.style.setProperty('--lift', '0px')
   }
 
+  function handlePointerDown() {
+    const node = ref.current
+    if (!node) return
+    node.style.setProperty('--lift', '-4px')
+    node.style.setProperty('--rotate-x', '2deg')
+  }
+
   return (
     <div
       ref={ref}
       className={cn('tilt-panel', className)}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerLeave}
+      onPointerCancel={handlePointerLeave}
       style={style}
     >
       {children}
