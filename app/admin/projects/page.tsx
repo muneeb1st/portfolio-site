@@ -151,11 +151,14 @@ export default function ManageProjects() {
     if (editingId) {
       const { error } = await supabase.from('projects').update(payload).eq('id', editingId)
 
-      if (!error) {
+      if (error) {
+        alert('Error updating project: ' + error.message)
+      } else {
         setShowForm(false)
         setEditingId(null)
         setFormData(emptyForm)
         void refreshProjects()
+        alert('Project updated successfully.')
       }
       return
     }
@@ -167,10 +170,13 @@ export default function ManageProjects() {
       },
     ])
 
-    if (!error) {
+    if (error) {
+      alert('Error adding project: ' + error.message)
+    } else {
       setShowForm(false)
       setFormData(emptyForm)
       void refreshProjects()
+      alert('Project added successfully.')
     }
   }
 
@@ -181,8 +187,11 @@ export default function ManageProjects() {
 
     const { error } = await supabase.from('projects').delete().eq('id', id)
 
-    if (!error) {
+    if (error) {
+      alert('Error deleting project: ' + error.message)
+    } else {
       void refreshProjects()
+      alert('Project deleted.')
     }
   }
 

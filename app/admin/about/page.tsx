@@ -73,7 +73,9 @@ export default function ManageAbout() {
       })
       .eq('id', aboutData.id)
 
-    if (!error) {
+    if (error) {
+      alert('Error updating about information: ' + error.message)
+    } else {
       alert('Updated successfully.')
     }
   }

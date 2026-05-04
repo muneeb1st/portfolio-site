@@ -393,8 +393,8 @@ export async function fetchAllPortfolioData() {
     fetchBuildingNext(),
   ])
 
-  const featuredProjects = projects.filter((p) => p.featured).slice(0, 3)
-  const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects.slice(0, 3)
+  const featuredProjects = projects.filter((p) => p.featured)
+  const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects
 
   return {
     projects: displayProjects,

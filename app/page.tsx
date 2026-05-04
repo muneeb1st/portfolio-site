@@ -444,7 +444,7 @@ async function ContactSection() {
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               {about.email && (
-                <a href={`mailto:${about.email}`} className="glow-button inline-flex text-sm px-5 py-2.5">Email me</a>
+                <a href={`mailto:${about.email}`} target="_blank" rel="noopener noreferrer" className="glow-button inline-flex text-sm px-5 py-2.5">Email me</a>
               )}
               {about.github_url && (
                 <a href={about.github_url} target="_blank" rel="noreferrer" className="ghost-button inline-flex text-sm px-5 py-2.5">GitHub</a>
