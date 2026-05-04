@@ -167,6 +167,13 @@ textarea {
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
     rgba(6, 11, 20, 0.82);
   box-shadow: var(--shadow);
+  transition: transform 0.4s cubic-bezier(0.2, 1, 0.22, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.package-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--line-strong);
+  box-shadow: 0 34px 110px rgba(0, 0, 0, 0.5);
 }
 
 .package-card::after {
