@@ -171,7 +171,6 @@ textarea {
 }
 
 .package-card:hover {
-  transform: translateY(-6px);
   border-color: var(--line-strong);
   box-shadow: 0 34px 110px rgba(0, 0, 0, 0.5);
 }
