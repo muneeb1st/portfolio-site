@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { ProjectModal, TiltPanel } from './client-only'
+import { ProjectModal } from './client-only'
 import type { Project } from '@/lib/data'
 
 function accentStyle(accent: string): React.CSSProperties {
@@ -16,11 +16,19 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
     <>
       <div className="mt-8 sm:mt-12 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {projects.map((project, index) => (
-          <TiltPanel 
+          <div 
             key={project.id} 
             className="package-card group h-full rounded-[1.5rem] sm:rounded-[1.85rem] p-4 sm:p-5 md:p-6 cursor-pointer" 
             style={accentStyle(index === 0 ? '247, 178, 77' : index === 1 ? '93, 226, 231' : '255, 122, 89')}
             onClick={() => setSelectedProject(project)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setSelectedProject(project);
+              }
+            }}
           >
             <div className="overflow-hidden rounded-[1.2rem] sm:rounded-[1.4rem] border border-white/10 bg-black/20">
               {project.image_url ? (
@@ -59,7 +67,7 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
               </div>
               <div className="mt-4 sm:mt-6 text-xs sm:text-sm uppercase tracking-[0.24em] text-[#5de2e7] group-hover:text-white transition">View details →</div>
             </div>
-          </TiltPanel>
+          </div>
         ))}
       </div>
 

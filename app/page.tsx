@@ -8,7 +8,7 @@ import {
   fallbackTimelineItems,
   fallbackSkillCategories,
 } from '@/lib/data'
-import { AmbientSpotlight, RevealSection, TiltPanel } from '@/components/client-only'
+import { AmbientSpotlight, RevealSection } from '@/components/client-only'
 import { ContactForm } from '@/components/contact-form'
 import { ProjectsListClient } from '@/components/projects-client'
 import {
@@ -319,7 +319,7 @@ async function ServicesSection() {
 
       <div className="mt-8 sm:mt-12 grid gap-6 sm:gap-8 xl:grid-cols-2">
         {serviceShowcases.map((item, index) => (
-          <TiltPanel key={item.id} className="package-card rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-5 md:p-6" style={accentStyle(item.accent)}>
+          <div key={item.id} className="package-card rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-5 md:p-6" style={accentStyle(item.accent)}>
             <div className="text-xs uppercase tracking-[0.28em] text-white/38">{item.eyebrow}</div>
             <h3 className="font-display mt-4 sm:mt-5 text-2xl sm:text-3xl md:text-4xl text-[#fff7ec]">{item.title}</h3>
             <p className="mt-3 sm:mt-5 text-sm sm:text-base leading-6 sm:leading-7 text-white/62">{item.summary}</p>
@@ -337,13 +337,13 @@ async function ServicesSection() {
                 <div key={deliverable} className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/74">{deliverable}</div>
               ))}
             </div>
-          </TiltPanel>
+          </div>
         ))}
       </div>
 
       <div className="mt-10 sm:mt-12 grid gap-5 sm:gap-6 sm:grid-cols-2 xl:grid-cols-4">
         {offerPackages.map((item) => (
-          <TiltPanel key={item.id} className="package-card rounded-[1.5rem] sm:rounded-[1.85rem] p-4 sm:p-5" style={accentStyle(item.accent)}>
+          <div key={item.id} className="package-card rounded-[1.5rem] sm:rounded-[1.85rem] p-4 sm:p-5" style={accentStyle(item.accent)}>
             <div className="text-xs uppercase tracking-[0.24em] text-white/38">{item.family}</div>
             <h3 className="font-display mt-3 sm:mt-4 text-xl sm:text-2xl md:text-3xl text-[#fff7ec]">{item.title}</h3>
             <p className="mt-3 sm:mt-4 text-xs sm:text-sm leading-6 sm:leading-7 text-white/62">{item.pitch}</p>
@@ -356,7 +356,7 @@ async function ServicesSection() {
                 <div key={deliverable} className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs sm:text-sm text-white/76">{deliverable}</div>
               ))}
             </div>
-          </TiltPanel>
+          </div>
         ))}
       </div>
     </RevealSection>
