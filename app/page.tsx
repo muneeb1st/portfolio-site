@@ -386,10 +386,13 @@ async function SkillsSection() {
         <div className="grid gap-4 sm:gap-5 sm:grid-cols-3">
           {featuredCerts.length > 0 ? featuredCerts.map((cert) => (
             cert.credential_url ? (
-              <a key={cert.id} href={cert.credential_url} target="_blank" rel="noreferrer" className="glass-panel rounded-[1.5rem] sm:rounded-[1.85rem] p-4 sm:p-5 text-center hover:bg-white/[0.05] transition cursor-pointer">
-                <div className="text-xs uppercase tracking-[0.2em] text-white/38 mb-2">Certificate</div>
-                <div className="font-display text-lg sm:text-xl text-[#fff7ec]">{cert.title}</div>
-                <div className="mt-2 text-xs text-white/50">{cert.issuer}</div>
+              <a key={cert.id} href={cert.credential_url} target="_blank" rel="noopener noreferrer" className="glass-panel group rounded-[1.5rem] sm:rounded-[1.85rem] p-4 sm:p-5 text-center hover:bg-white/[0.05] transition cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.2em] text-white/38 mb-2">Certificate</div>
+                  <div className="font-display text-lg sm:text-xl text-[#fff7ec]">{cert.title}</div>
+                  <div className="mt-2 text-xs text-white/50">{cert.issuer}</div>
+                </div>
+                <div className="mt-4 text-xs uppercase tracking-[0.24em] text-[#5de2e7] group-hover:text-white transition">View credential →</div>
               </a>
             ) : (
               <div key={cert.id} className="glass-panel rounded-[1.5rem] sm:rounded-[1.85rem] p-4 sm:p-5 text-center">
