@@ -6,7 +6,7 @@ import {
   fallbackSkillCategories,
   fallbackTimelineItems,
 } from '@/lib/data'
-import { AmbientSpotlight, RevealSection, TiltPanel } from '@/components/client-only'
+import { AmbientSpotlight, MotionOrchestrator, RevealSection, TiltPanel } from '@/components/client-only'
 import { ContactForm } from '@/components/contact-form'
 import { ProjectsListClient } from '@/components/projects-client'
 
@@ -45,7 +45,7 @@ async function Header() {
   return (
     <header className="site-header">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="brand-mark" aria-label={`${cleanName} home`}>
+        <Link href="/" className="brand-mark" aria-label={`${cleanName} home`} data-magnetic>
           <span className="brand-mark__symbol">MR</span>
           <span className="hidden sm:block">{cleanName}</span>
         </Link>
@@ -55,7 +55,7 @@ async function Header() {
           <Link href="#process" className="nav-link">Process</Link>
           <Link href="#about" className="nav-link">About</Link>
         </div>
-        <Link href="#contact" className="button button--small">
+        <Link href="#contact" className="button button--small" data-magnetic>
           Start a project
         </Link>
       </nav>
@@ -85,13 +85,14 @@ async function HeroSection() {
           <span className="motion-word">Launch</span>
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="#work" className="button">See selected work</Link>
-          <Link href="#contact" className="button button--ghost">Work with {firstName}</Link>
+          <Link href="#work" className="button" data-magnetic>See selected work</Link>
+          <Link href="#contact" className="button button--ghost" data-magnetic>Work with {firstName}</Link>
         </div>
       </RevealSection>
 
       <RevealSection immediate>
         <div className="portrait-panel">
+          <div className="portrait-panel__scan" aria-hidden />
           <div className="portrait-panel__top">
             <div>
               <p className="panel-kicker">{siteSettings.hero_badge}</p>
@@ -380,6 +381,7 @@ export default function Home() {
   return (
     <main className="page-shell">
       <AmbientSpotlight />
+      <MotionOrchestrator />
       <div className="site-noise" aria-hidden />
       <Header />
       <HeroSection />

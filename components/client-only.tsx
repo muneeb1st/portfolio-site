@@ -105,6 +105,95 @@ export function AmbientSpotlight() {
   )
 }
 
+export function MotionOrchestrator() {
+  const cursorRef = useRef<HTMLDivElement>(null)
+  const progressRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduceMotion) return
+
+    let raf = 0
+    let targetX = window.innerWidth / 2
+    let targetY = window.innerHeight / 2
+    let currentX = targetX
+    let currentY = targetY
+
+    function updateScroll() {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight
+      const progress = scrollable > 0 ? window.scrollY / scrollable : 0
+      document.documentElement.style.setProperty('--scroll-progress', progress.toFixed(4))
+      progressRef.current?.style.setProperty('--progress', `${progress * 100}%`)
+    }
+
+    function animate() {
+      currentX += (targetX - currentX) * 0.16
+      currentY += (targetY - currentY) * 0.16
+
+      const cursor = cursorRef.current
+      if (cursor) {
+        cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`
+      }
+
+      raf = window.requestAnimationFrame(animate)
+    }
+
+    function handlePointerMove(event: PointerEvent) {
+      targetX = event.clientX
+      targetY = event.clientY
+
+      const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-magnetic]') : null
+      document.documentElement.classList.toggle('is-magnetic-hover', Boolean(target))
+
+      if (target) {
+        const rect = target.getBoundingClientRect()
+        const x = (event.clientX - rect.left) / rect.width - 0.5
+        const y = (event.clientY - rect.top) / rect.height - 0.5
+        target.style.setProperty('--magnetic-x', `${x * 10}px`)
+        target.style.setProperty('--magnetic-y', `${y * 8}px`)
+      }
+    }
+
+    function handlePointerLeave(event: PointerEvent) {
+      const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-magnetic]') : null
+      if (!target) return
+      target.style.setProperty('--magnetic-x', '0px')
+      target.style.setProperty('--magnetic-y', '0px')
+      document.documentElement.classList.remove('is-magnetic-hover')
+    }
+
+    updateScroll()
+    animate()
+
+    window.addEventListener('scroll', updateScroll, { passive: true })
+    window.addEventListener('resize', updateScroll)
+    window.addEventListener('pointermove', handlePointerMove, { passive: true })
+    document.querySelectorAll('[data-magnetic]').forEach((node) => {
+      node.addEventListener('pointerleave', handlePointerLeave as EventListener)
+    })
+
+    return () => {
+      window.cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', updateScroll)
+      window.removeEventListener('resize', updateScroll)
+      window.removeEventListener('pointermove', handlePointerMove)
+      document.querySelectorAll('[data-magnetic]').forEach((node) => {
+        node.removeEventListener('pointerleave', handlePointerLeave as EventListener)
+      })
+      document.documentElement.classList.remove('is-magnetic-hover')
+    }
+  }, [])
+
+  return (
+    <>
+      <div ref={progressRef} className="scroll-progress" aria-hidden />
+      <div ref={cursorRef} className="cursor-orb" aria-hidden />
+    </>
+  )
+}
+
 export function RevealSection({ children, className, id, immediate = false }: { children: ReactNode; className?: string; id?: string; immediate?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(immediate)

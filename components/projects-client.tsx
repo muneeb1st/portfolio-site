@@ -17,6 +17,7 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
             type="button"
             className="work-card group"
             onClick={() => setSelectedProject(project)}
+            data-magnetic
           >
             <div className="work-card__media">
               {project.image_url ? (
