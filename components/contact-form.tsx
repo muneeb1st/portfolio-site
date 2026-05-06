@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 
 export function ContactForm() {
   const [submitting, setSubmitting] = useState(false)
@@ -19,24 +18,13 @@ export function ContactForm() {
     setSubmitting(true)
     setStatus(null)
 
-    const { error } = await supabase.from('contact_messages').insert([form])
-    const needsLegacyPayload = error?.code === 'PGRST204'
-    const legacyPayload = {
-      name: form.name,
-      email: form.email,
-      message: [
-        `Project type: ${form.project_type}`,
-        `Budget range: ${form.budget_range}`,
-        '',
-        form.message,
-      ].join('\n'),
-    }
-    const legacyResult = needsLegacyPayload
-      ? await supabase.from('contact_messages').insert([legacyPayload])
-      : null
-    const finalError = legacyResult?.error ?? error
+    const apiResult = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
 
-    if (finalError) {
+    if (!apiResult.ok) {
       setStatus({ tone: 'error', message: 'Message did not send. Try again and I will make sure we get it through.' })
     } else {
       setStatus({ tone: 'success', message: 'Message sent. I will get back to you with ideas for your build.' })

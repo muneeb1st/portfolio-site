@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getSchemaSetupMessage, isMissingTableError } from '@/lib/admin-schema'
+import { getSchemaSetupMessage } from '@/lib/admin-schema'
 import { supabase } from '@/lib/supabase'
 
 interface ContactMessage {
@@ -34,33 +34,26 @@ export default function ViewMessages() {
         return
       }
 
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .select('id, name, email, message, project_type, budget_range, created_at')
-        .order('created_at', { ascending: false })
-
-      const needsLegacySelect = error?.code === 'PGRST204'
-      const legacyResult = needsLegacySelect
-        ? await supabase
-            .from('contact_messages')
-            .select('id, name, email, message, created_at')
-            .order('created_at', { ascending: false })
-        : null
-      const finalData = legacyResult?.data ?? data
-      const finalError = legacyResult?.error ?? error
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const response = await fetch('/api/admin/messages', {
+        headers: { Authorization: `Bearer ${session?.access_token ?? ''}` },
+      })
 
       if (cancelled) {
         return
       }
 
-      if (isMissingTableError(finalError)) {
+      if (!response.ok) {
         setSchemaMessage(getSchemaSetupMessage('Contact messages'))
         setMessages([])
         setLoading(false)
         return
       }
 
-      setMessages((finalData as ContactMessage[] | null) ?? [])
+      const payload = await response.json()
+      setMessages((payload.messages as ContactMessage[] | null) ?? [])
       setLoading(false)
     }
 
