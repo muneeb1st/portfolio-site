@@ -40,8 +40,8 @@ export default function SkillStackPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchCategories()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function editCategory(category: SkillCategory) {
@@ -130,7 +130,7 @@ export default function SkillStackPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Skill Stack</h1>
         <p className="mt-2 text-sm text-gray-500">
-          Manage the categorized skills shown in the 'Skill stack' section of the homepage.
+          Manage the categorized skills shown in the &apos;Skill stack&apos; section of the homepage.
         </p>
       </div>
 

@@ -6,7 +6,13 @@ import { supabase } from '@/lib/supabase'
 export function ContactForm() {
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
-  const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    project_type: 'Premium website',
+    budget_range: 'Not sure yet',
+    message: '',
+  })
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -19,7 +25,13 @@ export function ContactForm() {
       setStatus({ tone: 'error', message: 'Message did not send. Try again and I will make sure we get it through.' })
     } else {
       setStatus({ tone: 'success', message: 'Message sent. I will get back to you with ideas for your build.' })
-      setForm({ name: '', email: '', message: '' })
+      setForm({
+        name: '',
+        email: '',
+        project_type: 'Premium website',
+        budget_range: 'Not sure yet',
+        message: '',
+      })
     }
 
     setSubmitting(false)
@@ -51,6 +63,36 @@ export function ContactForm() {
             className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/30 focus:border-[#5de2e7] focus:outline-none"
             placeholder="you@example.com"
           />
+        </div>
+      </div>
+      <div className="mt-5 grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2">
+          <label htmlFor="project_type" className="text-xs uppercase tracking-[0.22em] text-white/50">Project type</label>
+          <select
+            id="project_type"
+            value={form.project_type}
+            onChange={(e) => setForm((f) => ({ ...f, project_type: e.target.value }))}
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white focus:border-[#f4c978] focus:outline-none"
+          >
+            <option>Premium website</option>
+            <option>AI chatbot</option>
+            <option>Website + chatbot</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="budget_range" className="text-xs uppercase tracking-[0.22em] text-white/50">Budget range</label>
+          <select
+            id="budget_range"
+            value={form.budget_range}
+            onChange={(e) => setForm((f) => ({ ...f, budget_range: e.target.value }))}
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white focus:border-[#f4c978] focus:outline-none"
+          >
+            <option>Not sure yet</option>
+            <option>$1k - $3k</option>
+            <option>$3k - $6k</option>
+            <option>$6k+</option>
+          </select>
         </div>
       </div>
       <div className="mt-5 space-y-2">

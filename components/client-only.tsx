@@ -1,15 +1,20 @@
 'use client'
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react'
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ')
 }
 
-export function TiltPanel({ children, className, style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
+type TiltPanelProps = ComponentPropsWithoutRef<'div'> & {
+  children: ReactNode
+}
+
+export function TiltPanel({ children, className, onPointerMove, onPointerLeave, onPointerDown, onPointerUp, onPointerCancel, ...props }: TiltPanelProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    onPointerMove?.(event)
     const node = ref.current
     if (!node) return
 
@@ -24,7 +29,7 @@ export function TiltPanel({ children, className, style }: { children: ReactNode;
     node.style.setProperty('--lift', '-6px')
   }
 
-  function handlePointerLeave() {
+  function resetTilt() {
     const node = ref.current
     if (!node) return
 
@@ -33,11 +38,27 @@ export function TiltPanel({ children, className, style }: { children: ReactNode;
     node.style.setProperty('--lift', '0px')
   }
 
-  function handlePointerDown() {
+  function handlePointerLeave(event: React.PointerEvent<HTMLDivElement>) {
+    onPointerLeave?.(event)
+    resetTilt()
+  }
+
+  function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    onPointerDown?.(event)
     const node = ref.current
     if (!node) return
     node.style.setProperty('--lift', '-4px')
     node.style.setProperty('--rotate-x', '2deg')
+  }
+
+  function handlePointerUp(event: React.PointerEvent<HTMLDivElement>) {
+    onPointerUp?.(event)
+    resetTilt()
+  }
+
+  function handlePointerCancel(event: React.PointerEvent<HTMLDivElement>) {
+    onPointerCancel?.(event)
+    resetTilt()
   }
 
   return (
@@ -47,9 +68,9 @@ export function TiltPanel({ children, className, style }: { children: ReactNode;
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerLeave}
-      onPointerCancel={handlePointerLeave}
-      style={style}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      {...props}
     >
       {children}
     </div>

@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Muneeb Ur Rehman Portfolio
+
+Premium solo-studio portfolio built with Next.js, Tailwind CSS, and Supabase. The public site is designed for high-trust website and AI systems work, with a Supabase-backed admin panel for editing content.
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies and run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the site.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Set these environment variables:
 
-## Learn More
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-To learn more about Next.js, take a look at the following resources:
+Run the latest migration in `supabase/migrations/20260506_premium_cms_schema.sql`, then create an admin Auth user and add it to `public.admin_profiles`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Documentation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Admin usage: `docs/admin-guide.md`
+- Deployment: `docs/deployment.md`
+- Redesign spec: `docs/superpowers/specs/2026-05-06-premium-portfolio-redesign-design.md`
+- Implementation plan: `docs/superpowers/plans/2026-05-06-premium-portfolio-redesign.md`
 
-## Deploy on Vercel
+## Checks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run lint
+npm run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+Deploy on Vercel or Netlify after setting the Supabase environment variables. Test admin login, content editing, image upload, and the contact form on staging before pointing the live domain.

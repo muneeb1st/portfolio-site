@@ -40,8 +40,8 @@ export default function TimelinePage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchItems()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function editItem(item: TimelineItem) {

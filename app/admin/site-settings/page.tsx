@@ -151,7 +151,7 @@ export default function SiteSettingsPage() {
 
           <div>
             <label className="block text-gray-900 font-medium">Hero Badge Text</label>
-            <p className="text-xs text-slate-400 mb-2">The small badge above the headline (e.g. "Available for projects").</p>
+            <p className="text-xs text-slate-400 mb-2">The small badge above the headline, for example &quot;Available for projects&quot;.</p>
             <input
               type="text"
               value={formData.hero_badge}
@@ -163,7 +163,7 @@ export default function SiteSettingsPage() {
 
           <div>
             <label className="block text-gray-900 font-medium">Contact Section Title</label>
-            <p className="text-xs text-slate-400 mb-2">The heading in the "Get in touch" section at the bottom.</p>
+            <p className="text-xs text-slate-400 mb-2">The heading in the &quot;Get in touch&quot; section at the bottom.</p>
             <input
               type="text"
               value={formData.contact_title}

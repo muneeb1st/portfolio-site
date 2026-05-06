@@ -10,6 +10,8 @@ interface ContactMessage {
   name: string
   email: string
   message: string
+  project_type: string | null
+  budget_range: string | null
   created_at: string
 }
 
@@ -34,7 +36,7 @@ export default function ViewMessages() {
 
       const { data, error } = await supabase
         .from('contact_messages')
-        .select('id, name, email, message, created_at')
+        .select('id, name, email, message, project_type, budget_range, created_at')
         .order('created_at', { ascending: false })
 
       if (cancelled) {
@@ -100,6 +102,10 @@ export default function ViewMessages() {
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">{message.name}</h3>
                       <p className="text-sm text-gray-600">{message.email}</p>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
+                        {message.project_type ? <span className="rounded-full bg-slate-100 px-3 py-1">{message.project_type}</span> : null}
+                        {message.budget_range ? <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-700">{message.budget_range}</span> : null}
+                      </div>
                       <p className="mt-1 text-xs text-gray-400">{new Date(message.created_at).toLocaleString()}</p>
                     </div>
                     <button

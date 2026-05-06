@@ -40,8 +40,8 @@ export default function HeroStatsPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchStats()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function editStat(stat: HeroStat) {

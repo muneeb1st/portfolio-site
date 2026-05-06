@@ -70,7 +70,10 @@ export default function ServicesPage() {
     setLoading(false)
   }
 
-  useEffect(() => { void fetchData() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchData()
+  }, [])
 
   async function handleShowcaseSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); if (schemaMessage) return

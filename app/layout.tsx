@@ -13,9 +13,9 @@ const displayFont = Syne({
 })
 
 export const metadata: Metadata = {
-  title: 'Muneeb Ur Rehman | Web Developer & AI Builder',
+  title: 'Muneeb Ur Rehman | Premium Websites & AI Systems',
   description:
-    'CS student, fast learner, and builder. I design premium websites, build AI chatbot systems, and ship real projects. Available for freelance work.',
+    'Premium solo-studio portfolio for websites, AI chatbot systems, and launch-ready digital experiences by Muneeb Ur Rehman.',
 }
 
 export default function RootLayout({
@@ -27,6 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${bodyFont.variable} ${displayFont.variable} antialiased`}>
         {children}
+        <div id="chatbot-root" aria-hidden="true" />
       </body>
     </html>
   )

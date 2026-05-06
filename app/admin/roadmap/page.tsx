@@ -46,8 +46,8 @@ export default function RoadmapPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchItems()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
