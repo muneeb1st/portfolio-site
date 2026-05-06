@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import {
   fetchAllPortfolioData,
@@ -6,7 +5,7 @@ import {
   fallbackSkillCategories,
   fallbackTimelineItems,
 } from '@/lib/data'
-import { AmbientSpotlight, MotionOrchestrator, RevealSection, TiltPanel } from '@/components/client-only'
+import { AmbientSpotlight, MotionOrchestrator, RevealSection, StudioConsole, TiltPanel } from '@/components/client-only'
 import { ContactForm } from '@/components/contact-form'
 import { ProjectsListClient } from '@/components/projects-client'
 
@@ -91,31 +90,7 @@ async function HeroSection() {
       </RevealSection>
 
       <RevealSection immediate>
-        <div className="portrait-panel">
-          <div className="portrait-panel__scan" aria-hidden />
-          <div className="portrait-panel__top">
-            <div>
-              <p className="panel-kicker">{siteSettings.hero_badge}</p>
-              <h2>{cleanName}</h2>
-            </div>
-            <span className="availability-dot" aria-hidden />
-          </div>
-          <div className="portrait-panel__image">
-            <Image
-              src={profileImage || 'https://api.dicebear.com/7.x/initials/svg?seed=Muneeb&backgroundColor=1c1917,f5c16c'}
-              alt={cleanName}
-              width={420}
-              height={420}
-              priority
-              sizes="(max-width: 768px) 80vw, 420px"
-            />
-          </div>
-          <div className="portrait-panel__bottom">
-            <span>Websites</span>
-            <span>AI chatbots</span>
-            <span>Launch systems</span>
-          </div>
-        </div>
+        <StudioConsole cleanName={cleanName} profileImage={profileImage} />
       </RevealSection>
 
       <RevealSection immediate className="lg:col-span-2">

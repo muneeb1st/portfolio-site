@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react'
+import Image from 'next/image'
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ')
@@ -260,7 +261,7 @@ export function ProjectModal({ project, onClose }: { project: import('@/lib/data
             </h2>
           </div>
           <button type="button" onClick={onClose} className="rounded-full border border-white/10 bg-white/5 p-3 text-white/70 transition hover:border-white/20 hover:text-white" aria-label="Close project dialog">
-            ×
+            x
           </button>
         </div>
 
@@ -281,6 +282,104 @@ export function ProjectModal({ project, onClose }: { project: import('@/lib/data
           {project.github_url && (
             <a href={project.github_url} target="_blank" rel="noreferrer" className="ghost-button inline-flex">View code</a>
           )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const consoleModes = [
+  {
+    id: 'brand',
+    label: 'Brand',
+    title: 'Premium website system',
+    copy: 'Positioning, page rhythm, motion, SEO, and a content model shaped into one high-trust experience.',
+    metrics: ['Editorial UI', 'Conversion flow', 'CMS-ready'],
+    score: '92',
+  },
+  {
+    id: 'ai',
+    label: 'AI',
+    title: 'Business chatbot layer',
+    copy: 'A lightweight path for future lead qualification, support answers, and business automation without rebuilding the site.',
+    metrics: ['Lead capture', 'FAQ routing', 'Edge-ready'],
+    score: '88',
+  },
+  {
+    id: 'launch',
+    label: 'Launch',
+    title: 'Production handoff',
+    copy: 'Supabase content, admin editing, responsive polish, and deployment checks packaged for a real launch.',
+    metrics: ['RLS secure', 'Fast mobile', 'Deployable'],
+    score: '96',
+  },
+]
+
+export function StudioConsole({
+  cleanName,
+  profileImage,
+}: {
+  cleanName: string
+  profileImage: string | null
+}) {
+  const [activeMode, setActiveMode] = useState(consoleModes[0])
+
+  return (
+    <div className="studio-console">
+      <div className="studio-console__scan" aria-hidden />
+      <div className="studio-console__top">
+        <div>
+          <p className="panel-kicker">Interactive studio console</p>
+          <h2>{activeMode.title}</h2>
+        </div>
+        <div className="console-score" aria-label={`${activeMode.score} percent readiness`}>
+          {activeMode.score}
+        </div>
+      </div>
+
+      <div className="studio-console__stage">
+        <div className="console-avatar">
+          <Image
+            src={profileImage || 'https://api.dicebear.com/7.x/initials/svg?seed=Muneeb&backgroundColor=1c1917,f5c16c'}
+            alt={cleanName}
+            width={260}
+            height={260}
+            priority
+            sizes="260px"
+          />
+        </div>
+        <div className="console-orbit" aria-hidden>
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+
+      <div className="console-mode-grid" role="tablist" aria-label="Studio modes">
+        {consoleModes.map((mode) => (
+          <button
+            key={mode.id}
+            type="button"
+            role="tab"
+            aria-selected={activeMode.id === mode.id}
+            className={activeMode.id === mode.id ? 'is-active' : undefined}
+            onClick={() => setActiveMode(mode)}
+            data-magnetic
+          >
+            {mode.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="console-output" aria-live="polite">
+        <p>{activeMode.copy}</p>
+        <div className="console-meter">
+          <span style={{ width: `${activeMode.score}%` }} />
+        </div>
+        <div className="tag-row">
+          {activeMode.metrics.map((metric) => (
+            <span key={metric}>{metric}</span>
+          ))}
         </div>
       </div>
     </div>
