@@ -76,6 +76,14 @@ async function HeroSection() {
         <h1 className="hero-title">{siteSettings.hero_title || 'I build premium digital systems for brands that need to be taken seriously.'}</h1>
         <p className="hero-copy">{about.tagline}</p>
         <p className="hero-subcopy">{about.bio}</p>
+        <div className="hero-motion" aria-hidden="true">
+          <span className="hero-motion__node" />
+          <span className="hero-motion__node" />
+          <span className="hero-motion__node" />
+          <span className="motion-word">Strategy</span>
+          <span className="motion-word">Design</span>
+          <span className="motion-word">Launch</span>
+        </div>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="#work" className="button">See selected work</Link>
           <Link href="#contact" className="button button--ghost">Work with {firstName}</Link>
@@ -273,6 +281,42 @@ async function AboutSection() {
   )
 }
 
+async function CertificatesSection() {
+  const { certificates } = await fetchAllPortfolioData()
+
+  if (certificates.length === 0) {
+    return null
+  }
+
+  return (
+    <RevealSection id="certificates" className="section-wrap">
+      <SectionIntro
+        label="Certificates"
+        title="Credentials that support the craft."
+      >
+        <p>
+          A compact proof layer for technical learning, professional development, and the credibility behind the work.
+        </p>
+      </SectionIntro>
+      <div className="certificate-grid mt-10">
+        {certificates.map((certificate) => (
+          <a
+            key={certificate.id}
+            href={certificate.credential_url || '#'}
+            target={certificate.credential_url ? '_blank' : undefined}
+            rel={certificate.credential_url ? 'noreferrer' : undefined}
+            className="certificate-card"
+          >
+            <p className="panel-kicker">{certificate.issuer}</p>
+            <h3>{certificate.title}</h3>
+            {certificate.issue_date ? <span>{new Date(certificate.issue_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short' })}</span> : null}
+          </a>
+        ))}
+      </div>
+    </RevealSection>
+  )
+}
+
 async function ContactSection() {
   const { about, siteSettings } = await fetchCriticalData()
 
@@ -325,6 +369,7 @@ export default function Home() {
       <ServicesSection />
       <ProcessSection />
       <AboutSection />
+      <CertificatesSection />
       <ContactSection />
       <Footer />
     </main>

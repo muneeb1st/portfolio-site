@@ -39,18 +39,28 @@ export default function ViewMessages() {
         .select('id, name, email, message, project_type, budget_range, created_at')
         .order('created_at', { ascending: false })
 
+      const needsLegacySelect = error?.code === 'PGRST204'
+      const legacyResult = needsLegacySelect
+        ? await supabase
+            .from('contact_messages')
+            .select('id, name, email, message, created_at')
+            .order('created_at', { ascending: false })
+        : null
+      const finalData = legacyResult?.data ?? data
+      const finalError = legacyResult?.error ?? error
+
       if (cancelled) {
         return
       }
 
-      if (isMissingTableError(error)) {
+      if (isMissingTableError(finalError)) {
         setSchemaMessage(getSchemaSetupMessage('Contact messages'))
         setMessages([])
         setLoading(false)
         return
       }
 
-      setMessages((data as ContactMessage[] | null) ?? [])
+      setMessages((finalData as ContactMessage[] | null) ?? [])
       setLoading(false)
     }
 

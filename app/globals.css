@@ -61,10 +61,6 @@ select {
   font: inherit;
 }
 
-button {
-  color: inherit;
-}
-
 .font-display {
   font-family: var(--font-display), serif;
 }
@@ -566,6 +562,44 @@ button {
   font-size: 1.3rem;
 }
 
+.certificate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.certificate-card {
+  display: block;
+  min-height: 12rem;
+  border: 1px solid var(--line);
+  border-radius: 1.35rem;
+  background:
+    radial-gradient(circle at top right, rgba(244, 201, 120, 0.12), transparent 10rem),
+    rgba(255, 249, 239, 0.045);
+  padding: 1.25rem;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.certificate-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-strong);
+  background: rgba(255, 249, 239, 0.065);
+}
+
+.certificate-card h3 {
+  margin-top: 0.9rem;
+  font-family: var(--font-display), serif;
+  font-size: 1.55rem;
+  line-height: 1.08;
+}
+
+.certificate-card span {
+  display: inline-flex;
+  margin-top: 1rem;
+  color: var(--faint);
+  font-size: 0.82rem;
+}
+
 .contact-notes {
   display: flex;
   flex-wrap: wrap;
@@ -625,12 +659,6 @@ button {
   background: var(--cool);
 }
 
-input,
-textarea,
-select {
-  color: inherit;
-}
-
 .glass-panel input,
 .glass-panel textarea,
 .glass-panel select {
@@ -651,10 +679,129 @@ select {
   color: var(--ink);
 }
 
+.hero-motion {
+  position: relative;
+  margin-top: 2rem;
+  height: 4.4rem;
+  max-width: 34rem;
+  overflow: hidden;
+  border-block: 1px solid var(--line);
+}
+
+.hero-motion::before {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(244, 201, 120, 0.75), transparent);
+  animation: signatureSweep 4.8s ease-in-out infinite;
+}
+
+.hero-motion__node {
+  position: absolute;
+  top: 50%;
+  height: 0.72rem;
+  width: 0.72rem;
+  border-radius: 999px;
+  background: var(--accent-strong);
+  box-shadow: 0 0 28px rgba(244, 201, 120, 0.45);
+  transform: translate(-50%, -50%);
+  animation: nodeFloat 5.4s ease-in-out infinite;
+}
+
+.hero-motion__node:nth-child(1) {
+  left: 12%;
+}
+
+.hero-motion__node:nth-child(2) {
+  left: 48%;
+  animation-delay: -1.6s;
+  background: var(--cool);
+}
+
+.hero-motion__node:nth-child(3) {
+  left: 84%;
+  animation-delay: -3.1s;
+}
+
+.motion-word {
+  position: absolute;
+  bottom: 0.45rem;
+  color: var(--faint);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  animation: wordDrift 8s linear infinite;
+}
+
+.motion-word:nth-of-type(4) {
+  left: 0;
+}
+
+.motion-word:nth-of-type(5) {
+  left: 42%;
+  animation-delay: -2.4s;
+}
+
+.motion-word:nth-of-type(6) {
+  left: 74%;
+  animation-delay: -5s;
+}
+
+.portrait-panel {
+  animation: panelFloat 7s ease-in-out infinite;
+}
+
+.work-card__media img {
+  transition: transform 900ms cubic-bezier(0.2, 1, 0.22, 1);
+}
+
+.work-card:hover .work-card__media img {
+  transform: scale(1.045);
+}
+
+.section-wrap::before {
+  content: "";
+  display: block;
+  width: 4.5rem;
+  height: 1px;
+  margin-bottom: 1.2rem;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  transform-origin: left;
+  animation: lineBreathe 4.8s ease-in-out infinite;
+}
+
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(131, 212, 155, 0.4); }
   70% { box-shadow: 0 0 0 10px rgba(131, 212, 155, 0); }
   100% { box-shadow: 0 0 0 0 rgba(131, 212, 155, 0); }
+}
+
+@keyframes signatureSweep {
+  0%, 100% { transform: translateX(-28%); opacity: 0.35; }
+  50% { transform: translateX(28%); opacity: 1; }
+}
+
+@keyframes nodeFloat {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.88); }
+  50% { transform: translate(-50%, -86%) scale(1.1); }
+}
+
+@keyframes wordDrift {
+  0% { transform: translateX(-0.8rem); opacity: 0.35; }
+  50% { opacity: 0.9; }
+  100% { transform: translateX(0.8rem); opacity: 0.35; }
+}
+
+@keyframes panelFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes lineBreathe {
+  0%, 100% { transform: scaleX(0.7); opacity: 0.45; }
+  50% { transform: scaleX(1.25); opacity: 1; }
 }
 
 @media (max-width: 1024px) {
@@ -681,7 +828,8 @@ select {
   .service-grid,
   .package-row,
   .about-grid,
-  .contact-grid {
+  .contact-grid,
+  .certificate-grid {
     grid-template-columns: 1fr;
   }
 
@@ -743,5 +891,13 @@ select {
 
   .ambient-spotlight {
     display: none;
+  }
+
+  .portrait-panel,
+  .section-wrap::before,
+  .hero-motion::before,
+  .hero-motion__node,
+  .motion-word {
+    animation: none !important;
   }
 }

@@ -25,6 +25,12 @@ insert into public.about (name)
 select 'Muneeb Ur Rehman'
 where not exists (select 1 from public.about);
 
+update public.about
+set
+  bio = 'I picked up web development and AI automation on my own, started shipping real projects within weeks, and I have not slowed down. I build premium websites and smart chatbot systems for businesses that want to stand out.',
+  updated_at = now()
+where bio = 'Desperate for building real automated systems.';
+
 create table if not exists public.site_settings (
   id uuid primary key default gen_random_uuid(),
   hero_title text not null default 'I build premium digital systems for brands that need to be taken seriously.',

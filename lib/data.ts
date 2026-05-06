@@ -254,6 +254,14 @@ function toStringArray(value: unknown): string[] {
     : []
 }
 
+function normalizeBio(value: unknown) {
+  const bio = typeof value === 'string' ? value.trim() : ''
+  if (!bio || bio === 'Desperate for building real automated systems.') {
+    return fallbackAbout.bio
+  }
+  return bio
+}
+
 async function fetchProjects(): Promise<Project[]> {
   const { data } = await supabase.from('projects').select('*').order('order', { ascending: true })
   if (!data) return fallbackProjects
@@ -289,7 +297,7 @@ async function fetchAbout(): Promise<Required<AboutData>> {
   return {
     name: data.name?.trim() || fallbackAbout.name,
     tagline: data.tagline?.trim() || fallbackAbout.tagline,
-    bio: data.bio?.trim() || fallbackAbout.bio,
+    bio: normalizeBio(data.bio),
     email: data.email?.trim() || fallbackAbout.email,
     profile_image_url: data.profile_image_url || fallbackAbout.profile_image_url,
     github_url: data.github_url || fallbackAbout.github_url,
@@ -393,8 +401,7 @@ export async function fetchAllPortfolioData() {
     fetchBuildingNext(),
   ])
 
-  const featuredProjects = projects.filter((p) => p.featured)
-  const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects
+  const displayProjects = [...projects].sort((a, b) => Number(b.featured) - Number(a.featured))
 
   return {
     projects: displayProjects,

@@ -20,8 +20,23 @@ export function ContactForm() {
     setStatus(null)
 
     const { error } = await supabase.from('contact_messages').insert([form])
+    const needsLegacyPayload = error?.code === 'PGRST204'
+    const legacyPayload = {
+      name: form.name,
+      email: form.email,
+      message: [
+        `Project type: ${form.project_type}`,
+        `Budget range: ${form.budget_range}`,
+        '',
+        form.message,
+      ].join('\n'),
+    }
+    const legacyResult = needsLegacyPayload
+      ? await supabase.from('contact_messages').insert([legacyPayload])
+      : null
+    const finalError = legacyResult?.error ?? error
 
-    if (error) {
+    if (finalError) {
       setStatus({ tone: 'error', message: 'Message did not send. Try again and I will make sure we get it through.' })
     } else {
       setStatus({ tone: 'success', message: 'Message sent. I will get back to you with ideas for your build.' })
