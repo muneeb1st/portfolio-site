@@ -107,6 +107,58 @@ select {
   backdrop-filter: blur(18px);
 }
 
+.admin-shell {
+  color-scheme: light;
+  color: #0f172a;
+}
+
+.admin-shell .text-white,
+.admin-shell button.text-white,
+.admin-shell .bg-red-500,
+.admin-shell .bg-blue-500,
+.admin-shell .bg-blue-600,
+.admin-shell .bg-green-600,
+.admin-shell .bg-amber-500 {
+  color: #ffffff;
+}
+
+.admin-shell .text-slate-900,
+.admin-shell .text-gray-900 {
+  color: #0f172a;
+}
+
+.admin-shell .text-slate-700,
+.admin-shell .text-gray-700 {
+  color: #334155;
+}
+
+.admin-shell .text-slate-600,
+.admin-shell .text-gray-600 {
+  color: #475569;
+}
+
+.admin-shell .text-slate-500,
+.admin-shell .text-gray-500 {
+  color: #64748b;
+}
+
+.admin-shell .text-slate-400,
+.admin-shell .text-gray-400 {
+  color: #94a3b8;
+}
+
+.admin-shell input,
+.admin-shell textarea,
+.admin-shell select {
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  color: #94a3b8;
+}
+
 .brand-mark {
   display: inline-flex;
   align-items: center;
@@ -564,17 +616,19 @@ select {
 
 .certificate-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.8rem;
+  gap: 0.9rem;
 }
 
 .certificate-card {
-  display: block;
-  min-height: 12rem;
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 1.1rem;
+  min-height: 10rem;
   border: 1px solid var(--line);
   border-radius: 1.35rem;
   background:
-    radial-gradient(circle at top right, rgba(244, 201, 120, 0.12), transparent 10rem),
+    linear-gradient(90deg, rgba(244, 201, 120, 0.1), transparent 32%),
+    radial-gradient(circle at top right, rgba(244, 201, 120, 0.12), transparent 12rem),
     rgba(255, 249, 239, 0.045);
   padding: 1.25rem;
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
@@ -589,7 +643,7 @@ select {
 .certificate-card h3 {
   margin-top: 0.9rem;
   font-family: var(--font-display), serif;
-  font-size: 1.55rem;
+  font-size: 2rem;
   line-height: 1.08;
 }
 
@@ -598,6 +652,19 @@ select {
   margin-top: 1rem;
   color: var(--faint);
   font-size: 0.82rem;
+}
+
+.certificate-card__index {
+  display: flex;
+  height: 4rem;
+  width: 4rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  font-family: var(--font-display), serif;
+  font-size: 1.35rem;
 }
 
 .contact-notes {
@@ -686,6 +753,53 @@ select {
   max-width: 34rem;
   overflow: hidden;
   border-block: 1px solid var(--line);
+}
+
+.kinetic-band {
+  position: relative;
+  overflow: hidden;
+  border-block: 1px solid var(--line);
+  background: rgba(255, 249, 239, 0.035);
+  padding-block: 0.85rem;
+}
+
+.kinetic-band__track {
+  display: flex;
+  width: max-content;
+  gap: 2rem;
+  animation: marqueeSlide 24s linear infinite;
+}
+
+.kinetic-band span {
+  color: rgba(255, 249, 239, 0.58);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.kinetic-band span:nth-child(3n) {
+  color: var(--accent-strong);
+}
+
+.kinetic-band:hover .kinetic-band__track {
+  animation-play-state: paused;
+}
+
+.work-card:nth-child(even) {
+  transform: translateX(1.4rem);
+}
+
+.work-card:nth-child(even):hover {
+  transform: translateX(1.4rem) translateY(-3px);
+}
+
+.service-panel:nth-child(2) {
+  transform: translateY(2rem);
+}
+
+.service-panel:nth-child(2):hover {
+  transform: translateY(1.4rem) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg));
 }
 
 .hero-motion::before {
@@ -804,6 +918,11 @@ select {
   50% { transform: scaleX(1.25); opacity: 1; }
 }
 
+@keyframes marqueeSlide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 @media (max-width: 1024px) {
   .hero-title {
     font-size: 4.5rem;
@@ -852,6 +971,13 @@ select {
     min-height: 16rem;
   }
 
+  .work-card:nth-child(even),
+  .work-card:nth-child(even):hover,
+  .service-panel:nth-child(2),
+  .service-panel:nth-child(2):hover {
+    transform: none;
+  }
+
   .process-item,
   .timeline-row {
     grid-template-columns: 1fr;
@@ -897,7 +1023,8 @@ select {
   .section-wrap::before,
   .hero-motion::before,
   .hero-motion__node,
-  .motion-word {
+  .motion-word,
+  .kinetic-band__track {
     animation: none !important;
   }
 }

@@ -30,6 +30,11 @@ interface DashboardStats {
   unreadMessages: number
 }
 
+interface DashboardNotice {
+  tone: 'warning' | 'info'
+  message: string
+}
+
 const emptyStats: DashboardStats = {
   totalProjects: 0,
   featuredProjects: 0,
@@ -42,6 +47,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>(emptyStats)
   const [recentMessages, setRecentMessages] = useState<MessageRow[]>([])
   const [contentAdminReady, setContentAdminReady] = useState(true)
+  const [notice, setNotice] = useState<DashboardNotice | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
@@ -56,6 +62,10 @@ export default function AdminDashboard() {
         supabase.from('site_settings').select('id').limit(1),
       ])
 
+      const messagesCountResult = await supabase
+        .from('contact_messages')
+        .select('id', { count: 'exact', head: true })
+
       if (cancelled) {
         return
       }
@@ -63,6 +73,7 @@ export default function AdminDashboard() {
       const projects = (projectsResult.data as ProjectRow[] | null) ?? []
       const certificates = (certificatesResult.data as CertificateRow[] | null) ?? []
       const messages = (messagesResult.data as MessageRow[] | null) ?? []
+      const messagesHiddenByPolicy = messages.length === 0 && (messagesCountResult.count ?? 0) === 0
 
       setStats({
         totalProjects: projects.length,
@@ -73,6 +84,19 @@ export default function AdminDashboard() {
       })
       setRecentMessages(messages.slice(0, 5))
       setContentAdminReady(!isMissingTableError(contentTablesResult.error))
+      if (messagesResult.error) {
+        setNotice({
+          tone: 'warning',
+          message: `Messages could not be loaded: ${messagesResult.error.message}`,
+        })
+      } else if (messagesHiddenByPolicy) {
+        setNotice({
+          tone: 'info',
+          message: 'No messages are readable with the current Supabase session. If the database has messages, add this signed-in user to public.admin_profiles and run the premium CMS migration policies.',
+        })
+      } else {
+        setNotice(null)
+      }
       setLoading(false)
     }
 
@@ -135,6 +159,16 @@ export default function AdminDashboard() {
       {!contentAdminReady ? (
         <section className="rounded-[24px] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
           {getSchemaSetupMessage('The new homepage content admin')}
+        </section>
+      ) : null}
+
+      {notice ? (
+        <section className={`rounded-[24px] border px-5 py-4 text-sm ${
+          notice.tone === 'warning'
+            ? 'border-red-200 bg-red-50 text-red-800'
+            : 'border-sky-200 bg-sky-50 text-sky-800'
+        }`}>
+          {notice.message}
         </section>
       ) : null}
 

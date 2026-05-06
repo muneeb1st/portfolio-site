@@ -149,6 +149,21 @@ async function WorkSection() {
   )
 }
 
+function KineticBand() {
+  const items = ['Premium websites', 'AI chatbots', 'Conversion systems', 'Fast launches', 'Editorial motion', 'Supabase CMS']
+  const track = [...items, ...items]
+
+  return (
+    <div className="kinetic-band" aria-hidden="true">
+      <div className="kinetic-band__track">
+        {track.map((item, index) => (
+          <span key={`${item}-${index}`}>{item}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 async function ServicesSection() {
   const { serviceShowcases, offerPackages } = await fetchAllPortfolioData()
 
@@ -299,7 +314,7 @@ async function CertificatesSection() {
         </p>
       </SectionIntro>
       <div className="certificate-grid mt-10">
-        {certificates.map((certificate) => (
+        {certificates.map((certificate, index) => (
           <a
             key={certificate.id}
             href={certificate.credential_url || '#'}
@@ -307,9 +322,12 @@ async function CertificatesSection() {
             rel={certificate.credential_url ? 'noreferrer' : undefined}
             className="certificate-card"
           >
-            <p className="panel-kicker">{certificate.issuer}</p>
-            <h3>{certificate.title}</h3>
-            {certificate.issue_date ? <span>{new Date(certificate.issue_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short' })}</span> : null}
+            <div className="certificate-card__index">{String(index + 1).padStart(2, '0')}</div>
+            <div>
+              <p className="panel-kicker">{certificate.issuer}</p>
+              <h3>{certificate.title}</h3>
+              {certificate.issue_date ? <span>{new Date(certificate.issue_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short' })}</span> : null}
+            </div>
           </a>
         ))}
       </div>
@@ -365,6 +383,7 @@ export default function Home() {
       <div className="site-noise" aria-hidden />
       <Header />
       <HeroSection />
+      <KineticBand />
       <WorkSection />
       <ServicesSection />
       <ProcessSection />
