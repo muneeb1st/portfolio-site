@@ -319,6 +319,11 @@ async function ContactSection() {
       <div className="contact-grid">
         <SectionIntro label="Contact" title={siteSettings.contact_title}>
           <p>{siteSettings.contact_subtitle}</p>
+          <div className="message-signal" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
           <div className="contact-notes">
             <span>Premium website</span>
             <span>AI chatbot</span>

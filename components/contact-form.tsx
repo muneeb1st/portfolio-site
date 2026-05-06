@@ -52,8 +52,15 @@ export function ContactForm() {
     setSubmitting(false)
   }
 
+  const messageProgress = Math.min(100, Math.max(8, form.message.length / 2))
+
   return (
-    <form onSubmit={handleSubmit} className="glass-panel rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8">
+    <form onSubmit={handleSubmit} className="contact-form-panel glass-panel rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8">
+      <div className="message-routing" aria-hidden="true">
+        <span>Lead capture</span>
+        <span>{form.project_type}</span>
+        <span>{form.budget_range}</span>
+      </div>
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="name" className="text-xs uppercase tracking-[0.22em] text-white/50">Name</label>
@@ -111,7 +118,10 @@ export function ContactForm() {
         </div>
       </div>
       <div className="mt-5 space-y-2">
-        <label htmlFor="message" className="text-xs uppercase tracking-[0.22em] text-white/50">Message</label>
+        <div className="flex items-center justify-between gap-3">
+          <label htmlFor="message" className="text-xs uppercase tracking-[0.22em] text-white/50">Message</label>
+          <span className="message-count">{form.message.length} chars</span>
+        </div>
         <textarea
           id="message"
           required
@@ -121,8 +131,11 @@ export function ContactForm() {
           className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/30 focus:border-[#5de2e7] focus:outline-none resize-none"
           placeholder="Tell me about your project..."
         />
+        <div className="message-depth" aria-hidden="true">
+          <span style={{ width: `${messageProgress}%` }} />
+        </div>
       </div>
-      <button type="submit" disabled={submitting} className="glow-button mt-6 inline-flex w-full sm:w-auto justify-center text-sm px-6 py-3 disabled:opacity-50">
+      <button type="submit" disabled={submitting} className="glow-button mt-6 inline-flex w-full sm:w-auto justify-center text-sm px-6 py-3 disabled:opacity-50" data-magnetic>
         {submitting ? 'Sending...' : 'Send message'}
       </button>
       {status && (
