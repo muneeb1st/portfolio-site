@@ -193,16 +193,30 @@ export default function PortfolioChatbot() {
             className="p-3 flex gap-2"
             style={{ borderTop: '1px solid rgba(255, 249, 239, 0.12)', background: 'rgba(8, 7, 6, 0.55)' }}
           >
-            <input
-              className="flex-1 px-4 py-2.5 text-sm rounded-full transition-all focus:outline-none focus:ring-2"
+            <textarea
+              className="flex-1 px-4 py-2.5 text-sm rounded-2xl transition-all focus:outline-none focus:ring-2 resize-none"
+              rows={1}
               style={{
                 border: '1px solid rgba(255, 249, 239, 0.12)',
                 background: 'rgba(0, 0, 0, 0.24)',
                 color: '#fff9ef',
+                minHeight: '42px',
+                maxHeight: '100px',
               }}
               placeholder="Ask me anything..."
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = Math.min(e.target.scrollHeight, 100) + 'px';
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  const form = e.currentTarget.closest('form');
+                  if (form) form.requestSubmit();
+                }
+              }}
             />
             <button
               type="submit"
