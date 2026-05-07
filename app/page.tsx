@@ -8,6 +8,7 @@ import {
 import { AmbientSpotlight, MotionOrchestrator, RevealSection, StudioConsole, TiltPanel } from '@/components/client-only'
 import { ContactForm } from '@/components/contact-form'
 import { ProjectsListClient } from '@/components/projects-client'
+import { SiteHeader } from '@/components/SiteHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,29 +38,8 @@ function SectionIntro({
   )
 }
 
-async function Header() {
-  const { about } = await fetchCriticalData()
-  const { cleanName } = splitName(about.name)
-
-  return (
-    <header className="site-header">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="brand-mark" aria-label={`${cleanName} home`} data-magnetic>
-          <span className="brand-mark__symbol">MR</span>
-          <span className="hidden sm:block">{cleanName}</span>
-        </Link>
-        <div className="hidden items-center gap-8 text-sm text-stone-300/80 md:flex">
-          <Link href="#work" className="nav-link">Work</Link>
-          <Link href="#services" className="nav-link">Services</Link>
-          <Link href="#process" className="nav-link">Process</Link>
-          <Link href="#about" className="nav-link">About</Link>
-        </div>
-        <Link href="#contact" className="button button--small" data-magnetic>
-          Start a project
-        </Link>
-      </nav>
-    </header>
-  )
+function Header() {
+  return <SiteHeader />
 }
 
 async function HeroSection() {
@@ -328,10 +308,21 @@ async function ContactSection() {
             <span>Premium website</span>
             <span>AI chatbot</span>
             <span>Launch support</span>
+            <span>Typical response: under 24 hours</span>
           </div>
-          {about.email ? (
-            <a className="text-link" href={`mailto:${about.email}`}>{about.email}</a>
-          ) : null}
+          <div className="flex flex-col gap-3 mt-4">
+            {about.email ? (
+              <a className="text-link" href={`mailto:${about.email}`}>{about.email}</a>
+            ) : null}
+            <a 
+              href="https://calendly.com/muneeburehman1st/30min" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="button button--small w-fit"
+            >
+              Book a call
+            </a>
+          </div>
         </SectionIntro>
         <ContactForm />
       </div>

@@ -100,9 +100,9 @@ export const fallbackSiteSettings: SiteSettings = {
   id: 'fallback-site-settings',
   hero_title: 'I build what most people think takes years to learn.',
   hero_badge: 'Available for projects',
-  contact_title: "Got a project in mind? Let's build it.",
+  contact_title: "Ready to scale your digital presence?",
   contact_subtitle:
-    'Tell me what you need - a website, a chatbot, or both. I will get back to you with a clear plan and timeline.',
+    "Share your project vision below. I specialize in turning complex requirements into seamless digital experiences. I'll review your details and send over a custom strategy and timeline within 24 hours.",
   footer_text: 'Built with Next.js, Supabase, and a lot of late nights.',
   ticker_items: [
     'React', 'Next.js', 'TypeScript', 'Python', 'Tailwind CSS',
