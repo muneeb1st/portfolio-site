@@ -54,9 +54,9 @@ async function Header() {
           <Link href="#process" className="nav-link">Process</Link>
           <Link href="#about" className="nav-link">About</Link>
         </div>
-        <Link href="#contact" className="button button--small" data-magnetic>
+        <a href="#contact" className="button button--small">
           Start a project
-        </Link>
+        </a>
       </nav>
     </header>
   )
