@@ -10,7 +10,7 @@ import { ContactForm } from '@/components/contact-form'
 import { ProjectsListClient } from '@/components/projects-client'
 import { SiteHeader } from '@/components/SiteHeader'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 10
 
 function splitName(name: string | null) {
   const cleanName = name?.trim() || 'Muneeb Ur Rehman'
