@@ -211,10 +211,17 @@ export default function PortfolioChatbot() {
                 e.target.style.height = Math.min(e.target.scrollHeight, 100) + 'px';
               }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  const form = e.currentTarget.closest('form');
-                  if (form) form.requestSubmit();
+                const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
+                if (e.key === 'Enter') {
+                  if (isMobile || e.shiftKey) {
+                    // Mobile: always add newline, desktop shift+enter: add newline
+                    return; // Let default happen (newline)
+                  } else {
+                    // Desktop: send message
+                    e.preventDefault();
+                    const form = e.currentTarget.closest('form');
+                    if (form) form.requestSubmit();
+                  }
                 }
               }}
             />

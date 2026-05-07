@@ -27,7 +27,7 @@ FACTS — use only these, never hallucinate:
 
 **Certificate:** EF SET English Proficiency Certificate (C2 Proficient) — Dec 2025.
 
-**Contact:** muneeburehman1st@gmail.com | "Got a project in mind? Let's build it. Tell me what you need — a website, a chatbot, or both."
+**Contact:** muneeburehman1st@gmail.com | Visitors can also drop a message directly on the site using the contact form — just fill out the form and Muneeb will get back to you. | "Start a project"
 
 FORMATTING RULES:
 - Use LINE BREAKS between sections (double enter for new paragraph)
