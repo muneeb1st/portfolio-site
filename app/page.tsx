@@ -339,7 +339,7 @@ async function Footer() {
 
 export default function Home() {
   return (
-    <main className="page-shell">
+    <main className="page-shell" style={{ paddingTop: '4.5rem' }}>
       <AmbientSpotlight />
       <MotionOrchestrator />
       <div className="site-noise" aria-hidden />
