@@ -1,25 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState } from 'react'
 
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="site-header" style={{ position: 'sticky', top: 0, zIndex: 50 }}>
+    <header className="site-header">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2" aria-label="Muneeb Ur Rehman home">
-          <div className="w-10 h-10 relative">
-            <Image 
-              src="/logo.png" 
-              alt="Muneeb" 
-              fill
-              className="object-contain"
-            />
-          </div>
-          <span className="hidden sm:block text-sm font-semibold text-stone-200">Muneeb</span>
+        <Link href="/" className="brand-mark" aria-label="Muneeb Ur Rehman home">
+          <span className="brand-mark__symbol">MR</span>
+          <span className="hidden md:block" style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.02em' }}>Muneeb</span>
         </Link>
         
         {/* Desktop Navigation */}
