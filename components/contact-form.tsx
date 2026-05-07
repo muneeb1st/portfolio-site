@@ -5,7 +5,6 @@ import { useState } from 'react'
 export function ContactForm() {
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
-  const [customBudget, setCustomBudget] = useState('')
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -97,35 +96,14 @@ export function ContactForm() {
           <select
             id="budget_range"
             value={form.budget_range}
-            onChange={(e) => {
-              const value = e.target.value
-              setForm((f) => ({ ...f, budget_range: value }))
-              if (value !== 'Custom') setCustomBudget('')
-            }}
+            onChange={(e) => setForm((f) => ({ ...f, budget_range: e.target.value }))}
             className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white focus:border-[#f4c978] focus:outline-none"
           >
             <option>Not sure yet</option>
             <option>$1k - $3k</option>
             <option>$3k - $6k</option>
             <option>$6k+</option>
-            <option>Custom</option>
           </select>
-          {form.budget_range === 'Custom' && (
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50">$</span>
-              <input
-                type="number"
-                value={customBudget}
-                onChange={(e) => {
-                  const value = e.target.value
-                  setCustomBudget(value)
-                  setForm((f) => ({ ...f, budget_range: value ? `$${value}` : 'Custom' }))
-                }}
-                placeholder="Enter amount"
-                className="w-full rounded-2xl border border-white/10 bg-black/20 pl-8 pr-4 py-3 text-white placeholder:text-white/30 focus:border-[#f4c978] focus:outline-none"
-              />
-            </div>
-          )}
         </div>
       </div>
       <div className="mt-5 space-y-2">
@@ -140,7 +118,7 @@ export function ContactForm() {
           value={form.message}
           onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
           className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/30 focus:border-[#5de2e7] focus:outline-none resize-none"
-          placeholder="What is the main goal of this project? (e.g., more leads, better branding, AI automation...)"
+          placeholder="Tell me about your project..."
         />
         <div className="message-depth" aria-hidden="true">
           <span style={{ width: `${messageProgress}%` }} />
