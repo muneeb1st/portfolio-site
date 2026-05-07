@@ -25,7 +25,10 @@ export async function GET(request: Request) {
     .eq('user_id', userData.user.id)
     .maybeSingle()
 
-  if (adminCheck.error || !adminCheck.data) {
+  const allowedEmail = process.env.ADMIN_EMAIL?.toLowerCase()
+  const emailAllowed = allowedEmail && userData.user.email?.toLowerCase() === allowedEmail
+
+  if ((adminCheck.error || !adminCheck.data) && !emailAllowed) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

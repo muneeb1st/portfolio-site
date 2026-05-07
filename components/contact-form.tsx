@@ -25,7 +25,8 @@ export function ContactForm() {
     })
 
     if (!apiResult.ok) {
-      setStatus({ tone: 'error', message: 'Message did not send. Try again and I will make sure we get it through.' })
+      const payload = await apiResult.json().catch(() => null)
+      setStatus({ tone: 'error', message: payload?.error ? `Message did not send: ${payload.error}` : 'Message did not send. Try again and I will make sure we get it through.' })
     } else {
       setStatus({ tone: 'success', message: 'Message sent. I will get back to you with ideas for your build.' })
       setForm({
