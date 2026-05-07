@@ -8,6 +8,7 @@ import {
 import { AmbientSpotlight, MotionOrchestrator, RevealSection, StudioConsole, TiltPanel } from '@/components/client-only'
 import { ContactForm } from '@/components/contact-form'
 import { ProjectsListClient } from '@/components/projects-client'
+import { SiteHeader } from '@/components/SiteHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,29 +38,8 @@ function SectionIntro({
   )
 }
 
-async function Header() {
-  const { about } = await fetchCriticalData()
-  const { cleanName } = splitName(about.name)
-
-  return (
-    <header className="site-header">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="brand-mark" aria-label={`${cleanName} home`} data-magnetic>
-          <span className="brand-mark__symbol">MR</span>
-          <span className="hidden sm:block">{cleanName}</span>
-        </Link>
-        <div className="hidden items-center gap-8 text-sm text-stone-300/80 md:flex">
-          <a href="#work" className="nav-link">Work</a>
-          <a href="#services" className="nav-link">Services</a>
-          <a href="#process" className="nav-link">Process</a>
-          <a href="#about" className="nav-link">About</a>
-        </div>
-        <a href="#contact" className="button button--small">
-          Start a project
-        </a>
-      </nav>
-    </header>
-  )
+function Header() {
+  return <SiteHeader />
 }
 
 async function HeroSection() {
