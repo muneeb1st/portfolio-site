@@ -49,10 +49,10 @@ async function Header() {
           <span className="hidden sm:block">{cleanName}</span>
         </Link>
         <div className="hidden items-center gap-8 text-sm text-stone-300/80 md:flex">
-          <Link href="#work" className="nav-link">Work</Link>
-          <Link href="#services" className="nav-link">Services</Link>
-          <Link href="#process" className="nav-link">Process</Link>
-          <Link href="#about" className="nav-link">About</Link>
+          <a href="#work" className="nav-link">Work</a>
+          <a href="#services" className="nav-link">Services</a>
+          <a href="#process" className="nav-link">Process</a>
+          <a href="#about" className="nav-link">About</a>
         </div>
         <a href="#contact" className="button button--small">
           Start a project
@@ -84,8 +84,8 @@ async function HeroSection() {
           <span className="motion-word">Launch</span>
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="#work" className="button" data-magnetic>See selected work</Link>
-          <Link href="#contact" className="button button--ghost" data-magnetic>Work with {firstName}</Link>
+          <a href="#work" className="button" data-magnetic>See selected work</a>
+          <a href="#contact" className="button button--ghost" data-magnetic>Work with {firstName}</a>
         </div>
       </RevealSection>
 
