@@ -8,18 +8,18 @@ export function SiteHeader() {
 
   return (
     <header className="site-header">
-      <nav className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
+      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="brand-mark" aria-label="Muneeb Ur Rehman home">
           <span className="brand-mark__symbol">MR</span>
           <span className="brand-name" style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.02em' }}>Muneeb</span>
         </Link>
 
-        {/* Desktop Navigation - centered */}
-        <div className="nav-links-container hidden md:flex md:flex-1 md:justify-center md:gap-6">
-          <a href="#work" className="nav-link">Work</a>
-          <a href="#services" className="nav-link">Services</a>
-          <a href="#process" className="nav-link">Process</a>
-          <a href="#about" className="nav-link">About</a>
+        {/* Navigation - visible on larger mobile screens */}
+        <div className="nav-links-container hidden min-[480px]:flex min-[480px]:flex-1 min-[480px]:justify-center min-[480px]:gap-3 min-[480px]:text-xs min-[768px]:gap-6 min-[768px]:text-sm">
+          <a href="#work" className="nav-link whitespace-nowrap">Work</a>
+          <a href="#services" className="nav-link whitespace-nowrap">Services</a>
+          <a href="#process" className="nav-link whitespace-nowrap">Process</a>
+          <a href="#about" className="nav-link whitespace-nowrap">About</a>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4 md:ml-auto">
