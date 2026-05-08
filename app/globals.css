@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @layer utilities {
-  .hidden { display: none !important; }
+  .hidden { display: none; }
 }
 
 :root {
