@@ -24,7 +24,8 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2 sm:gap-4">
           <a href="#contact" className="button button--small px-3 sm:px-4">
-            Start a project
+            <span className="sm:hidden">Hire me</span>
+            <span className="hidden sm:inline">Start a project</span>
           </a>
 
           {/* Mobile Menu Button */}
