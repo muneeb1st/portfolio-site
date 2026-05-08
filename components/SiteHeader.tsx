@@ -23,9 +23,11 @@ export function SiteHeader() {
         </div>
 
         {/* Desktop CTA */}
-        <a href="#contact" className="hidden md:inline-flex button button--small">
-          Start a project
-        </a>
+        <div className="hidden md:block">
+          <a href="#contact" className="button button--small">
+            Start a project
+          </a>
+        </div>
 
         {/* Mobile Menu Button */}
         <button

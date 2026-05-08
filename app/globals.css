@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@layer utilities {
+  .hidden { display: none !important; }
+}
+
 :root {
   color-scheme: dark;
   --page-bg: #080706;
@@ -631,17 +635,18 @@ select {
 .proof-item strong {
   display: block;
   font-family: var(--font-display), serif;
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 5vw, 1.8rem);
   line-height: 1;
 }
 
 .proof-item span {
   display: block;
   margin-top: 0.65rem;
-  color: var(--faint);
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.4;
 }
+
 
 .section-wrap {
   max-width: 80rem;
@@ -1410,6 +1415,11 @@ select {
   .proof-item + .proof-item {
     border-left: 0;
     border-top: 1px solid var(--line);
+  }
+
+  .proof-item {
+    padding: 1.5rem 1rem;
+    text-align: center;
   }
 
   .section-wrap {
