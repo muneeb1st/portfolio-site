@@ -22,27 +22,26 @@ export function SiteHeader() {
           <a href="#about" className="nav-link">About</a>
         </div>
 
-        {/* Desktop CTA */}
-        <div className="hidden md:block">
-          <a href="#contact" className="button button--small">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <a href="#contact" className="button button--small px-3 sm:px-4">
             Start a project
           </a>
-        </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden p-2 rounded-full hover:bg-white/5 transition-colors"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {mobileMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2 rounded-full hover:bg-white/5 transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
 
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
@@ -52,9 +51,6 @@ export function SiteHeader() {
               <a href="#services" className="nav-link text-base py-2" onClick={() => setMobileMenuOpen(false)}>Services</a>
               <a href="#process" className="nav-link text-base py-2" onClick={() => setMobileMenuOpen(false)}>Process</a>
               <a href="#about" className="nav-link text-base py-2" onClick={() => setMobileMenuOpen(false)}>About</a>
-              <a href="#contact" className="button button--small text-center mt-2" onClick={() => setMobileMenuOpen(false)}>
-                Start a project
-              </a>
             </div>
           </div>
         )}
