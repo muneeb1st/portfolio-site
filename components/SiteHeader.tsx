@@ -8,13 +8,13 @@ export function SiteHeader() {
 
   return (
     <header className="site-header">
-      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <nav className="mx-auto flex w-full max-w-7xl items-center max-[479px]:justify-center gap-4 px-4 py-3 sm:px-6 md:justify-between">
         <Link href="/" className="brand-mark" aria-label="Muneeb Ur Rehman home">
           <span className="brand-mark__symbol">MR</span>
           <span className="brand-name" style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.02em' }}>Muneeb</span>
         </Link>
 
-        {/* Navigation - visible on larger mobile screens */}
+        {/* Navigation - visible on larger mobile screens (480px+) */}
         <div className="nav-links-container hidden min-[480px]:flex min-[480px]:flex-1 min-[480px]:justify-center min-[480px]:gap-3 min-[480px]:text-xs min-[768px]:gap-6 min-[768px]:text-sm">
           <a href="#work" className="nav-link whitespace-nowrap">Work</a>
           <a href="#services" className="nav-link whitespace-nowrap">Services</a>
@@ -22,15 +22,17 @@ export function SiteHeader() {
           <a href="#about" className="nav-link whitespace-nowrap">About</a>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4 md:ml-auto">
-          <a href="#contact" className="button button--small px-3 sm:px-4">
-            <span className="sm:hidden">Hire me</span>
-            <span className="hidden sm:inline">Start a project</span>
+        {/* Desktop: button + hamburger | Mobile < 480px: large centered button only */}
+        <div className="flex items-center gap-2 sm:gap-4 md:ml-auto max-[479px]:flex-1 max-[479px]:justify-center">
+          <a href="#contact" className="button px-4 py-2 text-sm min-[480px]:button--small min-[480px]:px-3 min-[480px]:text-xs">
+            <span className="max-[479px]:inline hidden min-[480px]:hidden">Start a project</span>
+            <span className="hidden min-[480px]:inline md:hidden">Hire me</span>
+            <span className="hidden md:inline">Start a project</span>
           </a>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - hidden on screens < 480px */}
           <button
-            className="p-2 rounded-full hover:bg-white/5 transition-colors md:hidden"
+            className="p-2 rounded-full hover:bg-white/5 transition-colors max-[479px]:hidden md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
