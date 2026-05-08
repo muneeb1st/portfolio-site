@@ -96,7 +96,7 @@ function HeroSection({ about, siteSettings, heroStats }: { about: Required<About
 
 function WorkSection({ projects }: { projects: Project[] }) {
   return (
-    <RevealSection id="work" className="section-wrap">
+      <RevealSection id="work" className="section-wrap" immediate>
       <SectionIntro
         label="Selected work"
         title="Case-study style proof for clients who care about finish."
@@ -127,7 +127,7 @@ function KineticBand() {
 
 function ServicesSection({ serviceShowcases, offerPackages }: { serviceShowcases: ServiceShowcase[]; offerPackages: PackageCardData[] }) {
   return (
-    <RevealSection id="services" className="section-wrap">
+      <RevealSection id="services" className="section-wrap" immediate>
       <SectionIntro
         label="Services"
         title="Two focused offers, built with the same standard of polish."
@@ -193,7 +193,7 @@ function ProcessSection() {
   ]
 
   return (
-    <RevealSection id="process" className="section-wrap">
+      <RevealSection id="process" className="section-wrap" immediate>
       <SectionIntro
         label="Process"
         title="A clear path from rough idea to premium launch."
@@ -218,7 +218,7 @@ function AboutSection({ timelineItems, skillCategories }: { timelineItems: Timel
   const skills = skillCategories.length ? skillCategories : fallbackSkillCategories
 
   return (
-    <RevealSection id="about" className="section-wrap">
+      <RevealSection id="about" className="section-wrap" immediate>
       <div className="about-grid">
         <SectionIntro
           label="About"
@@ -260,7 +260,7 @@ function CertificatesSection({ certificates }: { certificates: Certificate[] }) 
   }
 
   return (
-    <RevealSection id="certificates" className="section-wrap">
+      <RevealSection id="certificates" className="section-wrap" immediate>
       <SectionIntro
         label="Certificates"
         title="Credentials that support the craft."
@@ -293,7 +293,7 @@ function CertificatesSection({ certificates }: { certificates: Certificate[] }) 
 
 function ContactSection({ about, siteSettings }: { about: Required<AboutData>; siteSettings: SiteSettings }) {
   return (
-    <RevealSection id="contact" className="section-wrap pb-12 md:pb-20">
+      <RevealSection id="contact" className="section-wrap pb-12 md:pb-20" immediate>
       <div className="contact-grid">
         <SectionIntro label="Contact" title={siteSettings.contact_title}>
           <p>{siteSettings.contact_subtitle}</p>
