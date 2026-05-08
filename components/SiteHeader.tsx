@@ -11,11 +11,11 @@ export function SiteHeader() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" className="brand-mark" aria-label="Muneeb Ur Rehman home">
           <span className="brand-mark__symbol">MR</span>
-          <span className="hidden md:block" style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.02em' }}>Muneeb</span>
+          <span className="brand-name" style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.02em' }}>Muneeb</span>
         </Link>
         
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-6 text-sm text-stone-300/80 md:flex">
+        <div className="nav-links-container">
           <a href="#work" className="nav-link">Work</a>
           <a href="#services" className="nav-link">Services</a>
           <a href="#process" className="nav-link">Process</a>

@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
-@layer utilities {
-  .hidden { display: none; }
-}
+
 
 :root {
   color-scheme: dark;
@@ -230,6 +228,28 @@ select {
 
 .nav-link:hover {
   color: var(--ink);
+}
+
+.nav-links-container {
+  display: none;
+}
+
+.brand-name {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .nav-links-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+  
+  .brand-name {
+    display: block;
+  }
 }
 
 .button,
