@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Manrope, Syne } from 'next/font/google'
 import './globals.css'
-import PortfolioChatbot from '@/components/PortfolioChatbot'
+import ChatbotLoader from '@/components/ChatbotLoader'
 
 const bodyFont = Manrope({
   variable: '--font-body',
@@ -28,8 +28,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${bodyFont.variable} ${displayFont.variable} antialiased`}>
         {children}
-        <PortfolioChatbot />
+        <ChatbotLoader />
       </body>
     </html>
   )
 }
+
+

@@ -263,127 +263,163 @@ function normalizeBio(value: unknown) {
 }
 
 async function fetchProjects(): Promise<Project[]> {
-  const { data } = await supabase.from('projects').select('*').order('order', { ascending: true })
-  if (!data) return fallbackProjects
-  return data.map((row) => ({
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    technologies: Array.isArray(row.technologies) ? row.technologies.filter((t: unknown) => typeof t === 'string') : [],
-    image_url: row.image_url,
-    demo_url: row.demo_url,
-    github_url: row.github_url,
-    featured: Boolean(row.featured),
-  })).length > 0 ? data.map((row) => ({
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    technologies: Array.isArray(row.technologies) ? row.technologies.filter((t: unknown) => typeof t === 'string') : [],
-    image_url: row.image_url,
-    demo_url: row.demo_url,
-    github_url: row.github_url,
-    featured: Boolean(row.featured),
-  })) : fallbackProjects
+  try {
+    const { data } = await supabase.from('projects').select('*').order('order', { ascending: true })
+    if (!data) return fallbackProjects
+    const mapped = data.map((row) => ({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      technologies: Array.isArray(row.technologies) ? row.technologies.filter((t: unknown) => typeof t === 'string') : [],
+      image_url: row.image_url,
+      demo_url: row.demo_url,
+      github_url: row.github_url,
+      featured: Boolean(row.featured),
+    }))
+    return mapped.length > 0 ? mapped : fallbackProjects
+  } catch {
+    return fallbackProjects
+  }
 }
 
 async function fetchCertificates(): Promise<Certificate[]> {
-  const { data } = await supabase.from('certificates').select('*').order('order', { ascending: true })
-  return data || []
+  try {
+    const { data } = await supabase.from('certificates').select('*').order('order', { ascending: true })
+    return data || []
+  } catch {
+    return []
+  }
 }
 
 async function fetchAbout(): Promise<Required<AboutData>> {
-  const { data } = await supabase.from('about').select('*').single()
-  if (!data) return fallbackAbout
-  return {
-    name: data.name?.trim() || fallbackAbout.name,
-    tagline: data.tagline?.trim() || fallbackAbout.tagline,
-    bio: normalizeBio(data.bio),
-    email: data.email?.trim() || fallbackAbout.email,
-    profile_image_url: data.profile_image_url || fallbackAbout.profile_image_url,
-    github_url: data.github_url || fallbackAbout.github_url,
-    linkedin_url: data.linkedin_url || fallbackAbout.linkedin_url,
-    twitter_url: data.twitter_url || fallbackAbout.twitter_url,
+  try {
+    const { data } = await supabase.from('about').select('*').single()
+    if (!data) return fallbackAbout
+    return {
+      name: data.name?.trim() || fallbackAbout.name,
+      tagline: data.tagline?.trim() || fallbackAbout.tagline,
+      bio: normalizeBio(data.bio),
+      email: data.email?.trim() || fallbackAbout.email,
+      profile_image_url: data.profile_image_url || fallbackAbout.profile_image_url,
+      github_url: data.github_url || fallbackAbout.github_url,
+      linkedin_url: data.linkedin_url || fallbackAbout.linkedin_url,
+      twitter_url: data.twitter_url || fallbackAbout.twitter_url,
+    }
+  } catch {
+    return fallbackAbout
   }
 }
 
 async function fetchSkills(): Promise<SkillRow[]> {
-  const { data } = await supabase.from('skills').select('*').order('order_num', { ascending: true })
-  return data || []
+  try {
+    const { data } = await supabase.from('skills').select('*').order('order_num', { ascending: true })
+    return data || []
+  } catch {
+    return []
+  }
 }
 
 async function fetchSiteSettings(): Promise<SiteSettings> {
-  const { data } = await supabase.from('site_settings').select('*').maybeSingle()
-  if (!data) return fallbackSiteSettings
-  return {
-    id: data.id,
-    hero_title: data.hero_title?.trim() || fallbackSiteSettings.hero_title,
-    hero_badge: data.hero_badge?.trim() || fallbackSiteSettings.hero_badge,
-    contact_title: data.contact_title?.trim() || fallbackSiteSettings.contact_title,
-    contact_subtitle: data.contact_subtitle?.trim() || fallbackSiteSettings.contact_subtitle,
-    footer_text: data.footer_text?.trim() || fallbackSiteSettings.footer_text,
-    ticker_items: toStringArray(data.ticker_items).length > 0 ? toStringArray(data.ticker_items) : fallbackSiteSettings.ticker_items,
+  try {
+    const { data } = await supabase.from('site_settings').select('*').maybeSingle()
+    if (!data) return fallbackSiteSettings
+    return {
+      id: data.id,
+      hero_title: data.hero_title?.trim() || fallbackSiteSettings.hero_title,
+      hero_badge: data.hero_badge?.trim() || fallbackSiteSettings.hero_badge,
+      contact_title: data.contact_title?.trim() || fallbackSiteSettings.contact_title,
+      contact_subtitle: data.contact_subtitle?.trim() || fallbackSiteSettings.contact_subtitle,
+      footer_text: data.footer_text?.trim() || fallbackSiteSettings.footer_text,
+      ticker_items: toStringArray(data.ticker_items).length > 0 ? toStringArray(data.ticker_items) : fallbackSiteSettings.ticker_items,
+    }
+  } catch {
+    return fallbackSiteSettings
   }
 }
 
 async function fetchHeroStats(): Promise<HeroStat[]> {
-  const { data } = await supabase.from('hero_stats').select('*').order('order_num', { ascending: true })
-  return (data && data.length > 0) ? data : heroSignals
+  try {
+    const { data } = await supabase.from('hero_stats').select('*').order('order_num', { ascending: true })
+    return (data && data.length > 0) ? data : heroSignals
+  } catch {
+    return heroSignals
+  }
 }
 
 async function fetchTimelineItems(): Promise<TimelineItem[]> {
-  const { data } = await supabase.from('timeline_items').select('*').order('order_num', { ascending: true })
-  return (data && data.length > 0) ? data : fallbackTimelineItems
+  try {
+    const { data } = await supabase.from('timeline_items').select('*').order('order_num', { ascending: true })
+    return (data && data.length > 0) ? data : fallbackTimelineItems
+  } catch {
+    return fallbackTimelineItems
+  }
 }
 
 async function fetchSkillCategories(): Promise<SkillCategory[]> {
-  const { data } = await supabase.from('skill_categories').select('*').order('order_num', { ascending: true })
-  if (!data || data.length === 0) return fallbackSkillCategories
-  return data.map((row) => ({
-    title: row.title,
-    skills: toStringArray(row.skills),
-  }))
+  try {
+    const { data } = await supabase.from('skill_categories').select('*').order('order_num', { ascending: true })
+    if (!data || data.length === 0) return fallbackSkillCategories
+    return data.map((row) => ({
+      title: row.title,
+      skills: toStringArray(row.skills),
+    }))
+  } catch {
+    return fallbackSkillCategories
+  }
 }
 
 async function fetchServiceShowcases(): Promise<ServiceShowcase[]> {
-  const { data } = await supabase.from('service_showcases').select('*').order('order_num', { ascending: true })
-  if (!data || data.length === 0) return serviceShowcases
-  return data.map((row) => ({
-    id: row.id,
-    eyebrow: row.eyebrow,
-    title: row.title,
-    summary: row.summary,
-    highlight: row.highlight,
-    deliverables: toStringArray(row.deliverables),
-    accent: row.accent?.trim() || '247, 178, 77',
-    tags: toStringArray(row.tags),
-  }))
+  try {
+    const { data } = await supabase.from('service_showcases').select('*').order('order_num', { ascending: true })
+    if (!data || data.length === 0) return serviceShowcases
+    return data.map((row) => ({
+      id: row.id,
+      eyebrow: row.eyebrow,
+      title: row.title,
+      summary: row.summary,
+      highlight: row.highlight,
+      deliverables: toStringArray(row.deliverables),
+      accent: row.accent?.trim() || '247, 178, 77',
+      tags: toStringArray(row.tags),
+    }))
+  } catch {
+    return serviceShowcases
+  }
 }
 
 async function fetchOfferPackages(): Promise<PackageCardData[]> {
-  const { data } = await supabase.from('offer_packages').select('*').order('order_num', { ascending: true })
-  if (!data || data.length === 0) return offerPackages
-  return data.map((row) => ({
-    id: row.id,
-    family: row.family,
-    title: row.title,
-    pitch: row.pitch,
-    bestFor: row.best_for,
-    timeline: row.timeline,
-    deliverables: toStringArray(row.deliverables),
-    accent: row.accent?.trim() || '247, 178, 77',
-  }))
+  try {
+    const { data } = await supabase.from('offer_packages').select('*').order('order_num', { ascending: true })
+    if (!data || data.length === 0) return offerPackages
+    return data.map((row) => ({
+      id: row.id,
+      family: row.family,
+      title: row.title,
+      pitch: row.pitch,
+      bestFor: row.best_for,
+      timeline: row.timeline,
+      deliverables: toStringArray(row.deliverables),
+      accent: row.accent?.trim() || '247, 178, 77',
+    }))
+  } catch {
+    return offerPackages
+  }
 }
 
 async function fetchBuildingNext(): Promise<BuildingNext[]> {
-  const { data } = await supabase.from('building_next').select('*').order('order_num', { ascending: true })
-  if (!data || data.length === 0) return buildingNext
-  return data.map((row) => ({
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    tags: toStringArray(row.tags),
-    accent: row.accent?.trim() || '247, 178, 77',
-  }))
+  try {
+    const { data } = await supabase.from('building_next').select('*').order('order_num', { ascending: true })
+    if (!data || data.length === 0) return buildingNext
+    return data.map((row) => ({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      tags: toStringArray(row.tags),
+      accent: row.accent?.trim() || '247, 178, 77',
+    }))
+  } catch {
+    return buildingNext
+  }
 }
 
 export async function fetchAllPortfolioData() {

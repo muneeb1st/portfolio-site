@@ -28,7 +28,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -68,7 +68,7 @@ select {
 .page-shell {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow-x: hidden;
   --pointer-x: 50%;
   --pointer-y: 12%;
 }
@@ -121,14 +121,14 @@ select {
 
 .ambient-spotlight {
   position: fixed;
-  inset: -30%;
+  inset: -10%;
   z-index: -5;
   pointer-events: none;
-  filter: blur(52px);
   opacity: 0.88;
   background:
-    radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(244, 201, 120, 0.11), transparent 22%),
-    radial-gradient(circle at 70% 12%, rgba(143, 202, 208, 0.08), transparent 20%);
+    radial-gradient(circle 28vw at var(--pointer-x) var(--pointer-y), rgba(244, 201, 120, 0.09), transparent 100%),
+    radial-gradient(circle 22vw at 70% 12%, rgba(143, 202, 208, 0.06), transparent 100%);
+  transition: background 300ms ease;
 }
 
 .site-header {
@@ -139,8 +139,8 @@ select {
   z-index: 50;
   width: 100%;
   border-bottom: 1px solid rgba(255, 249, 239, 0.08);
-  background: rgba(8, 7, 6, 0.74);
-  backdrop-filter: blur(18px);
+  background: rgba(8, 7, 6, 0.82);
+  backdrop-filter: blur(10px);
 }
 
 .admin-shell {
@@ -1132,6 +1132,7 @@ select {
 .tilt-panel {
   transform: perspective(900px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) translateY(var(--lift, 0));
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  touch-action: manipulation;
 }
 
 .stat-number {

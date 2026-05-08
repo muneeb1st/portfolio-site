@@ -1,16 +1,25 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import {
   fetchAllPortfolioData,
-  fetchCriticalData,
   fallbackSkillCategories,
   fallbackTimelineItems,
+  type Project,
+  type Certificate,
+  type AboutData,
+  type SiteSettings,
+  type HeroStat,
+  type TimelineItem,
+  type SkillCategory,
+  type ServiceShowcase,
+  type PackageCardData,
 } from '@/lib/data'
 import { AmbientSpotlight, MotionOrchestrator, RevealSection, StudioConsole, TiltPanel } from '@/components/client-only'
 import { ContactForm } from '@/components/contact-form'
 import { ProjectsListClient } from '@/components/projects-client'
 import { SiteHeader } from '@/components/SiteHeader'
 
-export const revalidate = 10
+export const revalidate = 3600
 
 function splitName(name: string | null) {
   const cleanName = name?.trim() || 'Muneeb Ur Rehman'
@@ -42,9 +51,7 @@ function Header() {
   return <SiteHeader />
 }
 
-async function HeroSection() {
-  const { about, siteSettings } = await fetchCriticalData()
-  const { heroStats } = await fetchAllPortfolioData()
+function HeroSection({ about, siteSettings, heroStats }: { about: Required<AboutData>; siteSettings: SiteSettings; heroStats: HeroStat[] }) {
   const { cleanName, firstName } = splitName(about.name)
   const profileImage = about.profile_image_url
 
@@ -87,9 +94,7 @@ async function HeroSection() {
   )
 }
 
-async function WorkSection() {
-  const { projects } = await fetchAllPortfolioData()
-
+function WorkSection({ projects }: { projects: Project[] }) {
   return (
     <RevealSection id="work" className="section-wrap">
       <SectionIntro
@@ -120,9 +125,7 @@ function KineticBand() {
   )
 }
 
-async function ServicesSection() {
-  const { serviceShowcases, offerPackages } = await fetchAllPortfolioData()
-
+function ServicesSection({ serviceShowcases, offerPackages }: { serviceShowcases: ServiceShowcase[]; offerPackages: PackageCardData[] }) {
   return (
     <RevealSection id="services" className="section-wrap">
       <SectionIntro
@@ -169,7 +172,7 @@ async function ServicesSection() {
   )
 }
 
-async function ProcessSection() {
+function ProcessSection() {
   const steps = [
     {
       title: 'Clarify the offer',
@@ -210,8 +213,7 @@ async function ProcessSection() {
   )
 }
 
-async function AboutSection() {
-  const { timelineItems, skillCategories } = await fetchAllPortfolioData()
+function AboutSection({ timelineItems, skillCategories }: { timelineItems: TimelineItem[]; skillCategories: SkillCategory[] }) {
   const timeline = timelineItems.length ? timelineItems : fallbackTimelineItems
   const skills = skillCategories.length ? skillCategories : fallbackSkillCategories
 
@@ -252,9 +254,7 @@ async function AboutSection() {
   )
 }
 
-async function CertificatesSection() {
-  const { certificates } = await fetchAllPortfolioData()
-
+function CertificatesSection({ certificates }: { certificates: Certificate[] }) {
   if (certificates.length === 0) {
     return null
   }
@@ -291,9 +291,7 @@ async function CertificatesSection() {
   )
 }
 
-async function ContactSection() {
-  const { about, siteSettings } = await fetchCriticalData()
-
+function ContactSection({ about, siteSettings }: { about: Required<AboutData>; siteSettings: SiteSettings }) {
   return (
     <RevealSection id="contact" className="section-wrap pb-12 md:pb-20">
       <div className="contact-grid">
@@ -319,8 +317,7 @@ async function ContactSection() {
   )
 }
 
-async function Footer() {
-  const { about, siteSettings } = await fetchCriticalData()
+function Footer({ about, siteSettings }: { about: Required<AboutData>; siteSettings: SiteSettings }) {
   const { cleanName } = splitName(about.name)
 
   return (
@@ -337,22 +334,25 @@ async function Footer() {
   )
 }
 
-export default function Home() {
+export default async function Home() {
+  const data = await fetchAllPortfolioData()
+  const { about, siteSettings, heroStats, projects, serviceShowcases, offerPackages, timelineItems, skillCategories, certificates } = data
+
   return (
     <main className="page-shell" style={{ paddingTop: '4.5rem' }}>
       <AmbientSpotlight />
       <MotionOrchestrator />
       <div className="site-noise" aria-hidden />
       <Header />
-      <HeroSection />
+      <HeroSection about={about} siteSettings={siteSettings} heroStats={heroStats} />
       <KineticBand />
-      <WorkSection />
-      <ServicesSection />
+      <WorkSection projects={projects} />
+      <ServicesSection serviceShowcases={serviceShowcases} offerPackages={offerPackages} />
       <ProcessSection />
-      <AboutSection />
-      <CertificatesSection />
-      <ContactSection />
-      <Footer />
+      <AboutSection timelineItems={timelineItems} skillCategories={skillCategories} />
+      <CertificatesSection certificates={certificates} />
+      <ContactSection about={about} siteSettings={siteSettings} />
+      <Footer about={about} siteSettings={siteSettings} />
     </main>
   )
 }

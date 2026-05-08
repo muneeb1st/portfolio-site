@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.68",
     "@ai-sdk/mistral": "^3.0.35",
     "@ai-sdk/react": "^3.0.177",
     "@supabase/supabase-js": "^2.99.1",

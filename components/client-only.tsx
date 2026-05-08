@@ -79,36 +79,23 @@ export function TiltPanel({ children, className, onPointerMove, onPointerLeave, 
 }
 
 export function AmbientSpotlight() {
-  const ref = useRef<HTMLDivElement>(null)
-  const isClient = typeof window !== 'undefined'
-
-  useEffect(() => {
-    if (!isClient) return
-
-    function handleMove(event: PointerEvent) {
-      const node = ref.current
-      if (!node) return
-
-      node.style.setProperty('--pointer-x', `${(event.clientX / window.innerWidth) * 100}%`)
-      node.style.setProperty('--pointer-y', `${(event.clientY / window.innerHeight) * 100}%`)
-    }
-
-    window.addEventListener('pointermove', handleMove)
-    return () => window.removeEventListener('pointermove', handleMove)
-  }, [isClient])
-
   return (
     <div
-      ref={ref}
       className="ambient-spotlight"
       aria-hidden
     />
   )
 }
 
+function isTouchDevice() {
+  if (typeof window === 'undefined') return false
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0
+}
+
 export function MotionOrchestrator() {
   const cursorRef = useRef<HTMLDivElement>(null)
   const progressRef = useRef<HTMLDivElement>(null)
+  const spotlightRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -116,7 +103,13 @@ export function MotionOrchestrator() {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduceMotion) return
 
+    const isTouch = isTouchDevice()
+
+    // Cache spotlight element for pointer updates
+    spotlightRef.current = document.querySelector('.ambient-spotlight')
+
     let raf = 0
+    let isAnimating = false
     let targetX = window.innerWidth / 2
     let targetY = window.innerHeight / 2
     let currentX = targetX
@@ -130,8 +123,23 @@ export function MotionOrchestrator() {
     }
 
     function animate() {
-      currentX += (targetX - currentX) * 0.16
-      currentY += (targetY - currentY) * 0.16
+      const dx = targetX - currentX
+      const dy = targetY - currentY
+
+      // Stop the loop if cursor has settled (delta < 0.5px)
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+        currentX = targetX
+        currentY = targetY
+        const cursor = cursorRef.current
+        if (cursor) {
+          cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`
+        }
+        isAnimating = false
+        return
+      }
+
+      currentX += dx * 0.16
+      currentY += dy * 0.16
 
       const cursor = cursorRef.current
       if (cursor) {
@@ -141,9 +149,27 @@ export function MotionOrchestrator() {
       raf = window.requestAnimationFrame(animate)
     }
 
+    function startAnimation() {
+      if (!isAnimating) {
+        isAnimating = true
+        raf = window.requestAnimationFrame(animate)
+      }
+    }
+
     function handlePointerMove(event: PointerEvent) {
+      // Update ambient spotlight position (consolidated from separate listener)
+      const spotlight = spotlightRef.current
+      if (spotlight) {
+        spotlight.style.setProperty('--pointer-x', `${(event.clientX / window.innerWidth) * 100}%`)
+        spotlight.style.setProperty('--pointer-y', `${(event.clientY / window.innerHeight) * 100}%`)
+      }
+
+      // Skip cursor and magnetic effects on touch devices
+      if (isTouch) return
+
       targetX = event.clientX
       targetY = event.clientY
+      startAnimation()
 
       const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-magnetic]') : null
       document.documentElement.classList.toggle('is-magnetic-hover', Boolean(target))
@@ -158,6 +184,7 @@ export function MotionOrchestrator() {
     }
 
     function handlePointerLeave(event: PointerEvent) {
+      if (isTouch) return
       const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-magnetic]') : null
       if (!target) return
       target.style.setProperty('--magnetic-x', '0px')
@@ -166,17 +193,20 @@ export function MotionOrchestrator() {
     }
 
     updateScroll()
-    animate()
 
     window.addEventListener('scroll', updateScroll, { passive: true })
     window.addEventListener('resize', updateScroll)
     window.addEventListener('pointermove', handlePointerMove, { passive: true })
-    document.querySelectorAll('[data-magnetic]').forEach((node) => {
-      node.addEventListener('pointerleave', handlePointerLeave as EventListener)
-    })
+
+    if (!isTouch) {
+      document.querySelectorAll('[data-magnetic]').forEach((node) => {
+        node.addEventListener('pointerleave', handlePointerLeave as EventListener)
+      })
+    }
 
     return () => {
       window.cancelAnimationFrame(raf)
+      isAnimating = false
       window.removeEventListener('scroll', updateScroll)
       window.removeEventListener('resize', updateScroll)
       window.removeEventListener('pointermove', handlePointerMove)
