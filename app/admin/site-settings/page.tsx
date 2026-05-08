@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSchemaSetupMessage, isMissingTableError } from '@/lib/admin-schema'
 import { supabase } from '@/lib/supabase'
+import { triggerRevalidation } from '@/lib/revalidate'
 
 interface SiteSettingsForm {
   id: string | null
@@ -105,6 +106,7 @@ export default function SiteSettingsPage() {
     if (formData.id) {
       const { error } = await supabase.from('site_settings').update(payload).eq('id', formData.id)
       if (!error) {
+        await triggerRevalidation()
         alert('Site settings updated successfully.')
       } else {
         alert(error.message)
@@ -113,6 +115,7 @@ export default function SiteSettingsPage() {
       const { data, error } = await supabase.from('site_settings').insert([payload]).select('*').single()
       if (!error && data) {
         setFormData((current) => ({ ...current, id: data.id }))
+        await triggerRevalidation()
         alert('Site settings created successfully.')
       } else if (error) {
         alert(error.message)

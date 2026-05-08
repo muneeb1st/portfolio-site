@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSchemaSetupMessage, isMissingTableError } from '@/lib/admin-schema'
 import { supabase } from '@/lib/supabase'
+import { triggerRevalidation } from '@/lib/revalidate'
 
 interface SkillCategory {
   id: string
@@ -80,6 +81,7 @@ export default function SkillStackPage() {
       if (!error) {
         cancelEdit()
         void fetchCategories()
+        await triggerRevalidation()
       } else {
         console.error('Error updating category:', error)
         alert('Failed to update category. Check console for details.')
@@ -98,6 +100,7 @@ export default function SkillStackPage() {
     if (!error) {
       setFormData({ title: '', skills: '', order_num: categories.length + 2 })
       void fetchCategories()
+      await triggerRevalidation()
     } else {
       console.error('Error adding category:', error)
       alert('Failed to add category. Check console for details.')
@@ -112,6 +115,7 @@ export default function SkillStackPage() {
     const { error } = await supabase.from('skill_categories').delete().eq('id', id)
     if (!error) {
       void fetchCategories()
+      await triggerRevalidation()
       if (editingId === id) {
         cancelEdit()
       }

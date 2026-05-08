@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { triggerRevalidation } from '@/lib/revalidate'
 
 interface Certificate {
   id: string
@@ -81,6 +82,7 @@ export default function ManageCertificates() {
         setEditingId(null)
         setFormData(emptyForm)
         void refreshCertificates()
+        await triggerRevalidation()
       }
       return
     }
@@ -96,6 +98,7 @@ export default function ManageCertificates() {
       setShowForm(false)
       setFormData(emptyForm)
       void refreshCertificates()
+      await triggerRevalidation()
     }
   }
 
@@ -108,6 +111,7 @@ export default function ManageCertificates() {
 
     if (!error) {
       void refreshCertificates()
+      await triggerRevalidation()
     }
   }
 

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { triggerRevalidation } from '@/lib/revalidate'
 
 interface AboutRecord {
   id: string
@@ -76,6 +77,7 @@ export default function ManageAbout() {
     if (error) {
       alert('Error updating about information: ' + error.message)
     } else {
+      await triggerRevalidation()
       alert('Updated successfully.')
     }
   }
@@ -107,6 +109,7 @@ export default function ManageAbout() {
     const { error } = await supabase.from('about').update({ profile_image_url: publicUrl }).eq('id', aboutData.id)
 
     if (!error) {
+      await triggerRevalidation()
       setAboutData((current) => (current ? { ...current, profile_image_url: publicUrl } : current))
     }
 

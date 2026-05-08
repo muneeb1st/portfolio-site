@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSchemaSetupMessage, isMissingTableError } from '@/lib/admin-schema'
 import { supabase } from '@/lib/supabase'
+import { triggerRevalidation } from '@/lib/revalidate'
 
 interface ServiceShowcase {
   id: string
@@ -80,10 +81,10 @@ export default function ServicesPage() {
     const payload = { eyebrow: showcaseForm.eyebrow, title: showcaseForm.title, summary: showcaseForm.summary, highlight: showcaseForm.highlight, deliverables: parseCsv(showcaseForm.deliverables), accent: showcaseForm.accent, tags: parseCsv(showcaseForm.tags), order_num: showcaseForm.order_num }
     if (editingShowcaseId) {
       const { error } = await supabase.from('service_showcases').update(payload).eq('id', editingShowcaseId)
-      if (!error) { setShowShowcaseForm(false); setEditingShowcaseId(null); setShowcaseForm(defaultShowcaseForm); void fetchData() }
+      if (!error) { await triggerRevalidation(); setShowShowcaseForm(false); setEditingShowcaseId(null); setShowcaseForm(defaultShowcaseForm); void fetchData() }
     } else {
       const { error } = await supabase.from('service_showcases').insert([payload])
-      if (!error) { setShowShowcaseForm(false); setShowcaseForm(defaultShowcaseForm); void fetchData() }
+      if (!error) { await triggerRevalidation(); setShowShowcaseForm(false); setShowcaseForm(defaultShowcaseForm); void fetchData() }
     }
   }
 
@@ -92,10 +93,10 @@ export default function ServicesPage() {
     const payload = { family: packageForm.family, title: packageForm.title, pitch: packageForm.pitch, best_for: packageForm.best_for, timeline: packageForm.timeline, deliverables: parseCsv(packageForm.deliverables), accent: packageForm.accent, order_num: packageForm.order_num }
     if (editingPackageId) {
       const { error } = await supabase.from('offer_packages').update(payload).eq('id', editingPackageId)
-      if (!error) { setShowPackageForm(false); setEditingPackageId(null); setPackageForm(defaultPackageForm); void fetchData() }
+      if (!error) { await triggerRevalidation(); setShowPackageForm(false); setEditingPackageId(null); setPackageForm(defaultPackageForm); void fetchData() }
     } else {
       const { error } = await supabase.from('offer_packages').insert([payload])
-      if (!error) { setShowPackageForm(false); setPackageForm(defaultPackageForm); void fetchData() }
+      if (!error) { await triggerRevalidation(); setShowPackageForm(false); setPackageForm(defaultPackageForm); void fetchData() }
     }
   }
 
@@ -111,8 +112,8 @@ export default function ServicesPage() {
     setShowPackageForm(true)
   }
 
-  async function deleteShowcase(id: string) { if (!confirm('Delete this service showcase?')) return; const { error } = await supabase.from('service_showcases').delete().eq('id', id); if (!error) void fetchData() }
-  async function deletePackage(id: string) { if (!confirm('Delete this package?')) return; const { error } = await supabase.from('offer_packages').delete().eq('id', id); if (!error) void fetchData() }
+  async function deleteShowcase(id: string) { if (!confirm('Delete this service showcase?')) return; const { error } = await supabase.from('service_showcases').delete().eq('id', id); if (!error) { await triggerRevalidation(); void fetchData() } }
+  async function deletePackage(id: string) { if (!confirm('Delete this package?')) return; const { error } = await supabase.from('offer_packages').delete().eq('id', id); if (!error) { await triggerRevalidation(); void fetchData() } }
   function resetShowcaseForm() { setEditingShowcaseId(null); setShowShowcaseForm(false); setShowcaseForm({ ...defaultShowcaseForm, order_num: showcases.length + 1 }) }
   function resetPackageForm() { setEditingPackageId(null); setShowPackageForm(false); setPackageForm({ ...defaultPackageForm, order_num: packages.length + 1 }) }
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSchemaSetupMessage, isMissingTableError } from '@/lib/admin-schema'
 import { supabase } from '@/lib/supabase'
+import { triggerRevalidation } from '@/lib/revalidate'
 
 interface HeroStat {
   id: string
@@ -69,6 +70,7 @@ export default function HeroStatsPage() {
       if (!error) {
         cancelEdit()
         void fetchStats()
+        await triggerRevalidation()
       }
       return
     }
@@ -84,6 +86,7 @@ export default function HeroStatsPage() {
     if (!error) {
       setFormData({ value: '', label: '', order_num: stats.length + 2 })
       void fetchStats()
+      await triggerRevalidation()
     }
   }
 
@@ -95,6 +98,7 @@ export default function HeroStatsPage() {
     const { error } = await supabase.from('hero_stats').delete().eq('id', id)
     if (!error) {
       void fetchStats()
+      await triggerRevalidation()
       if (editingId === id) {
         cancelEdit()
       }

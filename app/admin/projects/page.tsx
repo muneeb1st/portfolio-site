@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { triggerRevalidation } from '@/lib/revalidate'
 
 interface Project {
   id: string
@@ -158,6 +159,7 @@ export default function ManageProjects() {
         setEditingId(null)
         setFormData(emptyForm)
         void refreshProjects()
+        await triggerRevalidation()
         alert('Project updated successfully.')
       }
       return
@@ -176,6 +178,7 @@ export default function ManageProjects() {
       setShowForm(false)
       setFormData(emptyForm)
       void refreshProjects()
+      await triggerRevalidation()
       alert('Project added successfully.')
     }
   }
@@ -191,6 +194,7 @@ export default function ManageProjects() {
       alert('Error deleting project: ' + error.message)
     } else {
       void refreshProjects()
+      await triggerRevalidation()
       alert('Project deleted.')
     }
   }

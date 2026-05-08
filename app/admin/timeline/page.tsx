@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSchemaSetupMessage, isMissingTableError } from '@/lib/admin-schema'
 import { supabase } from '@/lib/supabase'
+import { triggerRevalidation } from '@/lib/revalidate'
 
 interface TimelineItem {
   id: string
@@ -69,6 +70,7 @@ export default function TimelinePage() {
       if (!error) {
         cancelEdit()
         void fetchItems()
+        await triggerRevalidation()
       }
       return
     }
@@ -84,6 +86,7 @@ export default function TimelinePage() {
     if (!error) {
       setFormData({ phase: '', description: '', order_num: items.length + 2 })
       void fetchItems()
+      await triggerRevalidation()
     }
   }
 
@@ -95,6 +98,7 @@ export default function TimelinePage() {
     const { error } = await supabase.from('timeline_items').delete().eq('id', id)
     if (!error) {
       void fetchItems()
+      await triggerRevalidation()
       if (editingId === id) {
         cancelEdit()
       }
