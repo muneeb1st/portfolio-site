@@ -14,15 +14,15 @@ export function SiteHeader() {
           <span className="brand-name" style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.02em' }}>Muneeb</span>
         </Link>
 
-        {/* Navigation Links - Scrollable on mobile */}
-        <div className="nav-links-container flex-1 min-w-0 overflow-x-auto">
-          <a href="#work" className="nav-link whitespace-nowrap">Work</a>
-          <a href="#services" className="nav-link whitespace-nowrap">Services</a>
-          <a href="#process" className="nav-link whitespace-nowrap">Process</a>
-          <a href="#about" className="nav-link whitespace-nowrap">About</a>
+        {/* Desktop Navigation - centered */}
+        <div className="nav-links-container hidden md:flex md:flex-1 md:justify-center md:gap-6">
+          <a href="#work" className="nav-link">Work</a>
+          <a href="#services" className="nav-link">Services</a>
+          <a href="#process" className="nav-link">Process</a>
+          <a href="#about" className="nav-link">About</a>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 md:ml-auto">
           <a href="#contact" className="button button--small px-3 sm:px-4">
             <span className="sm:hidden">Hire me</span>
             <span className="hidden sm:inline">Start a project</span>
