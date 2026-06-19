@@ -145,6 +145,10 @@ select {
   backdrop-filter: blur(10px);
 }
 
+.site-header__nav {
+  position: relative;
+}
+
 .admin-shell {
   color-scheme: light;
   color: #0f172a;
@@ -220,6 +224,13 @@ select {
   border-radius: 999px;
   background: rgba(255, 249, 239, 0.06);
   color: var(--accent-strong);
+}
+
+.brand-mark__name {
+  font-family: var(--font-display), serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .nav-link {
@@ -318,6 +329,11 @@ select {
   min-height: 2.45rem;
   padding: 0.65rem 1rem;
   font-size: 0.7rem;
+}
+
+.mobile-inline-nav,
+.mobile-icon-link {
+  display: none;
 }
 
 .button--ghost,
@@ -1444,6 +1460,113 @@ select {
 
   .skill-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .site-header {
+    border-bottom: 0;
+    background: transparent;
+    padding: 0.75rem 0.65rem 0;
+    backdrop-filter: none;
+  }
+
+  .site-header__nav {
+    min-height: 3rem;
+    border: 1px solid rgba(255, 249, 239, 0.13);
+    border-radius: 0.7rem;
+    background:
+      linear-gradient(120deg, rgba(255, 249, 239, 0.08), rgba(255, 249, 239, 0.025)),
+      rgba(8, 7, 6, 0.9);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 249, 239, 0.09),
+      0 18px 46px rgba(0, 0, 0, 0.34);
+    padding: 0.45rem 0.5rem;
+    backdrop-filter: blur(18px);
+  }
+
+  .brand-mark {
+    flex: 0 0 auto;
+    gap: 0.5rem;
+    color: var(--ink);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .brand-mark__symbol {
+    height: 1.65rem;
+    width: 1.65rem;
+    border: 1px solid rgba(244, 201, 120, 0.32);
+    border-radius: 0.38rem;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(244, 201, 120, 0.24), transparent 72%),
+      rgba(255, 249, 239, 0.075);
+    color: var(--accent-strong);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+    box-shadow: inset 0 1px 0 rgba(255, 249, 239, 0.08);
+  }
+
+  .brand-mark__name {
+    display: inline-flex;
+    color: var(--ink);
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .mobile-inline-nav {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: flex-end;
+    gap: clamp(0.7rem, 3.2vw, 1rem);
+    padding-inline: 0.55rem;
+  }
+
+  .mobile-inline-nav a {
+    color: rgba(255, 249, 239, 0.62);
+    font-size: clamp(0.68rem, 2.7vw, 0.78rem);
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    transition: color 160ms ease;
+  }
+
+  .mobile-inline-nav a:hover,
+  .mobile-inline-nav a:focus-visible {
+    color: var(--accent-strong);
+    outline: none;
+  }
+
+  .mobile-icon-link {
+    display: inline-grid;
+    flex: 0 0 auto;
+    height: 2rem;
+    width: 2rem;
+    place-items: center;
+    border: 1px solid rgba(255, 249, 239, 0.14);
+    border-radius: 0.5rem;
+    background: rgba(255, 249, 239, 0.055);
+    color: rgba(255, 249, 239, 0.78);
+    transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+
+  .mobile-icon-link:hover,
+  .mobile-icon-link:focus-visible {
+    border-color: rgba(244, 201, 120, 0.38);
+    color: var(--accent-strong);
+    outline: none;
+  }
+
+  .mobile-icon-link svg {
+    height: 1.05rem;
+    width: 1.05rem;
   }
 }
 
