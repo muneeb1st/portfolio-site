@@ -12,11 +12,9 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
     <>
       <div className="work-list mt-10">
         {projects.map((project, index) => (
-          <button
+          <article
             key={project.id}
-            type="button"
             className="work-card group"
-            onClick={() => setSelectedProject(project)}
             data-magnetic
           >
             <div className="work-card__media">
@@ -45,9 +43,32 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
                   <span key={technology}>{technology}</span>
                 ))}
               </div>
-              <span className="work-card__link">View case notes</span>
+              <div className="work-card__actions">
+                {project.demo_url ? (
+                  <a
+                    href={project.demo_url}
+                    className="work-card__link"
+                    target={project.demo_url.startsWith('#') ? undefined : '_blank'}
+                    rel={project.demo_url.startsWith('#') ? undefined : 'noreferrer'}
+                  >
+                    Live demo
+                  </a>
+                ) : null}
+                {project.github_url ? (
+                  <a href={project.github_url} className="work-card__link" target="_blank" rel="noreferrer">
+                    Source code
+                  </a>
+                ) : null}
+                <button
+                  type="button"
+                  className="work-card__link work-card__case-button"
+                  onClick={() => setSelectedProject(project)}
+                >
+                  Case notes
+                </button>
+              </div>
             </div>
-          </button>
+          </article>
         ))}
       </div>
 

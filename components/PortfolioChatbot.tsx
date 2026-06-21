@@ -76,12 +76,12 @@ export default function PortfolioChatbot() {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105"
+        className="fixed bottom-5 right-5 z-50 hidden h-14 w-14 items-center justify-center rounded-full transition-all duration-300 hover:scale-105 md:flex"
         style={{
           background: 'linear-gradient(135deg, #f6d58c, #c9943c)',
           boxShadow: '0 8px 32px rgba(244, 201, 120, 0.35)',
         }}
-        aria-label="Open chat"
+        aria-label={isOpen ? 'Close chat' : 'Open chat'}
       >
         {isOpen ? (
           <svg className="w-6 h-6" fill="none" stroke="#161108" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@ export default function PortfolioChatbot() {
               className="ml-auto text-xs font-semibold transition-colors hover:opacity-80"
               style={{ color: '#f4c978' }}
             >
-              📅 Book call
+              Book call
             </a>
           </div>
 
@@ -229,6 +229,7 @@ export default function PortfolioChatbot() {
               type="submit"
               disabled={isLoading || !input.trim()}
               className="w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Send chat message"
               style={{
                 background: 'linear-gradient(135deg, #f6d58c, #c9943c)',
                 color: '#161108',

@@ -98,7 +98,7 @@ export interface BuildingNext {
 
 export const fallbackSiteSettings: SiteSettings = {
   id: 'fallback-site-settings',
-  hero_title: 'I build what most people think takes years to learn.',
+  hero_title: 'I build fast, polished web apps and AI automations.',
   hero_badge: 'Available for projects',
   contact_title: "Got a project in mind? Let's build it.",
   contact_subtitle:
@@ -112,8 +112,8 @@ export const fallbackSiteSettings: SiteSettings = {
 
 export const fallbackAbout: Required<AboutData> = {
   name: 'Muneeb Ur Rehman',
-  tagline: 'CS student who builds websites and AI systems faster than most people expect.',
-  bio: 'I picked up web development and AI automation on my own, started shipping real projects within weeks, and I have not slowed down. I build premium websites and smart chatbot systems for businesses that want to stand out.',
+  tagline: 'CS student and full-stack developer focused on Next.js, Supabase, Python, and practical AI workflows.',
+  bio: 'I learn by building real products: responsive interfaces, Supabase-backed apps, contact workflows, and AI assistants that solve clear problems. Right now I am focused on frontend/full-stack roles, AI automation projects, and stronger public case studies.',
   profile_image_url: null,
   email: 'muneeb@example.com',
   github_url: 'https://github.com/muneeb1st',
@@ -124,8 +124,8 @@ export const fallbackAbout: Required<AboutData> = {
 export const fallbackProjects: Project[] = [
   {
     id: 'portfolio-site',
-    title: 'This Portfolio',
-    description: 'The site you are looking at right now. A Next.js portfolio with glassmorphism design, 3D tilt interactions, scroll-reveal animations, ambient cursor spotlight, Supabase-powered CMS, and a full admin panel. Built from scratch.',
+    title: 'CMS-backed portfolio website',
+    description: 'A portfolio built with Next.js and Supabase to manage projects, services, certificates, and contact inquiries from one place. I built the responsive UI, project system, admin content editing, contact form, and AI assistant integration so the site can support job applications and freelance outreach without hardcoded updates.',
     technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Supabase'],
     image_url: null,
     demo_url: null,
@@ -256,26 +256,91 @@ function toStringArray(value: unknown): string[] {
 
 function normalizeBio(value: unknown) {
   const bio = typeof value === 'string' ? value.trim() : ''
-  if (!bio || bio === 'Desperate for building real automated systems.') {
+  if (
+    !bio ||
+    bio === 'Desperate for building real automated systems.' ||
+    bio.includes('started shipping real projects within weeks')
+  ) {
     return fallbackAbout.bio
   }
   return bio
+}
+
+function normalizeHeroTitle(value: unknown) {
+  const title = typeof value === 'string' ? value.trim() : ''
+  if (
+    !title ||
+    title.includes('convert traffic into revenue') ||
+    title.includes('need to be taken seriously') ||
+    title.includes('most people think takes years')
+  ) {
+    return fallbackSiteSettings.hero_title
+  }
+  return title
+}
+
+function normalizeTagline(value: unknown) {
+  const tagline = typeof value === 'string' ? value.trim() : ''
+  if (
+    !tagline ||
+    tagline.includes('Building Amazing Web Experiences') ||
+    tagline.includes('faster than most people expect')
+  ) {
+    return fallbackAbout.tagline
+  }
+  return tagline
+}
+
+function normalizeProject(row: Record<string, unknown>): Project {
+  const title = String(row.title ?? '').trim()
+  const description = String(row.description ?? '').trim()
+  const id = String(row.id ?? title)
+
+  if (title.toLowerCase().includes('portfolio')) {
+    return {
+      id,
+      title: 'CMS-backed portfolio website',
+      description:
+        'A portfolio built with Next.js and Supabase to manage projects, services, certificates, and contact inquiries from one place. I built the responsive UI, project system, admin content editing, contact form, and AI assistant integration so the site can support job applications and freelance outreach without hardcoded updates.',
+      technologies: ['Next.js', 'React', 'Supabase', 'TypeScript'],
+      image_url: typeof row.image_url === 'string' ? row.image_url : null,
+      demo_url: typeof row.demo_url === 'string' ? row.demo_url : null,
+      github_url: typeof row.github_url === 'string' ? row.github_url : null,
+      featured: Boolean(row.featured),
+    }
+  }
+
+  if (title.toLowerCase().includes('blog')) {
+    return {
+      id,
+      title: 'AI workflow blog',
+      description:
+        'A practical AI workflow blog focused on clear guides, prompt templates, and tool comparisons for students, freelancers, and small businesses. I designed and built the frontend, content structure, responsive layout, and article presentation system to turn AI tutorials into repeatable step-by-step workflows.',
+      technologies: ['JavaScript', 'HTML', 'CSS'],
+      image_url: typeof row.image_url === 'string' ? row.image_url : null,
+      demo_url: typeof row.demo_url === 'string' ? row.demo_url : null,
+      github_url: typeof row.github_url === 'string' ? row.github_url : null,
+      featured: Boolean(row.featured),
+    }
+  }
+
+  return {
+    id,
+    title,
+    description,
+    technologies: Array.isArray(row.technologies) ? row.technologies.filter((t): t is string => typeof t === 'string') : [],
+    image_url: typeof row.image_url === 'string' ? row.image_url : null,
+    demo_url: typeof row.demo_url === 'string' ? row.demo_url : null,
+    github_url: typeof row.github_url === 'string' ? row.github_url : null,
+    featured: Boolean(row.featured),
+  }
 }
 
 async function fetchProjects(): Promise<Project[]> {
   try {
     const { data } = await supabase.from('projects').select('*').order('order', { ascending: true })
     if (!data) return fallbackProjects
-    const mapped = data.map((row) => ({
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      technologies: Array.isArray(row.technologies) ? row.technologies.filter((t: unknown) => typeof t === 'string') : [],
-      image_url: row.image_url,
-      demo_url: row.demo_url,
-      github_url: row.github_url,
-      featured: Boolean(row.featured),
-    }))
+    const mapped = data.map((row) => normalizeProject(row))
     return mapped.length > 0 ? mapped : fallbackProjects
   } catch {
     return fallbackProjects
@@ -297,7 +362,7 @@ async function fetchAbout(): Promise<Required<AboutData>> {
     if (!data) return fallbackAbout
     return {
       name: data.name?.trim() || fallbackAbout.name,
-      tagline: data.tagline?.trim() || fallbackAbout.tagline,
+      tagline: normalizeTagline(data.tagline),
       bio: normalizeBio(data.bio),
       email: data.email?.trim() || fallbackAbout.email,
       profile_image_url: data.profile_image_url || fallbackAbout.profile_image_url,
@@ -325,7 +390,7 @@ async function fetchSiteSettings(): Promise<SiteSettings> {
     if (!data) return fallbackSiteSettings
     return {
       id: data.id,
-      hero_title: data.hero_title?.trim() || fallbackSiteSettings.hero_title,
+      hero_title: normalizeHeroTitle(data.hero_title),
       hero_badge: data.hero_badge?.trim() || fallbackSiteSettings.hero_badge,
       contact_title: data.contact_title?.trim() || fallbackSiteSettings.contact_title,
       contact_subtitle: data.contact_subtitle?.trim() || fallbackSiteSettings.contact_subtitle,

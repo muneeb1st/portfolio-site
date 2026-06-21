@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import { Suspense } from 'react'
 import {
   fetchAllPortfolioData,
   fallbackSkillCategories,
@@ -52,13 +50,13 @@ function Header() {
 }
 
 function HeroSection({ about, siteSettings, heroStats }: { about: Required<AboutData>; siteSettings: SiteSettings; heroStats: HeroStat[] }) {
-  const { cleanName, firstName } = splitName(about.name)
+  const { cleanName } = splitName(about.name)
   const profileImage = about.profile_image_url
 
   return (
     <section className="hero-section mx-auto grid max-w-7xl gap-10 px-4 pb-20 pt-10 sm:px-6 md:pb-28 lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:pt-20">
       <RevealSection immediate className="max-w-3xl">
-        <p className="section-label">Premium websites and AI systems</p>
+        <p className="section-label">Full-stack web apps and AI workflows</p>
         <h1 className="hero-title">{siteSettings.hero_title || 'I build premium digital systems for brands that need to be taken seriously.'}</h1>
         <p className="hero-copy">{about.tagline}</p>
         <p className="hero-subcopy">{about.bio}</p>
@@ -71,8 +69,8 @@ function HeroSection({ about, siteSettings, heroStats }: { about: Required<About
           <span className="motion-word">Launch</span>
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
-          <a href="#work" className="button" data-magnetic>See selected work</a>
-          <a href="#contact" className="button button--ghost" data-magnetic>Work with {firstName}</a>
+          <a href="#work" className="button" data-magnetic>View projects</a>
+          <a href="/resume.html" className="button button--ghost" target="_blank" rel="noreferrer" data-magnetic>Download resume</a>
         </div>
       </RevealSection>
 
@@ -99,10 +97,10 @@ function WorkSection({ projects }: { projects: Project[] }) {
       <RevealSection id="work" className="section-wrap" immediate>
       <SectionIntro
         label="Selected work"
-        title="Case-study style proof for clients who care about finish."
+        title="Projects with real stack, decisions, and shipped links."
       >
         <p>
-          Every project here is framed around trust, conversion, and the kind of craft that makes a first impression feel expensive.
+          A short proof layer for how I build: responsive interfaces, Supabase-backed workflows, AI touchpoints, and clear public demos.
         </p>
       </SectionIntro>
       <ProjectsListClient projects={projects} />
@@ -222,10 +220,10 @@ function AboutSection({ timelineItems, skillCategories }: { timelineItems: Timel
       <div className="about-grid">
         <SectionIntro
           label="About"
-          title="Self-taught, fast-moving, and serious about the details."
+          title="I'm a CS student who learns by building."
         >
           <p>
-            The story is not years of agency polish. It is speed, taste, discipline, and the ability to learn what the project needs until it ships.
+            I started with HTML, CSS, JavaScript, and Python, then moved into full-stack projects with Next.js, Supabase, and API integrations. I care about clean interfaces, practical features, and shipping projects that people can actually use.
           </p>
         </SectionIntro>
         <div className="timeline-card">

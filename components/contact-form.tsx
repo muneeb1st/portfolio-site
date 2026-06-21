@@ -55,6 +55,7 @@ export function ContactForm() {
           <label htmlFor="name" className="text-xs uppercase tracking-[0.22em] text-white/50">Name</label>
           <input
             id="name"
+            name="name"
             type="text"
             required
             value={form.name}
@@ -67,6 +68,7 @@ export function ContactForm() {
           <label htmlFor="email" className="text-xs uppercase tracking-[0.22em] text-white/50">Email</label>
           <input
             id="email"
+            name="email"
             type="email"
             required
             value={form.email}
@@ -81,6 +83,7 @@ export function ContactForm() {
           <label htmlFor="project_type" className="text-xs uppercase tracking-[0.22em] text-white/50">Project type</label>
           <select
             id="project_type"
+            name="project_type"
             value={form.project_type}
             onChange={(e) => setForm((f) => ({ ...f, project_type: e.target.value }))}
             className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white focus:border-[#f4c978] focus:outline-none"
@@ -95,6 +98,7 @@ export function ContactForm() {
           <label htmlFor="budget_range" className="text-xs uppercase tracking-[0.22em] text-white/50">Budget range</label>
           <select
             id="budget_range"
+            name="budget_range"
             value={form.budget_range}
             onChange={(e) => setForm((f) => ({ ...f, budget_range: e.target.value }))}
             className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white focus:border-[#f4c978] focus:outline-none"
@@ -113,6 +117,7 @@ export function ContactForm() {
         </div>
         <textarea
           id="message"
+          name="message"
           required
           rows={5}
           value={form.message}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react'
 import Image from 'next/image'
+import { createPortal } from 'react-dom'
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ')
@@ -268,11 +269,11 @@ export function ProjectModal({ project, onClose }: { project: import('@/lib/data
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [project, onClose])
 
-  if (!project) return null
+  if (!project || typeof document === 'undefined') return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#05070c]/80 p-4 backdrop-blur-xl"
+      className="project-modal-backdrop fixed inset-0 flex items-center justify-center bg-[#05070c]/80 p-4 backdrop-blur-xl"
       onClick={onClose}
       role="presentation"
     >
@@ -290,8 +291,8 @@ export function ProjectModal({ project, onClose }: { project: import('@/lib/data
               {project.title}
             </h2>
           </div>
-          <button type="button" onClick={onClose} className="rounded-full border border-white/10 bg-white/5 p-3 text-white/70 transition hover:border-white/20 hover:text-white" aria-label="Close project dialog">
-            x
+          <button type="button" onClick={onClose} className="rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white/70 transition hover:border-white/20 hover:text-white" aria-label="Close project dialog">
+            Close
           </button>
         </div>
 
@@ -314,7 +315,8 @@ export function ProjectModal({ project, onClose }: { project: import('@/lib/data
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -322,25 +324,25 @@ const consoleModes = [
   {
     id: 'brand',
     label: 'Brand',
-    title: 'Premium website system',
-    copy: 'Positioning, page rhythm, motion, SEO, and a content model shaped into one high-trust experience.',
-    metrics: ['Editorial UI', 'Conversion flow', 'CMS-ready'],
+    title: 'Web app presentation layer',
+    copy: 'Responsive layout, project structure, readable copy, SEO basics, and a Supabase content model kept in one maintainable site.',
+    metrics: ['Responsive UI', 'Clear copy', 'CMS-backed'],
     score: '92',
   },
   {
     id: 'ai',
     label: 'AI',
-    title: 'Business chatbot layer',
-    copy: 'A lightweight path for future lead qualification, support answers, and business automation without rebuilding the site.',
-    metrics: ['Lead capture', 'FAQ routing', 'Edge-ready'],
+    title: 'AI assistant layer',
+    copy: 'A focused assistant that answers questions about the portfolio, points visitors to real work, and keeps claims tied to visible proof.',
+    metrics: ['Portfolio Q&A', 'Lead routing', 'Scoped facts'],
     score: '88',
   },
   {
     id: 'launch',
     label: 'Launch',
-    title: 'Production handoff',
-    copy: 'Supabase content, admin editing, responsive polish, and deployment checks packaged for a real launch.',
-    metrics: ['RLS secure', 'Fast mobile', 'Deployable'],
+    title: 'Production launch checklist',
+    copy: 'Supabase content, admin editing, responsive polish, public links, and deployment checks packaged for a real portfolio launch.',
+    metrics: ['Admin CMS', 'Fast mobile', 'Deployable'],
     score: '96',
   },
 ]
