@@ -1,142 +1,281 @@
 'use client'
 
 import { useState } from 'react'
+import confetti from 'canvas-confetti'
+import { Send, Check, Copy, Sparkles, AlertCircle } from 'lucide-react'
+import { sounds } from '@/lib/sound'
+
+const PROJECT_TYPES = [
+  'Full-Stack Web App',
+  'AI Chatbot / Agent',
+  'Conversion Website',
+  'Supabase Backend / API',
+  'Other / Custom Idea',
+]
+
+const BUDGET_RANGES = [
+  '<$1,000',
+  '$1,000 - $2,500',
+  '$2,500 - $5,000',
+  '$5,000+',
+  'Flexible / Retainer',
+]
 
 export function ContactForm() {
   const [submitting, setSubmitting] = useState(false)
+  const [copiedEmail, setCopiedEmail] = useState(false)
   const [status, setStatus] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
   const [form, setForm] = useState({
     name: '',
     email: '',
-    project_type: 'Premium website',
-    budget_range: 'Not sure yet',
+    project_type: 'Full-Stack Web App',
+    budget_range: '$1,000 - $2,500',
     message: '',
   })
 
+  const copyEmail = () => {
+    sounds.playClick()
+    navigator.clipboard.writeText('muneeburehman1st@gmail.com')
+    setCopiedEmail(true)
+    sounds.playSuccess()
+    setTimeout(() => setCopiedEmail(false), 2000)
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    sounds.playClick()
     setSubmitting(true)
     setStatus(null)
 
-    const apiResult = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-
-    if (!apiResult.ok) {
-      const payload = await apiResult.json().catch(() => null)
-      setStatus({ tone: 'error', message: payload?.error ? `Message did not send: ${payload.error}` : 'Message did not send. Try again and I will make sure we get it through.' })
-    } else {
-      setStatus({ tone: 'success', message: 'Message sent. I will get back to you with ideas for your build.' })
-      setForm({
-        name: '',
-        email: '',
-        project_type: 'Premium website',
-        budget_range: 'Not sure yet',
-        message: '',
+    try {
+      const apiResult = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       })
-    }
 
-    setSubmitting(false)
+      if (!apiResult.ok) {
+        const payload = await apiResult.json().catch(() => null)
+        sounds.playClick()
+        setStatus({
+          tone: 'error',
+          message: payload?.error
+            ? `Message could not be saved: ${payload.error}`
+            : 'Something went wrong. Please reach out directly to muneeburehman1st@gmail.com',
+        })
+      } else {
+        sounds.playSuccess()
+        try {
+          confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#f4c978', '#8fcad0', '#ffd98c', '#ffffff'],
+          })
+        } catch {
+          // ignore confetti errors
+        }
+
+        setStatus({
+          tone: 'success',
+          message: 'Message delivered! I will review your project details and get back to you promptly.',
+        })
+
+        setForm({
+          name: '',
+          email: '',
+          project_type: 'Full-Stack Web App',
+          budget_range: '$1,000 - $2,500',
+          message: '',
+        })
+      }
+    } catch {
+      setStatus({
+        tone: 'error',
+        message: 'Network issue. Please send an email directly to muneeburehman1st@gmail.com.',
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const messageProgress = Math.min(100, Math.max(8, form.message.length / 2))
+  const messageProgress = Math.min(100, Math.max(5, (form.message.length / 150) * 100))
 
   return (
-    <form onSubmit={handleSubmit} className="contact-form-panel glass-panel rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8">
-      <div className="message-routing" aria-hidden="true">
-        <span>Lead capture</span>
-        <span>{form.project_type}</span>
-        <span>{form.budget_range}</span>
+    <div className="relative overflow-hidden rounded-[2rem] border border-[#f4c978]/30 bg-gradient-to-br from-[#181511]/95 via-[#120f0c]/90 to-[#080706] p-6 sm:p-9 shadow-[0_20px_70px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+      {/* Decorative Aura */}
+      <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-[#f4c978]/10 blur-3xl pointer-events-none" />
+
+      {/* Header bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-5 mb-6">
+        <div>
+          <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-[#ffd98c]">
+            <Sparkles className="h-3.5 w-3.5 text-[#f4c978]" />
+            Direct Inquiry Channel
+          </span>
+          <h3 className="font-display text-2xl font-bold text-white tracking-tight mt-1">
+            Let&apos;s build something exceptional.
+          </h3>
+        </div>
+
+        <button
+          type="button"
+          onClick={copyEmail}
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-mono text-stone-300 hover:border-[#f4c978] hover:text-white transition-all self-start sm:self-auto"
+        >
+          {copiedEmail ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+          {copiedEmail ? 'Email Copied!' : 'Copy Email'}
+        </button>
       </div>
-      <div className="grid gap-5 sm:grid-cols-2">
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Row 1: Name & Email */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <label htmlFor="name" className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400">
+              Your Name *
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              placeholder="e.g. Alexander Wright"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder:text-stone-600 focus:border-[#f4c978] focus:bg-black/60 focus:outline-none transition-all"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400">
+              Your Email *
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={form.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              placeholder="e.g. alexander@company.com"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder:text-stone-600 focus:border-[#f4c978] focus:bg-black/60 focus:outline-none transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Row 2: Project Type Chips */}
         <div className="space-y-2">
-          <label htmlFor="name" className="text-xs uppercase tracking-[0.22em] text-white/50">Name</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
+          <label className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400">
+            Select Offer / Project Scope
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {PROJECT_TYPES.map((type) => {
+              const isSelected = form.project_type === type
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick()
+                    setForm((f) => ({ ...f, project_type: type }))
+                  }}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
+                    isSelected
+                      ? 'border border-[#f4c978] bg-[#f4c978] text-[#161108] font-bold shadow-[0_0_15px_rgba(244,201,120,0.3)]'
+                      : 'border border-white/10 bg-white/5 text-stone-300 hover:border-white/20 hover:text-white'
+                  }`}
+                >
+                  {type}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Row 3: Budget Range Chips */}
+        <div className="space-y-2">
+          <label className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400">
+            Estimated Budget
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {BUDGET_RANGES.map((b) => {
+              const isSelected = form.budget_range === b
+              return (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick()
+                    setForm((f) => ({ ...f, budget_range: b }))
+                  }}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                    isSelected
+                      ? 'border border-[#8fcad0] bg-[#8fcad0] text-[#080706] font-bold shadow-[0_0_15px_rgba(143,202,208,0.3)]'
+                      : 'border border-white/10 bg-white/5 text-stone-300 hover:border-white/20 hover:text-white'
+                  }`}
+                >
+                  {b}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Row 4: Message */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label htmlFor="message" className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400">
+              Project Description / Goals *
+            </label>
+            <span className="text-[11px] font-mono text-stone-500">{form.message.length} chars</span>
+          </div>
+          <textarea
+            id="message"
             required
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/30 focus:border-[#5de2e7] focus:outline-none"
-            placeholder="Your name"
+            rows={4}
+            value={form.message}
+            onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+            placeholder="Tell me what you are building, timeline expectations, or any specific integrations..."
+            className="w-full resize-none rounded-xl border border-white/10 bg-black/40 p-4 text-sm text-white placeholder:text-stone-600 focus:border-[#f4c978] focus:bg-black/60 focus:outline-none transition-all"
           />
+          {/* Depth meter */}
+          <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full bg-gradient-to-r from-[#f4c978] to-[#8fcad0] transition-all duration-300"
+              style={{ width: `${messageProgress}%` }}
+            />
+          </div>
         </div>
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-xs uppercase tracking-[0.22em] text-white/50">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            value={form.email}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/30 focus:border-[#5de2e7] focus:outline-none"
-            placeholder="you@example.com"
-          />
-        </div>
-      </div>
-      <div className="mt-5 grid gap-5 sm:grid-cols-2">
-        <div className="space-y-2">
-          <label htmlFor="project_type" className="text-xs uppercase tracking-[0.22em] text-white/50">Project type</label>
-          <select
-            id="project_type"
-            name="project_type"
-            value={form.project_type}
-            onChange={(e) => setForm((f) => ({ ...f, project_type: e.target.value }))}
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white focus:border-[#f4c978] focus:outline-none"
+
+        {/* Submit button */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#f4c978] bg-gradient-to-r from-[#f6d58c] via-[#f4c978] to-[#c9943c] py-3.5 text-xs font-black uppercase tracking-widest text-[#161108] shadow-[0_0_30px_rgba(244,201,120,0.3)] hover:scale-[1.01] hover:shadow-[0_0_40px_rgba(244,201,120,0.5)] transition-all disabled:opacity-50"
           >
-            <option>Premium website</option>
-            <option>AI chatbot</option>
-            <option>Website + chatbot</option>
-            <option>Not sure yet</option>
-          </select>
+            <Send className="h-4 w-4" />
+            {submitting ? 'Transmitting Message...' : 'Send Message Now'}
+          </button>
         </div>
-        <div className="space-y-2">
-          <label htmlFor="budget_range" className="text-xs uppercase tracking-[0.22em] text-white/50">Budget range</label>
-          <select
-            id="budget_range"
-            name="budget_range"
-            value={form.budget_range}
-            onChange={(e) => setForm((f) => ({ ...f, budget_range: e.target.value }))}
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white focus:border-[#f4c978] focus:outline-none"
+
+        {/* Status Toast */}
+        {status && (
+          <div
+            className={`flex items-start gap-2.5 rounded-xl border p-4 text-xs ${
+              status.tone === 'success'
+                ? 'border-emerald-500/40 bg-emerald-950/40 text-emerald-300'
+                : 'border-red-500/40 bg-red-950/40 text-red-300'
+            }`}
           >
-            <option>Not sure yet</option>
-            <option>$1k - $3k</option>
-            <option>$3k - $6k</option>
-            <option>$6k+</option>
-          </select>
-        </div>
-      </div>
-      <div className="mt-5 space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <label htmlFor="message" className="text-xs uppercase tracking-[0.22em] text-white/50">Message</label>
-          <span className="message-count">{form.message.length} chars</span>
-        </div>
-        <textarea
-          id="message"
-          name="message"
-          required
-          rows={5}
-          value={form.message}
-          onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-          className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/30 focus:border-[#5de2e7] focus:outline-none resize-none"
-          placeholder="Tell me about your project..."
-        />
-        <div className="message-depth" aria-hidden="true">
-          <span style={{ width: `${messageProgress}%` }} />
-        </div>
-      </div>
-      <button type="submit" disabled={submitting} className="glow-button mt-6 inline-flex w-full sm:w-auto justify-center text-sm px-6 py-3 disabled:opacity-50" data-magnetic>
-        {submitting ? 'Sending...' : 'Send message'}
-      </button>
-      {status && (
-        <div className={`mt-4 rounded-xl px-4 py-3 text-sm ${status.tone === 'success' ? 'bg-[#5de2e7]/10 text-[#5de2e7]' : 'bg-red-500/10 text-red-400'}`}>
-          {status.message}
-        </div>
-      )}
-    </form>
+            {status.tone === 'success' ? (
+              <Check className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+            )}
+            <p className="leading-relaxed">{status.message}</p>
+          </div>
+        )}
+      </form>
+    </div>
   )
 }

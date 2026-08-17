@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 
 export interface Project {
   id: string
@@ -164,9 +164,10 @@ export const fallbackSkillCategories: SkillCategory[] = [
 ]
 
 export const heroSignals: HeroStat[] = [
-  { id: 'hero-stat-1', value: '430+', label: 'GitHub contributions in the last year', order_num: 1 },
-  { id: 'hero-stat-2', value: 'Self-taught', label: 'Learned web development, AI, and deployment independently', order_num: 2 },
+  { id: 'hero-stat-1', value: '990+', label: 'GitHub contributions in the last year', order_num: 1 },
+  { id: 'hero-stat-2', value: 'Self-Taught', label: 'Learned web development, AI, and deployment independently', order_num: 2 },
   { id: 'hero-stat-3', value: 'CS Student', label: 'Studying Computer Science at NFC-IET, Multan', order_num: 3 },
+  { id: 'hero-stat-4', value: 'Full-Stack', label: 'Next.js 15, Supabase, Python & AI Automation', order_num: 4 },
 ]
 
 export const fallbackTimelineItems: TimelineItem[] = [
@@ -249,46 +250,28 @@ export const buildingNext: BuildingNext[] = [
 ]
 
 function toStringArray(value: unknown): string[] {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
-    : []
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+  }
+  if (typeof value === 'string' && value.trim()) {
+    return value.split(',').map((item) => item.trim()).filter(Boolean)
+  }
+  return []
 }
 
 function normalizeBio(value: unknown) {
   const bio = typeof value === 'string' ? value.trim() : ''
-  if (
-    !bio ||
-    bio === 'Desperate for building real automated systems.' ||
-    bio.includes('started shipping real projects within weeks')
-  ) {
-    return fallbackAbout.bio
-  }
-  return bio
+  return bio || fallbackAbout.bio
 }
 
 function normalizeHeroTitle(value: unknown) {
   const title = typeof value === 'string' ? value.trim() : ''
-  if (
-    !title ||
-    title.includes('convert traffic into revenue') ||
-    title.includes('need to be taken seriously') ||
-    title.includes('most people think takes years')
-  ) {
-    return fallbackSiteSettings.hero_title
-  }
-  return title
+  return title || fallbackSiteSettings.hero_title
 }
 
 function normalizeTagline(value: unknown) {
   const tagline = typeof value === 'string' ? value.trim() : ''
-  if (
-    !tagline ||
-    tagline.includes('Building Amazing Web Experiences') ||
-    tagline.includes('faster than most people expect')
-  ) {
-    return fallbackAbout.tagline
-  }
-  return tagline
+  return tagline || fallbackAbout.tagline
 }
 
 function normalizeProject(row: Record<string, unknown>): Project {
@@ -296,69 +279,58 @@ function normalizeProject(row: Record<string, unknown>): Project {
   const description = String(row.description ?? '').trim()
   const id = String(row.id ?? title)
 
-  if (title.toLowerCase().includes('portfolio')) {
-    return {
-      id,
-      title: 'CMS-backed portfolio website',
-      description:
-        'A portfolio built with Next.js and Supabase to manage projects, services, certificates, and contact inquiries from one place. I built the responsive UI, project system, admin content editing, contact form, and AI assistant integration so the site can support job applications and freelance outreach without hardcoded updates.',
-      technologies: ['Next.js', 'React', 'Supabase', 'TypeScript'],
-      image_url: typeof row.image_url === 'string' ? row.image_url : null,
-      demo_url: typeof row.demo_url === 'string' ? row.demo_url : null,
-      github_url: typeof row.github_url === 'string' ? row.github_url : null,
-      featured: Boolean(row.featured),
-    }
-  }
-
-  if (title.toLowerCase().includes('blog')) {
-    return {
-      id,
-      title: 'AI workflow blog',
-      description:
-        'A practical AI workflow blog focused on clear guides, prompt templates, and tool comparisons for students, freelancers, and small businesses. I designed and built the frontend, content structure, responsive layout, and article presentation system to turn AI tutorials into repeatable step-by-step workflows.',
-      technologies: ['JavaScript', 'HTML', 'CSS'],
-      image_url: typeof row.image_url === 'string' ? row.image_url : null,
-      demo_url: typeof row.demo_url === 'string' ? row.demo_url : null,
-      github_url: typeof row.github_url === 'string' ? row.github_url : null,
-      featured: Boolean(row.featured),
-    }
-  }
-
   return {
     id,
-    title,
-    description,
-    technologies: Array.isArray(row.technologies) ? row.technologies.filter((t): t is string => typeof t === 'string') : [],
-    image_url: typeof row.image_url === 'string' ? row.image_url : null,
-    demo_url: typeof row.demo_url === 'string' ? row.demo_url : null,
-    github_url: typeof row.github_url === 'string' ? row.github_url : null,
+    title: title || 'Untitled Project',
+    description: description || '',
+    technologies: toStringArray(row.technologies),
+    image_url: typeof row.image_url === 'string' && row.image_url.trim() ? row.image_url : null,
+    demo_url: typeof row.demo_url === 'string' && row.demo_url.trim() ? row.demo_url : null,
+    github_url: typeof row.github_url === 'string' && row.github_url.trim() ? row.github_url : null,
     featured: Boolean(row.featured),
   }
 }
 
 async function fetchProjects(): Promise<Project[]> {
+  if (!isSupabaseConfigured) return fallbackProjects
   try {
-    const { data } = await supabase.from('projects').select('*').order('order', { ascending: true })
-    if (!data) return fallbackProjects
+    const { data, error } = await supabase.from('projects').select('*').order('order', { ascending: true })
+    if (error) {
+      console.warn('Error fetching projects from Supabase:', error.message)
+      return fallbackProjects
+    }
+    if (!data || data.length === 0) return fallbackProjects
     const mapped = data.map((row) => normalizeProject(row))
     return mapped.length > 0 ? mapped : fallbackProjects
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query projects:', err)
     return fallbackProjects
   }
 }
 
 async function fetchCertificates(): Promise<Certificate[]> {
+  if (!isSupabaseConfigured) return []
   try {
-    const { data } = await supabase.from('certificates').select('*').order('order', { ascending: true })
+    const { data, error } = await supabase.from('certificates').select('*').order('order', { ascending: true })
+    if (error) {
+      console.warn('Error fetching certificates from Supabase:', error.message)
+      return []
+    }
     return data || []
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query certificates:', err)
     return []
   }
 }
 
 async function fetchAbout(): Promise<Required<AboutData>> {
+  if (!isSupabaseConfigured) return fallbackAbout
   try {
-    const { data } = await supabase.from('about').select('*').single()
+    const { data, error } = await supabase.from('about').select('*').limit(1).maybeSingle()
+    if (error) {
+      console.warn('Error fetching about from Supabase:', error.message)
+      return fallbackAbout
+    }
     if (!data) return fallbackAbout
     return {
       name: data.name?.trim() || fallbackAbout.name,
@@ -370,23 +342,35 @@ async function fetchAbout(): Promise<Required<AboutData>> {
       linkedin_url: data.linkedin_url || fallbackAbout.linkedin_url,
       twitter_url: data.twitter_url || fallbackAbout.twitter_url,
     }
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query about:', err)
     return fallbackAbout
   }
 }
 
 async function fetchSkills(): Promise<SkillRow[]> {
+  if (!isSupabaseConfigured) return []
   try {
-    const { data } = await supabase.from('skills').select('*').order('order_num', { ascending: true })
+    const { data, error } = await supabase.from('skills').select('*').order('order_num', { ascending: true })
+    if (error) {
+      console.warn('Error fetching skills from Supabase:', error.message)
+      return []
+    }
     return data || []
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query skills:', err)
     return []
   }
 }
 
 async function fetchSiteSettings(): Promise<SiteSettings> {
+  if (!isSupabaseConfigured) return fallbackSiteSettings
   try {
-    const { data } = await supabase.from('site_settings').select('*').maybeSingle()
+    const { data, error } = await supabase.from('site_settings').select('*').limit(1).maybeSingle()
+    if (error) {
+      console.warn('Error fetching site_settings from Supabase:', error.message)
+      return fallbackSiteSettings
+    }
     if (!data) return fallbackSiteSettings
     return {
       id: data.id,
@@ -397,45 +381,69 @@ async function fetchSiteSettings(): Promise<SiteSettings> {
       footer_text: data.footer_text?.trim() || fallbackSiteSettings.footer_text,
       ticker_items: toStringArray(data.ticker_items).length > 0 ? toStringArray(data.ticker_items) : fallbackSiteSettings.ticker_items,
     }
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query site_settings:', err)
     return fallbackSiteSettings
   }
 }
 
 async function fetchHeroStats(): Promise<HeroStat[]> {
+  if (!isSupabaseConfigured) return heroSignals
   try {
-    const { data } = await supabase.from('hero_stats').select('*').order('order_num', { ascending: true })
+    const { data, error } = await supabase.from('hero_stats').select('*').order('order_num', { ascending: true })
+    if (error) {
+      console.warn('Error fetching hero_stats from Supabase:', error.message)
+      return heroSignals
+    }
     return (data && data.length > 0) ? data : heroSignals
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query hero_stats:', err)
     return heroSignals
   }
 }
 
 async function fetchTimelineItems(): Promise<TimelineItem[]> {
+  if (!isSupabaseConfigured) return fallbackTimelineItems
   try {
-    const { data } = await supabase.from('timeline_items').select('*').order('order_num', { ascending: true })
+    const { data, error } = await supabase.from('timeline_items').select('*').order('order_num', { ascending: true })
+    if (error) {
+      console.warn('Error fetching timeline_items from Supabase:', error.message)
+      return fallbackTimelineItems
+    }
     return (data && data.length > 0) ? data : fallbackTimelineItems
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query timeline_items:', err)
     return fallbackTimelineItems
   }
 }
 
 async function fetchSkillCategories(): Promise<SkillCategory[]> {
+  if (!isSupabaseConfigured) return fallbackSkillCategories
   try {
-    const { data } = await supabase.from('skill_categories').select('*').order('order_num', { ascending: true })
+    const { data, error } = await supabase.from('skill_categories').select('*').order('order_num', { ascending: true })
+    if (error) {
+      console.warn('Error fetching skill_categories from Supabase:', error.message)
+      return fallbackSkillCategories
+    }
     if (!data || data.length === 0) return fallbackSkillCategories
     return data.map((row) => ({
       title: row.title,
       skills: toStringArray(row.skills),
     }))
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query skill_categories:', err)
     return fallbackSkillCategories
   }
 }
 
 async function fetchServiceShowcases(): Promise<ServiceShowcase[]> {
+  if (!isSupabaseConfigured) return serviceShowcases
   try {
-    const { data } = await supabase.from('service_showcases').select('*').order('order_num', { ascending: true })
+    const { data, error } = await supabase.from('service_showcases').select('*').order('order_num', { ascending: true })
+    if (error) {
+      console.warn('Error fetching service_showcases from Supabase:', error.message)
+      return serviceShowcases
+    }
     if (!data || data.length === 0) return serviceShowcases
     return data.map((row) => ({
       id: row.id,
@@ -447,14 +455,20 @@ async function fetchServiceShowcases(): Promise<ServiceShowcase[]> {
       accent: row.accent?.trim() || '247, 178, 77',
       tags: toStringArray(row.tags),
     }))
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query service_showcases:', err)
     return serviceShowcases
   }
 }
 
 async function fetchOfferPackages(): Promise<PackageCardData[]> {
+  if (!isSupabaseConfigured) return offerPackages
   try {
-    const { data } = await supabase.from('offer_packages').select('*').order('order_num', { ascending: true })
+    const { data, error } = await supabase.from('offer_packages').select('*').order('order_num', { ascending: true })
+    if (error) {
+      console.warn('Error fetching offer_packages from Supabase:', error.message)
+      return offerPackages
+    }
     if (!data || data.length === 0) return offerPackages
     return data.map((row) => ({
       id: row.id,
@@ -466,14 +480,20 @@ async function fetchOfferPackages(): Promise<PackageCardData[]> {
       deliverables: toStringArray(row.deliverables),
       accent: row.accent?.trim() || '247, 178, 77',
     }))
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query offer_packages:', err)
     return offerPackages
   }
 }
 
 async function fetchBuildingNext(): Promise<BuildingNext[]> {
+  if (!isSupabaseConfigured) return buildingNext
   try {
-    const { data } = await supabase.from('building_next').select('*').order('order_num', { ascending: true })
+    const { data, error } = await supabase.from('building_next').select('*').order('order_num', { ascending: true })
+    if (error) {
+      console.warn('Error fetching building_next from Supabase:', error.message)
+      return buildingNext
+    }
     if (!data || data.length === 0) return buildingNext
     return data.map((row) => ({
       id: row.id,
@@ -482,7 +502,8 @@ async function fetchBuildingNext(): Promise<BuildingNext[]> {
       tags: toStringArray(row.tags),
       accent: row.accent?.trim() || '247, 178, 77',
     }))
-  } catch {
+  } catch (err) {
+    console.warn('Failed to query building_next:', err)
     return buildingNext
   }
 }

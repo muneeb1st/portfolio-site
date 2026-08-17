@@ -5,6 +5,7 @@ import type { NextConfig } from 'next'
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   turbopack: {
     root: rootDir,
   },
@@ -13,6 +14,11 @@ const nextConfig: NextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
       {
         protocol: 'https',
         hostname: 'ipditzvdtddpahizkbej.supabase.co',

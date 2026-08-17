@@ -52,8 +52,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${bodyFont.variable} ${displayFont.variable} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${bodyFont.variable} ${displayFont.variable} antialiased`} suppressHydrationWarning>
         {children}
         <ChatbotLoader />
       </body>

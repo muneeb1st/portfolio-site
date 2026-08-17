@@ -1,0 +1,6 @@
+{
+  "name": "Muneeb Ur Rehman Portfolio",
+  "description": "Portfolio of Muneeb Ur Rehman, a CS student and full-stack developer building Next.js apps, Supabase-backed workflows, and AI chatbots.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

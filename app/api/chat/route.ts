@@ -1,5 +1,6 @@
 import { generateText } from 'ai'
 import { mistral } from '@ai-sdk/mistral'
+import { GoogleGenAI } from '@google/genai'
 
 const SYSTEM_PROMPT = `You are Muneeb's personal AI assistant on his portfolio site (muneeb1st.vercel.app). Help visitors understand his visible work, skills, services, and contact options.
 
@@ -45,21 +46,73 @@ RULES:
 - If asked for resume: "Use the Resume link in the navigation or hero section."
 - If ready to hire or wants to book a call: "Use the Book call link in the chat header or send details through the contact form."
 - If off-topic: "I'm here to help with questions about Muneeb's work and services - what would you like to know?"
-- Keep answers to 3-5 sentences unless a detailed breakdown is requested.
-
-First message: "Hi there! I'm Muneeb's AI assistant. I can walk you through his work, skills, services, or process. What are you curious about?"`
+- Keep answers to 3-5 sentences unless a detailed breakdown is requested.`
 
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json()
 
-    const result = await generateText({
-      model: mistral('mistral-small-latest'),
-      system: SYSTEM_PROMPT,
-      messages,
-    })
+    // 1. Try Gemini API if GEMINI_API_KEY is available
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+        
+        // Format previous conversation messages for Gemini
+        const formattedPrompt = messages
+          .map((m: { role: string; content: string }) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+          .join('\n\n')
 
-    return Response.json({ response: result.text })
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: `${SYSTEM_PROMPT}\n\nConversation history:\n${formattedPrompt}\n\nAssistant:`,
+        })
+
+        if (response.text) {
+          return Response.json({ response: response.text })
+        }
+      } catch (geminiErr) {
+        console.warn('Gemini API call failed, attempting fallback provider:', geminiErr)
+      }
+    }
+
+    // 2. Try Mistral API if MISTRAL_API_KEY is available
+    if (process.env.MISTRAL_API_KEY) {
+      try {
+        const result = await generateText({
+          model: mistral('mistral-small-latest'),
+          system: SYSTEM_PROMPT,
+          messages,
+        })
+        return Response.json({ response: result.text })
+      } catch (mistralErr) {
+        console.warn('Mistral API call failed:', mistralErr)
+      }
+    }
+
+    // 3. Deterministic high-precision fallback if no external keys are active
+    const latestUserMsg = messages[messages.length - 1]?.content?.toLowerCase() || ''
+    
+    if (latestUserMsg.includes('stack') || latestUserMsg.includes('skill') || latestUserMsg.includes('tech')) {
+      return Response.json({
+        response: "Muneeb specializes in **Full-Stack Web Development & AI Workflows**.\n\n• **Frontend:** Next.js 15, React, TypeScript, Tailwind CSS\n• **Backend & DB:** Supabase, PostgreSQL, Node.js, Python, REST APIs\n• **AI & Automation:** LLM Integration, Custom Chatbots, AI Agents, Prompt Engineering\n\nFeel free to explore his projects above or book a quick intro call!"
+      })
+    }
+
+    if (latestUserMsg.includes('project') || latestUserMsg.includes('work') || latestUserMsg.includes('portfolio')) {
+      return Response.json({
+        response: "Muneeb has shipped multiple production-ready systems:\n\n1. **CMS-Backed Portfolio & Studio** (Next.js, Supabase, TypeScript) - Complete dynamic architecture with live DB sync and AI assistant.\n2. **AI Workflow & Prompt Engineering Hub** (JavaScript, HTML/CSS) - Structured automation blueprints and guides.\n\nCheck out the **Selected Work** section above for live demos and code repositories!"
+      })
+    }
+
+    if (latestUserMsg.includes('hire') || latestUserMsg.includes('contact') || latestUserMsg.includes('call') || latestUserMsg.includes('price') || latestUserMsg.includes('rate')) {
+      return Response.json({
+        response: "Muneeb is currently available for **Full-Stack contracts, AI automation builds, and freelance projects**.\n\n• **Email:** muneeburehman1st@gmail.com\n• **Direct Inquiry:** You can fill out the contact form below.\n• **Intro Call:** Click **Book call** in the chat header or use Calendly."
+      })
+    }
+
+    return Response.json({
+      response: "Thanks for reaching out! Muneeb is a Full-Stack Developer & AI Automation Engineer specializing in Next.js, Supabase, and custom AI agents.\n\nWould you like to know about his **tech stack**, **featured projects**, or **how to collaborate**?"
+    })
   } catch (error) {
     console.error('Chat API error:', error)
     return Response.json(
