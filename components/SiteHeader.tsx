@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Volume2, VolumeX, ArrowUpRight } from 'lucide-react'
 import { sounds } from '@/lib/sound'
 
@@ -46,8 +47,15 @@ export function SiteHeader() {
           className="group flex items-center gap-2 sm:gap-3 min-w-0"
           aria-label="Muneeb Ur Rehman Home"
         >
-          <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl border border-[#ffd98c]/30 bg-[#ffd98c]/10 text-xs font-mono font-black text-[#ffd98c] shadow-[0_0_15px_rgba(255,217,140,0.15)] group-hover:border-[#ffd98c] group-hover:shadow-[0_0_20px_rgba(255,217,140,0.3)] transition-all">
-            MR
+          <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl border border-[#ffd98c]/40 bg-black/80 shadow-[0_0_15px_rgba(255,217,140,0.2)] group-hover:border-[#ffd98c] group-hover:shadow-[0_0_22px_rgba(255,217,140,0.4)] transition-all overflow-hidden p-0.5">
+            <Image
+              src="/logo.png"
+              alt="MR Brand Logo"
+              width={36}
+              height={36}
+              className="h-full w-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+              priority
+            />
           </div>
           <div className="min-w-0">
             <span className="block font-display text-xs sm:text-sm font-bold tracking-tight text-white group-hover:text-[#ffd98c] transition-colors whitespace-nowrap">
