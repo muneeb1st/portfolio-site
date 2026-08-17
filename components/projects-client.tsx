@@ -58,10 +58,10 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
               sounds.playTab()
               setActiveFilter('all')
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all shrink-0 ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all shrink-0 ${
               activeFilter === 'all'
-                ? 'bg-[#ffd98c] text-black shadow-[0_0_15px_rgba(255,217,140,0.3)]'
-                : 'text-stone-400 hover:text-white bg-white/5'
+                ? 'bg-[#ffd98c] !text-[#080706] shadow-[0_0_15px_rgba(255,217,140,0.35)] border border-[#ffd98c]'
+                : 'text-stone-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5'
             }`}
           >
             All ({projects.length})
@@ -71,13 +71,13 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
               sounds.playTab()
               setActiveFilter('featured')
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all shrink-0 flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all shrink-0 flex items-center gap-1 ${
               activeFilter === 'featured'
-                ? 'bg-[#ffd98c] text-black shadow-[0_0_15px_rgba(255,217,140,0.3)]'
-                : 'text-stone-400 hover:text-white bg-white/5'
+                ? 'bg-[#ffd98c] !text-[#080706] shadow-[0_0_15px_rgba(255,217,140,0.35)] border border-[#ffd98c]'
+                : 'text-stone-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5'
             }`}
           >
-            <Sparkles className="h-3 w-3" />
+            <Sparkles className={`h-3 w-3 ${activeFilter === 'featured' ? '!text-[#080706]' : 'text-stone-400'}`} />
             Featured
           </button>
           {allTechs.map(tech => (
@@ -87,10 +87,10 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
                 sounds.playTab()
                 setActiveFilter(tech)
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all shrink-0 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all shrink-0 ${
                 activeFilter === tech
-                  ? 'bg-[#ffd98c] text-black shadow-[0_0_15px_rgba(255,217,140,0.3)]'
-                  : 'text-stone-400 hover:text-white bg-white/5'
+                  ? 'bg-[#ffd98c] !text-[#080706] shadow-[0_0_15px_rgba(255,217,140,0.35)] border border-[#ffd98c]'
+                  : 'text-stone-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5'
               }`}
             >
               {tech}
@@ -179,10 +179,10 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
                         target={project.demo_url.startsWith('#') ? undefined : '_blank'}
                         rel={project.demo_url.startsWith('#') ? undefined : 'noreferrer'}
                         onClick={() => sounds.playClick()}
-                        className="flex items-center gap-1.5 rounded-full bg-[#ffd98c] px-4 py-2 text-xs font-mono font-bold text-black shadow-[0_0_15px_rgba(255,217,140,0.25)] hover:bg-[#ffe1a6] transition-all"
+                        className="flex items-center gap-1.5 rounded-full border border-[#ffd98c]/50 bg-gradient-to-r from-[#ffd98c] via-[#f5c76d] to-[#e5b358] px-4 py-2 text-xs font-mono font-bold !text-[#080706] shadow-[0_0_15px_rgba(255,217,140,0.25)] hover:shadow-[0_0_20px_rgba(255,217,140,0.4)] hover:scale-105 transition-all"
                       >
-                        <span>Demo</span>
-                        <ArrowUpRight className="h-3.5 w-3.5" />
+                        <span className="font-bold !text-[#080706]">Demo</span>
+                        <ArrowUpRight className="h-3.5 w-3.5 !text-[#080706]" />
                       </a>
                     )}
                     {project.github_url && (
@@ -191,7 +191,7 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
                         target="_blank"
                         rel="noreferrer"
                         onClick={() => sounds.playClick()}
-                        className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-2 text-xs font-mono font-semibold text-stone-200 hover:border-white/30 hover:bg-white/10 hover:text-white transition-all"
+                        className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-2 text-xs font-mono font-semibold text-stone-200 hover:border-[#ffd98c]/40 hover:bg-white/10 hover:text-white transition-all"
                       >
                         <Code2 className="h-3.5 w-3.5 text-[#8fcad0]" />
                         <span>Code</span>
@@ -205,7 +205,7 @@ export function ProjectsListClient({ projects }: { projects: Project[] }) {
                       sounds.playModal()
                       setSelectedProject(project)
                     }}
-                    className="text-xs font-mono font-semibold text-stone-400 hover:text-[#ffd98c] underline underline-offset-4 transition-colors"
+                    className="text-xs font-mono font-semibold text-stone-300 hover:text-[#ffd98c] underline underline-offset-4 transition-colors"
                   >
                     Specs &amp; Case Notes
                   </button>

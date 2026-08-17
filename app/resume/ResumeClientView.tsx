@@ -47,10 +47,10 @@ export function ResumeClientView({ data }: { data: PortfolioData }) {
         <div className="flex items-center gap-2.5">
           <button
             onClick={handlePrintOrDownload}
-            className="inline-flex items-center gap-2 rounded-xl border border-[#ffd98c]/40 bg-[#ffd98c] px-4 py-2 text-xs font-mono font-bold text-black shadow-[0_0_20px_rgba(255,217,140,0.25)] hover:bg-[#ffe1a6] transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#ffd98c]/50 bg-gradient-to-r from-[#ffd98c] via-[#f5c76d] to-[#e5b358] px-4 py-2 text-xs font-mono font-bold !text-[#080706] shadow-[0_0_20px_rgba(255,217,140,0.25)] hover:shadow-[0_0_25px_rgba(255,217,140,0.4)] transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
-            <Download className="h-4 w-4" />
-            <span>{downloading ? 'Preparing...' : 'Download / Save PDF'}</span>
+            <Download className="h-4 w-4 !text-[#080706]" />
+            <span className="font-bold !text-[#080706]">{downloading ? 'Preparing...' : 'Download / Save PDF'}</span>
           </button>
           <button
             onClick={() => window.print()}

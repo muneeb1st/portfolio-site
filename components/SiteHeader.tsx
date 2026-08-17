@@ -91,10 +91,10 @@ export function SiteHeader() {
           <a 
             href="#contact" 
             onClick={() => sounds.playClick()}
-            className="relative inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#ffd98c]/40 bg-gradient-to-r from-[#ffd98c] to-[#e5b358] px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-mono font-bold text-black shadow-[0_0_20px_rgba(255,217,140,0.25)] hover:shadow-[0_0_25px_rgba(255,217,140,0.4)] whitespace-nowrap transition-all"
+            className="relative inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#ffd98c]/50 bg-gradient-to-r from-[#ffd98c] via-[#f5c76d] to-[#e5b358] px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-mono font-bold !text-[#080706] shadow-[0_0_20px_rgba(255,217,140,0.25)] hover:shadow-[0_0_25px_rgba(255,217,140,0.45)] whitespace-nowrap transition-all hover:scale-105 active:scale-95"
           >
-            <span>Let&apos;s Build</span>
-            <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+            <span className="font-bold !text-[#080706]">Let&apos;s Build</span>
+            <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 !text-[#080706]" />
           </a>
         </div>
       </nav>

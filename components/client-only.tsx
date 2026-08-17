@@ -505,10 +505,10 @@ export function ProjectModal({ project, onClose }: { project: Project | null; on
               target={project.demo_url.startsWith('#') ? undefined : '_blank'}
               rel={project.demo_url.startsWith('#') ? undefined : 'noreferrer'}
               onClick={() => sounds.playClick()}
-              className="flex items-center gap-2 rounded-full border border-[#f4c978] bg-gradient-to-r from-[#f6d58c] to-[#c9943c] px-6 py-2.5 text-xs font-black uppercase tracking-wider text-[#161108] shadow-[0_0_25px_rgba(244,201,120,0.35)] hover:scale-105 transition-all"
+              className="flex items-center gap-2 rounded-full border border-[#ffd98c]/50 bg-gradient-to-r from-[#ffd98c] via-[#f5c76d] to-[#e5b358] px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-wider !text-[#080706] shadow-[0_0_25px_rgba(255,217,140,0.35)] hover:scale-105 transition-all"
             >
-              <ExternalLink className="h-4 w-4" />
-              Launch Live Demo
+              <ExternalLink className="h-4 w-4 !text-[#080706]" />
+              <span className="font-bold !text-[#080706]">Launch Live Demo</span>
             </a>
           )}
           {project.github_url && (
@@ -517,19 +517,19 @@ export function ProjectModal({ project, onClose }: { project: Project | null; on
               target="_blank"
               rel="noreferrer"
               onClick={() => sounds.playClick()}
-              className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-xs font-bold text-stone-200 hover:border-white/30 hover:bg-white/10 hover:text-white transition-all"
+              className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-xs font-mono font-semibold text-stone-200 hover:border-[#ffd98c]/40 hover:bg-white/10 hover:text-white transition-all"
             >
-              <Code2 className="h-4 w-4" />
-              Source Repository
+              <Code2 className="h-4 w-4 text-[#8fcad0]" />
+              <span>Source Repository</span>
             </a>
           )}
           <button
             type="button"
             onClick={copyShareLink}
-            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-stone-400 hover:text-stone-200 transition-all ml-auto"
+            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-mono font-semibold text-stone-300 hover:text-white hover:border-white/20 transition-all ml-auto"
           >
             {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-            {copied ? 'Link Copied!' : 'Share Project'}
+            <span>{copied ? 'Link Copied!' : 'Share Project'}</span>
           </button>
         </div>
       </div>

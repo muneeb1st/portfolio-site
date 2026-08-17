@@ -224,7 +224,7 @@ export default function PortfolioChatbot() {
                 <div
                   className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl leading-relaxed whitespace-pre-wrap ${
                     m.role === 'user'
-                      ? 'bg-gradient-to-r from-[#ffd98c] to-[#f3cb7c] text-stone-950 font-medium rounded-tr-sm shadow-md'
+                      ? 'bg-gradient-to-r from-[#ffd98c] to-[#f3cb7c] !text-[#080706] font-semibold rounded-tr-sm shadow-md'
                       : 'bg-white/[0.06] border border-white/10 text-stone-200 rounded-tl-sm'
                   }`}
                 >
@@ -298,9 +298,9 @@ export default function PortfolioChatbot() {
                 type="submit"
                 disabled={isLoading || !input.trim()}
                 aria-label="Send message"
-                className="w-9 h-9 rounded-xl bg-[#ffd98c] hover:bg-[#ffe1a6] text-stone-950 flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0 mb-0.5"
+                className="w-9 h-9 rounded-xl bg-gradient-to-r from-[#ffd98c] to-[#e5b358] hover:bg-[#ffe1a6] !text-[#080706] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0 mb-0.5 border border-[#ffd98c]/50 shadow-md"
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-4 h-4 !text-[#080706]" />
               </button>
             </div>
             <div className="flex items-center justify-between text-[10px] font-mono text-stone-500 px-1">

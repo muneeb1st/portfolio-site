@@ -104,15 +104,15 @@ function HeroSection({
           <RevealSection immediate className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 rounded-full bg-[#ffd98c] px-6 py-3 text-xs font-mono font-bold text-black shadow-[0_0_20px_rgba(255,217,140,0.25)] transition-all hover:bg-[#ffe1a6] hover:shadow-[0_0_25px_rgba(255,217,140,0.4)] hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full border border-[#ffd98c]/50 bg-gradient-to-r from-[#ffd98c] via-[#f5c76d] to-[#e5b358] px-6 py-3 text-xs font-mono font-bold !text-[#080706] shadow-[0_0_20px_rgba(255,217,140,0.3)] transition-all hover:shadow-[0_0_25px_rgba(255,217,140,0.45)] hover:scale-105 active:scale-95"
             >
-              <span>Work With Me</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <span className="font-bold !text-[#080706]">Work With Me</span>
+              <ArrowRight className="h-3.5 w-3.5 !text-[#080706]" />
             </a>
 
             <a
               href="#work"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-xs font-mono font-semibold text-stone-200 backdrop-blur-md transition-all hover:border-white/30 hover:bg-white/10 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-xs font-mono font-semibold text-stone-200 backdrop-blur-md transition-all hover:border-[#ffd98c]/40 hover:bg-white/10 hover:text-white"
             >
               <Code2 className="h-3.5 w-3.5 text-[#ffd98c]" />
               <span>View Projects</span>
@@ -120,7 +120,7 @@ function HeroSection({
 
             <Link
               href="/resume"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-transparent px-4 py-3 text-xs font-mono font-semibold text-stone-400 transition-all hover:border-white/20 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-4 py-3 text-xs font-mono font-semibold text-stone-400 transition-all hover:border-white/20 hover:text-white hover:bg-white/5"
             >
               <FileText className="h-3.5 w-3.5 text-stone-400" />
               <span>Live Resume</span>
@@ -366,10 +366,10 @@ function AboutSection({ about }: { about: Required<AboutData> }) {
           </p>
           <a
             href="#contact"
-            className="inline-flex items-center gap-2 rounded-full border border-[#ffd98c] bg-[#ffd98c] px-6 py-3 text-xs font-mono font-bold text-black shadow-[0_0_20px_rgba(255,217,140,0.3)] hover:bg-[#ffe1a6] transition-all"
+            className="inline-flex items-center gap-2 rounded-full border border-[#ffd98c]/50 bg-gradient-to-r from-[#ffd98c] via-[#f5c76d] to-[#e5b358] px-6 py-3 text-xs font-mono font-bold !text-[#080706] shadow-[0_0_20px_rgba(255,217,140,0.3)] hover:shadow-[0_0_25px_rgba(255,217,140,0.45)] hover:scale-105 transition-all"
           >
-            <span>Start a Conversation</span>
-            <ArrowRight className="h-4 w-4" />
+            <span className="font-bold !text-[#080706]">Start a Conversation</span>
+            <ArrowRight className="h-4 w-4 !text-[#080706]" />
           </a>
         </div>
       </div>

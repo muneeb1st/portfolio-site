@@ -180,7 +180,7 @@ export function ContactForm() {
                   }}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
                     isSelected
-                      ? 'border border-[#f4c978] bg-[#f4c978] text-[#161108] font-bold shadow-[0_0_15px_rgba(244,201,120,0.3)]'
+                      ? 'border border-[#ffd98c] bg-[#ffd98c] !text-[#080706] font-bold shadow-[0_0_15px_rgba(255,217,140,0.35)]'
                       : 'border border-white/10 bg-white/5 text-stone-300 hover:border-white/20 hover:text-white'
                   }`}
                 >
@@ -209,7 +209,7 @@ export function ContactForm() {
                   }}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                     isSelected
-                      ? 'border border-[#8fcad0] bg-[#8fcad0] text-[#080706] font-bold shadow-[0_0_15px_rgba(143,202,208,0.3)]'
+                      ? 'border border-[#8fcad0] bg-[#8fcad0] !text-[#080706] font-bold shadow-[0_0_15px_rgba(143,202,208,0.35)]'
                       : 'border border-white/10 bg-white/5 text-stone-300 hover:border-white/20 hover:text-white'
                   }`}
                 >
@@ -251,10 +251,10 @@ export function ContactForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#f4c978] bg-gradient-to-r from-[#f6d58c] via-[#f4c978] to-[#c9943c] py-3.5 text-xs font-black uppercase tracking-widest text-[#161108] shadow-[0_0_30px_rgba(244,201,120,0.3)] hover:scale-[1.01] hover:shadow-[0_0_40px_rgba(244,201,120,0.5)] transition-all disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#ffd98c]/50 bg-gradient-to-r from-[#ffd98c] via-[#f5c76d] to-[#e5b358] py-3.5 text-xs font-mono font-bold uppercase tracking-widest !text-[#080706] shadow-[0_0_30px_rgba(255,217,140,0.35)] hover:scale-[1.01] hover:shadow-[0_0_40px_rgba(255,217,140,0.5)] transition-all disabled:opacity-50"
           >
-            <Send className="h-4 w-4" />
-            {submitting ? 'Transmitting Message...' : 'Send Message Now'}
+            <Send className="h-4 w-4 !text-[#080706]" />
+            <span className="font-bold !text-[#080706]">{submitting ? 'Transmitting Message...' : 'Send Message Now'}</span>
           </button>
         </div>
 
